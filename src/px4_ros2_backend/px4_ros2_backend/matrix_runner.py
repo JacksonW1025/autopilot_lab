@@ -10,11 +10,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from fep_core.study_analysis_runner import run_study_analysis
 from fep_core.paths import CONFIG_ROOT
 from fep_core.paths import PX4_MATRIX_ROOT as MATRIX_ROOT
 from fep_core.paths import PX4_ROOT
+from fep_core.paths import PX4_RUNS_ROOT
 
-from .analysis_runner import main as analysis_main
 from .common import load_run_config, wait_for_ros_topics
 from .experiment_runner import run_experiment
 
@@ -196,7 +197,7 @@ def run_matrix(
         )
         _write_matrix_rows(matrix_dir / "runs.csv", results)
 
-    analysis_main(["--world-filter", _analysis_world_filter(world, analysis_world_filter)])
+    run_study_analysis([PX4_RUNS_ROOT])
     return matrix_dir, results
 
 
@@ -204,7 +205,7 @@ CORE_TOPIC_SUFFIXES = ("vehicle_status", "vehicle_attitude", "vehicle_control_mo
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="按 fresh/headless 口径批量执行 world matrix，并在结束后自动汇总。")
+    parser = argparse.ArgumentParser(description="按 fresh/headless 口径批量执行 PX4 matrix，并在结束后生成新的分层 study 汇总。")
     parser.add_argument("--world", default="windy", help="Gazebo world 名称，默认 windy；nominal 请传 default。")
     parser.add_argument(
         "--pattern",
@@ -221,7 +222,7 @@ def main(argv: list[str] | None = None) -> None:
         "--analysis-world-filter",
         choices=("nominal", "windy", "all"),
         default=None,
-        help="analysis_runner 的 world_filter；默认按 world 自动映射，default->nominal，windy->windy。",
+        help="兼容旧接口；当前新的分层 study 汇总不再按 world_filter 切分。",
     )
     parser.add_argument("--repeat", type=int, default=1, help="每个 config fresh 重复次数，默认 1。")
     args = parser.parse_args(argv)

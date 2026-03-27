@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import rclpy
+from fep_core.mav_params import close_mavlink, connect_mavlink, set_parameters, snapshot_parameters
 from rclpy.executors import SingleThreadedExecutor
 
 from .artifacts import (
@@ -36,6 +37,8 @@ from .metrics import compute_metrics
 from .telemetry_recorder import TelemetryRecorder
 from .ulog_metrics import summarize_ulog
 
+PX4_PARAM_MASTER_DEFAULT = "udp:127.0.0.1:14550"
+
 
 def _preflight_checks() -> tuple[list[str], bool]:
     anomalies: list[str] = []
@@ -46,6 +49,156 @@ def _preflight_checks() -> tuple[list[str], bool]:
         anomalies.append("clock_not_advancing")
         return anomalies, False
     return anomalies, True
+
+
+def _prepare_px4_parameters(config: RunConfig) -> tuple[Any | None, dict[str, Any], dict[str, Any], list[str]]:
+    parameter_names = list(dict.fromkeys(config.controlled_parameters_for_backend("px4")))
+    parameter_names.extend(
+        name for name in config.parameter_overrides_for_backend("px4") if name not in parameter_names
+    )
+    if not parameter_names:
+        return None, {}, {}, []
+
+    anomalies: list[str] = []
+    master = None
+    before: dict[str, Any] = {}
+    after_apply: dict[str, Any] = {}
+    try:
+        master = connect_mavlink(str(config.extras.get("px4_param_master_uri", PX4_PARAM_MASTER_DEFAULT)), timeout_s=8.0)
+        before = snapshot_parameters(master, parameter_names, timeout_s=2.0)
+        overrides = config.parameter_overrides_for_backend("px4")
+        if overrides:
+            apply_results = set_parameters(master, overrides, timeout_s=2.0)
+            failed = [name for name, ok in apply_results.items() if not ok]
+            if failed:
+                anomalies.append(f"parameter_apply_failed:{','.join(failed)}")
+            after_apply = snapshot_parameters(master, parameter_names, timeout_s=2.0)
+        else:
+            after_apply = dict(before)
+    except Exception as exc:
+        anomalies.append(f"parameter_session_unavailable:{type(exc).__name__}")
+        close_mavlink(master)
+        return None, before, after_apply, anomalies
+
+    return master, before, after_apply, anomalies
+
+
+def _restore_px4_parameters(master: Any | None, snapshot_before: dict[str, Any]) -> list[str]:
+    if master is None or not snapshot_before:
+        return []
+    restore_values = {name: value for name, value in snapshot_before.items() if value not in ("", None)}
+    if not restore_values:
+        return []
+    try:
+        results = set_parameters(master, restore_values, timeout_s=2.0)
+    except Exception as exc:
+        return [f"parameter_restore_failed:{type(exc).__name__}"]
+
+    failed = [name for name, ok in results.items() if not ok]
+    if failed:
+        return [f"parameter_restore_failed:{','.join(failed)}"]
+    return []
+
+
+def _mechanism_flags(metrics: dict[str, Any], anomalies: list[str]) -> list[str]:
+    flags: list[str] = []
+    if metrics.get("failsafe_event") == 1:
+        flags.append("failsafe")
+    if metrics.get("nav_state_change") == 1:
+        flags.append("mode_transition_unexpected")
+    if any(item.startswith("parameter_") for item in anomalies):
+        flags.append("parameter_session_issue")
+    if float(metrics.get("clip_frac", 0.0) or 0.0) >= 0.015:
+        flags.append("motor_clipping")
+    if float(metrics.get("max_unalloc_torque", 0.0) or 0.0) >= 0.5:
+        flags.append("allocator_unallocated_torque")
+    if float(metrics.get("torque_achieved", 1.0) or 1.0) <= 0.85:
+        flags.append("torque_achieved_low")
+    if float(metrics.get("xy_displacement_peak_m", 0.0) or 0.0) >= 15.0:
+        flags.append("xy_drift_high")
+    if float(metrics.get("tracking_error_peak", 0.0) or 0.0) >= 0.25:
+        flags.append("tracking_error_high")
+    if float(metrics.get("response_delay_ms", 0.0) or 0.0) >= 250.0:
+        flags.append("response_delay_high")
+    return flags
+
+
+def _stress_class(metrics: dict[str, Any], run_status: str, mechanism_flags: list[str]) -> str:
+    if run_status != "completed" or metrics.get("failsafe_event") == 1:
+        return "saturated"
+    if any(flag in mechanism_flags for flag in {"motor_clipping", "allocator_unallocated_torque", "xy_drift_high"}):
+        return "saturated"
+    if any(flag in mechanism_flags for flag in {"tracking_error_high", "response_delay_high", "torque_achieved_low"}):
+        return "stressed"
+    return "nominal"
+
+
+def _oracle_decision(
+    config: RunConfig,
+    metrics: dict[str, Any],
+    anomalies: list[str],
+    run_status: str,
+    mechanism_flags: list[str],
+) -> tuple[int, str]:
+    if run_status != "completed":
+        return 0, f"run_status:{run_status}"
+    if metrics.get("failsafe_event") == 1:
+        return 0, "failsafe_event"
+    if metrics.get("nav_state_change") == 1:
+        return 0, "unexpected_mode_transition"
+    if any(
+        item
+        in {
+            "ground_clearance_low",
+            "profile_clearance_low",
+            "takeoff_clearance_timeout",
+            "manual_motion_not_observed",
+            "manual_motion_window_missing",
+            "manual_control_not_enabled",
+            "manual_posctl_not_reached",
+            "manual_echo_invalid",
+            "prestart_xy_radius_excessive",
+        }
+        for item in anomalies
+    ):
+        return 0, "runtime_gate_failed"
+
+    if config.resolved_study_layer == "attitude_explicit":
+        if float(metrics.get("tracking_error_peak", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_attitude_tracking_error_peak_limit", 0.35)
+        ):
+            return 0, "attitude_tracking_error_peak_high"
+        if float(metrics.get("tracking_error_rms", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_attitude_tracking_error_rms_limit", 0.20)
+        ):
+            return 0, "attitude_tracking_error_rms_high"
+        if float(metrics.get("response_delay_ms", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_attitude_response_delay_ms_limit", 400.0)
+        ):
+            return 0, "attitude_response_delay_high"
+    elif config.resolved_study_layer == "manual_whole_loop":
+        if "xy_drift_high" in mechanism_flags and float(metrics.get("xy_displacement_peak_m", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_manual_xy_displacement_limit_m", 25.0)
+        ):
+            return 0, "manual_xy_drift_high"
+
+    return 1, "valid"
+
+
+def _rate_layer_recommendation(
+    config: RunConfig,
+    oracle_valid: int,
+    mechanism_flags: list[str],
+) -> tuple[int, list[str]]:
+    reasons = list(config.rate_layer_recommended_reasons())
+    if config.resolved_study_layer == "attitude_explicit" and oracle_valid == 0 and not mechanism_flags:
+        reasons.append("attitude_difference_unexplained_by_current_mechanisms")
+    if config.resolved_study_layer == "attitude_explicit" and "tracking_error_high" in mechanism_flags and (
+        "parameter_group_is_rate_related" in reasons
+    ):
+        reasons.append("attitude_tracking_difference_under_rate_parameter_factor")
+    deduped = list(dict.fromkeys(reasons))
+    return (1 if deduped else 0), deduped
 
 
 def _recommend_next_action(config: RunConfig, status: str) -> str:
@@ -539,6 +692,16 @@ def _build_notes(
             "## 本次 run 的目的",
             f"- {_run_purpose(config)}",
             "",
+            "## 研究层信息",
+            f"- study_family: {config.study_family}",
+            f"- study_layer: {config.resolved_study_layer}",
+            f"- study_role: {config.resolved_study_role}",
+            f"- oracle_profile: {config.resolved_oracle_profile}",
+            f"- parameter_group: {config.resolved_parameter_group}",
+            f"- parameter_set_name: {config.parameter_set_name}",
+            f"- mode_under_test(px4): {config.mode_under_test_for_backend('px4')}",
+            f"- attribution_boundary: {config.resolved_attribution_boundary}",
+            "",
             "## 操作人/Agent",
             f"- {config.operator}",
             "",
@@ -586,7 +749,116 @@ def _build_notes(
 def run_experiment(config: RunConfig) -> tuple[int, Path]:
     start_time = datetime.now(timezone.utc).astimezone()
     run_id = config.build_run_id(start_time)
+    study = config.study_metadata("px4")
     paths = ensure_run_directories(run_id)
+    host_start = capture_host_snapshot()
+
+    if config.resolved_study_layer == "rate_single_loop":
+        anomalies = ["px4_rate_single_loop_not_implemented_yet"]
+        host_end = capture_host_snapshot()
+        end_time = datetime.now(timezone.utc).astimezone()
+        metrics = _placeholder_metrics(config, None)
+        metrics["run_id"] = run_id
+        metrics["backend"] = "px4_ros2"
+        metrics["study_layer"] = study["study_layer"]
+        metrics["study_role"] = study["study_role"]
+        metrics["mode_under_test"] = study["mode_under_test"]
+        metrics["parameter_group"] = study["parameter_group"]
+        metrics["parameter_set_name"] = study["parameter_set_name"]
+        metrics["oracle_valid"] = 0
+        metrics["oracle_failure_reason"] = "rate_layer_not_implemented_px4"
+        metrics["stress_class"] = "stressed"
+        metrics["mechanism_flags"] = "rate_layer_not_implemented"
+        metrics["rate_layer_recommended"] = 1
+        metrics["rate_layer_reasons"] = "study_layer_is_rate_single_loop"
+        metrics["attribution_boundary"] = config.resolved_attribution_boundary
+        write_single_row_csv(
+            paths["metrics_path"],
+            metrics,
+            [
+                "run_id",
+                "backend",
+                "study_layer",
+                "study_role",
+                "mode_under_test",
+                "parameter_group",
+                "parameter_set_name",
+                "input_chain",
+                "profile_type",
+                "axis",
+                "input_peak",
+                "input_rate_peak",
+                "tracking_error_peak",
+                "tracking_error_rms",
+                "response_delay_ms",
+                "nav_state_change",
+                "failsafe_event",
+                "start_xy_radius_m",
+                "end_xy_radius_m",
+                "xy_radius_peak_m",
+                "xy_displacement_peak_m",
+                "ulog_saturation_metric",
+                "ulog_parse_status",
+                "oracle_valid",
+                "oracle_failure_reason",
+                "stress_class",
+                "mechanism_flags",
+                "rate_layer_recommended",
+                "rate_layer_reasons",
+                "attribution_boundary",
+            ],
+        )
+        notes_text = _build_notes(
+            config,
+            run_id,
+            "invalid_runtime",
+            start_time,
+            end_time,
+            host_start,
+            host_end,
+            False,
+            anomalies,
+            {"message_counts": {}, "event_counts": {}},
+            {
+                "completion_reason": "rate_layer_not_implemented_px4",
+                "experiment_start_time_ns": None,
+                "landing_command_time_ns": None,
+                "completion_time_ns": None,
+                "command_trace": [],
+                "anomalies": [],
+            },
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+        paths["notes_path"].write_text(notes_text, encoding="utf-8")
+        write_yaml(
+            paths["manifest_path"],
+            {
+                "run_id": run_id,
+                "backend": "px4_ros2",
+                "phase": config.phase,
+                "input_chain": config.input_chain,
+                "input_topic": config.input_topic,
+                "profile_type": config.profile_type,
+                "profile_params": config.profile_params(),
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
+                "status": "invalid_runtime",
+                "study": study,
+                "px4_log_path": None,
+                "prestart_xy_gate": None,
+                "clock_bridge": None,
+                "xy_motion_summary": None,
+                "ros_topics_recorded": list(RECORDED_TOPICS),
+                "parameter_snapshot_before": {},
+                "parameter_snapshot_after": {},
+                "anomaly_summary": anomalies,
+            },
+        )
+        return 1, paths["base_dir"]
 
     clock_bridge_handle = None
     clock_bridge_summary: dict[str, Any] = {
@@ -602,17 +874,19 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
             clock_bridge_summary["started"] = True
             clock_bridge_summary["gz_topic"] = clock_bridge_handle.gz_topic
 
-    host_start = capture_host_snapshot()
     ulog_before = snapshot_ulog_files()
     preflight_anomalies, clock_available = _preflight_checks()
     sim_world = os.environ.get("PX4_GZ_WORLD", "").strip() or None
+    parameter_master, parameter_snapshot_before, parameter_snapshot_after, parameter_anomalies = _prepare_px4_parameters(config)
 
     rclpy.init()
     recorder = TelemetryRecorder()
     if config.input_chain == "manual":
         injector = ManualInputInjector(config)
-    else:
+    elif config.input_chain == "attitude":
         injector = AttitudeInjector(config)
+    else:
+        raise ValueError(f"PX4 当前只支持 manual 与 attitude 主线，暂不支持 input_chain={config.input_chain}")
     executor = SingleThreadedExecutor()
     executor.add_node(recorder)
     executor.add_node(injector)
@@ -621,7 +895,7 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
     spin_thread.start()
 
     run_status = "completed"
-    anomalies = list(preflight_anomalies)
+    anomalies = list(preflight_anomalies) + list(parameter_anomalies)
     timing_valid = clock_available
     prestart_gate_summary: dict[str, Any] | None = None
     completion_reason_override: str | None = None
@@ -667,6 +941,8 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
         recorder.destroy_node()
         rclpy.shutdown()
         stop_clock_bridge(clock_bridge_handle)
+        anomalies.extend(_restore_px4_parameters(parameter_master, parameter_snapshot_before))
+        close_mavlink(parameter_master)
 
     host_end = capture_host_snapshot()
     ulog_after = snapshot_ulog_files()
@@ -731,6 +1007,12 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
     else:
         metrics = _placeholder_metrics(config, prestart_gate_summary)
     metrics["run_id"] = run_id
+    metrics["backend"] = "px4_ros2"
+    metrics["study_layer"] = study["study_layer"]
+    metrics["study_role"] = study["study_role"]
+    metrics["mode_under_test"] = study["mode_under_test"]
+    metrics["parameter_group"] = study["parameter_group"]
+    metrics["parameter_set_name"] = study["parameter_set_name"]
     metrics.update(
         summarize_ulog(
             ulog_path,
@@ -778,6 +1060,18 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
     if config.timing_required and not timing_valid:
         run_status = "invalid_timing"
 
+    mechanism_flags = _mechanism_flags(metrics, anomalies)
+    stress_class = _stress_class(metrics, run_status, mechanism_flags)
+    oracle_valid, oracle_failure_reason = _oracle_decision(config, metrics, anomalies, run_status, mechanism_flags)
+    rate_layer_recommended, rate_layer_reasons = _rate_layer_recommendation(config, oracle_valid, mechanism_flags)
+    metrics["oracle_valid"] = oracle_valid
+    metrics["oracle_failure_reason"] = oracle_failure_reason
+    metrics["stress_class"] = stress_class
+    metrics["mechanism_flags"] = ",".join(mechanism_flags)
+    metrics["rate_layer_recommended"] = rate_layer_recommended
+    metrics["rate_layer_reasons"] = ",".join(rate_layer_reasons)
+    metrics["attribution_boundary"] = config.resolved_attribution_boundary
+
     notes_text = _build_notes(
         config,
         run_id,
@@ -810,14 +1104,16 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
         "end_time": end_time.isoformat(),
         "status": run_status,
         "sim_world": sim_world or "unspecified",
+        "study": study,
         "px4_log_path": ulog_path,
         "prestart_xy_gate": prestart_gate_summary,
         "clock_bridge": clock_bridge_summary,
         "xy_motion_summary": xy_motion_summary,
         "ros_topics_recorded": list(RECORDED_TOPICS),
+        "parameter_snapshot_before": parameter_snapshot_before,
+        "parameter_snapshot_after": parameter_snapshot_after,
         "anomaly_summary": anomalies,
     }
-    metrics["backend"] = "px4_ros2"
     write_yaml(paths["manifest_path"], manifest)
 
     write_single_row_csv(
@@ -826,6 +1122,11 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
         [
             "run_id",
             "backend",
+            "study_layer",
+            "study_role",
+            "mode_under_test",
+            "parameter_group",
+            "parameter_set_name",
             "input_chain",
             "profile_type",
             "axis",
@@ -842,6 +1143,13 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
             "xy_displacement_peak_m",
             "ulog_saturation_metric",
             "ulog_parse_status",
+            "oracle_valid",
+            "oracle_failure_reason",
+            "stress_class",
+            "mechanism_flags",
+            "rate_layer_recommended",
+            "rate_layer_reasons",
+            "attribution_boundary",
         ],
     )
 

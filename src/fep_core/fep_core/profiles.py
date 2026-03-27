@@ -127,3 +127,31 @@ class ProfileGenerator:
             raise ValueError(f"不支持的 axis: {config.axis}")
 
         return profile_value, roll, pitch, yaw, throttle, phase
+
+    def rate_targets_at(self, elapsed_s: float) -> tuple[float, float, float, float, float, str]:
+        config = self._config
+        profile_value, phase = self.profile_value_at(elapsed_s)
+
+        roll_rate = 0.0
+        pitch_rate = 0.0
+        yaw_rate = 0.0
+        thrust_z = config.hover_thrust
+
+        if config.axis == "roll":
+            roll_rate = profile_value
+        elif config.axis == "pitch":
+            pitch_rate = profile_value
+        elif config.axis == "yaw":
+            yaw_rate = profile_value
+        elif config.axis == "throttle":
+            thrust_z = clamp(config.hover_thrust - profile_value, -1.0, 1.0)
+        elif config.axis == "composite":
+            roll_rate = clamp(profile_value * float(config.extras.get("roll_rate_amplitude", config.extras.get("roll_amplitude", 0.0))), -4.0, 4.0)
+            pitch_rate = clamp(profile_value * float(config.extras.get("pitch_rate_amplitude", config.extras.get("pitch_amplitude", 0.0))), -4.0, 4.0)
+            yaw_rate = clamp(profile_value * float(config.extras.get("yaw_rate_amplitude", config.extras.get("yaw_amplitude", 0.0))), -4.0, 4.0)
+            thrust_delta = profile_value * float(config.extras.get("thrust_delta", 0.0))
+            thrust_z = clamp(config.hover_thrust - thrust_delta, -1.0, 1.0)
+        else:
+            raise ValueError(f"不支持的 axis: {config.axis}")
+
+        return profile_value, roll_rate, pitch_rate, yaw_rate, thrust_z, phase

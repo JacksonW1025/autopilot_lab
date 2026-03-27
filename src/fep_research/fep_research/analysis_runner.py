@@ -1,1 +1,5 @@
-from px4_ros2_backend.analysis_runner import *  # noqa: F401,F403
+from fep_core.study_analysis_runner import main
+
+
+if __name__ == "__main__":
+    main()

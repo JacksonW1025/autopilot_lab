@@ -1,54 +1,68 @@
 # autopilot_lab
 
-`autopilot_lab` 是当前的主研究仓库，用于承载 Flight Envelope Protection / PIO 前期实验。它把原先 PX4-only 的 `px4_ws` 工作区拆成了“共享研究层 + 两个 backend”：
+`autopilot_lab` 现在的默认定位不再是“PX4-only 激励演示仓”，而是一个面向论文研究的分层敏感性实验平台。
 
-- `px4_ros2_backend`
-  - 保留原有 PX4 + ROS 2 + Gazebo 实验链路
-- `ardupilot_mavlink_backend`
-  - 新增 ArduPilot SITL + MAVLink 实验链路
-- `fep_core`
-  - 承载共享配置、profile、路径和 artifact 读写
-- `fep_research`
-  - 兼容包，继续暴露原有 `ros2 run fep_research ...` 入口
+通俗地说，旧工作主要是在 PX4 里打激进输入，看系统哪里先坏、哪些约束先顶满；现在仓库要进一步回答的是：在不同控制层、不同参数组下，系统从 `valid` 到 `invalid` 的边界怎么移动，以及这个变化应该归因到哪一层。
 
-新仓库路径固定为：
+这次改造参考了 `~/RouthSearch` 的方法结构，而不是直接回退到旧的 PID 论文复现。当前显式吸收的核心概念有：
 
-- `/home/car/autopilot_lab -> /mnt/nvme/autopilot_lab`
+- `mode-specific task`
+- `offline oracle`
+- `valid/invalid boundary`
+- `parameter factor`
 
-旧 `/home/car/px4_ws` 保留为冻结基线，不再作为后续主开发仓。
+因此，仓库主线已经改成：
 
-## 当前状态
+- `manual_whole_loop`
+  - 评估飞手激进输入下的整机闭环响应敏感度
+- `attitude_explicit`
+  - 单独分析 `attitude setpoint -> actual attitude` 的参数敏感度
+- `rate_single_loop`
+  - 不是默认主线，但已经有统一 schema、触发条件和 artifact 位置；当姿态层归因不够强时再补进来
 
-截至 `2026-03-27`，仓库已经完成以下迁移与验证：
+## 当前默认研究口径
 
-- PX4 历史研究代码已迁入，并拆分为 `fep_core`、`px4_ros2_backend`、`fep_research`
-- `reference/` 已整体迁入新仓
-- 历史 PX4 artifacts 已迁入 `artifacts/px4/`
-- ArduPilot MAVLink backend 已完成最小可运行闭环
-- `colcon build` 已在新仓通过
-- PX4 smoke 已跑通
-- ArduPilot smoke 已跑通
+### 1. `manual_whole_loop`
 
-当前 artifact 规模：
+- 研究问题：飞手等价输入进入飞控后，整机闭环在哪个输入档位开始从 `valid` 走向 `invalid`
+- PX4：`manual -> POSCTL`
+- ArduPilot：`MANUAL_CONTROL -> STABILIZE`
+- 输入：`roll / pitch / yaw / throttle`
+- 输出：姿态、位置、模式变化、执行器约束
+- 主指标：`oracle_valid`、tracking error、response delay、XY/Z drift、failsafe、saturation onset
+- 归因边界：只用于整机 `pilot-input sensitivity`，不直接归因到 `attitude` 或 `rate` 单层参数
 
-- `artifacts/px4/runs/`: `249`
-- `artifacts/px4/analysis/`: `42`
-- `artifacts/px4/matrix/`: `9`
-- `artifacts/px4/identification/`: `5`
-- `artifacts/ardupilot/runs/`: `4`
+### 2. `attitude_explicit`
 
-`artifacts/` 根目录下旧的兼容软链接已经移除；后续统一直接使用 `artifacts/px4/...` 与 `artifacts/ardupilot/...`。
+- 研究问题：去掉 manual mapping 后，`attitude setpoint -> actual attitude` 的跟踪与失稳边界如何随参数改变
+- PX4：显式 offboard attitude setpoint
+- ArduPilot：`GUIDED + SET_ATTITUDE_TARGET`
+- 输入：`roll / pitch / yaw attitude setpoint` 与受控 `thrust`
+- 输出：actual attitude，必要时辅以 actual rates
+- 主指标：`oracle_valid`、attitude tracking error peak/rms、overshoot、settling、phase lag、clip/saturation
+- 归因边界：只归因到 `attitude` 输入层及其以下控制链，不混入 manual shaping
 
-## 工作区布局
+### 3. `rate_single_loop`
+
+- 当前不是第一批默认实验
+- 但不再被默认忽略
+- 只有满足以下条件时才正式补做：
+  - 姿态层已经观察到显著差异，但这些差异无法由输入映射、altitude hold 或 manual shaping 解释
+  - 当前研究因素本身就是 `MC_ROLLRATE_* / MC_PITCHRATE_* / ATC_RAT_RLL_* / ATC_RAT_PIT_*`
+  - 论文归因需要更强证据，需要显式拆开 `attitude outer loop` 与 `rate inner loop`
+
+## 仓库结构
 
 ```text
 autopilot_lab/
 ├── artifacts/
 │   ├── ardupilot/
-│   └── px4/
+│   ├── px4/
+│   └── studies/
+├── docs/
+│   └── legacy PX4 phase documents
 ├── reference/
 ├── scripts/
-│   └── autopilot_lab_env.sh
 └── src/
     ├── ardupilot_mavlink_backend/
     ├── fep_core/
@@ -58,26 +72,70 @@ autopilot_lab/
     └── px4_ros2_backend/
 ```
 
-关键约定：
+关键点：
 
-- `src/fep_core`
-  - 后端无关逻辑
-- `src/px4_ros2_backend`
-  - PX4 专用实现
-- `src/ardupilot_mavlink_backend`
-  - ArduPilot 专用实现
-- `src/fep_research`
-  - 兼容入口，保证既有 PX4 命令不变
+- `fep_core`
+  - 共享 schema、profile、artifact I/O、study analysis、参数快照工具
+- `px4_ros2_backend`
+  - PX4 专用 runner、injector、ULog 解析
+- `ardupilot_mavlink_backend`
+  - ArduPilot 专用 runner、MAVLink 注入、`.BIN` 解析
+- `fep_research`
+  - 兼容入口层，但默认 `analysis_runner` 已切到新的分层 study 汇总
+- `docs/`
+  - 旧 PX4-only Phase 文档归档区，不再代表当前主线
 
-## 快速使用
+## 现在真正会输出什么
 
-先准备环境：
+每个 run 都会落下新的研究元信息，而不再只保留旧的 phase 风格结果：
+
+- `study_layer`
+- `study_role`
+- `mode_under_test`
+- `parameter_group`
+- `parameter_set_name`
+- `parameter_snapshot_before`
+- `parameter_snapshot_after`
+- `oracle_valid`
+- `oracle_failure_reason`
+- `stress_class`
+- `mechanism_flags`
+- `rate_layer_recommended`
+- `rate_layer_reasons`
+
+跨 backend 汇总统一写到：
+
+- `artifacts/studies/<timestamp>_layered_sensitivity/`
+
+其中至少包括：
+
+- `tables/merged_runs.csv`
+- `reports/summary.md`
+- `manifest.yaml`
+
+## 默认实验配置
+
+第一批默认配置已经切到分层主线，并显式支持 `roll_rate_pid` 的 `baseline / P+20%`：
+
+- `src/fep_research/config/layered_manual_roll_020.yaml`
+- `src/fep_research/config/layered_manual_roll_020_p120.yaml`
+- `src/fep_research/config/layered_attitude_roll_010.yaml`
+- `src/fep_research/config/layered_attitude_roll_010_p120.yaml`
+
+当前 `P+20%` 使用：
+
+- PX4：`MC_ROLLRATE_P = 0.18`
+- ArduPilot：`ATC_RAT_RLL_P = 0.162`
+
+## 使用方式
+
+先加载环境：
 
 ```bash
 source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 ```
 
-PX4 工作流仍沿用原先方式：
+### PX4 manual 主线
 
 ```bash
 MicroXRCEAgent udp4 -p 8888
@@ -85,67 +143,76 @@ cd /home/car/PX4-Autopilot
 make px4_sitl gz_x500
 
 ros2 run fep_research experiment_runner \
-  --config /home/car/autopilot_lab/src/fep_research/config/baseline_roll.yaml
+  --config /home/car/autopilot_lab/src/fep_research/config/layered_manual_roll_020.yaml
 ```
 
-ArduPilot backend 默认通过外部 `/home/car/ardupilot` 启动 SITL：
+### PX4 attitude 主线
+
+```bash
+ros2 run fep_research experiment_runner \
+  --config /home/car/autopilot_lab/src/fep_research/config/layered_attitude_roll_010.yaml
+```
+
+### ArduPilot manual 主线
 
 ```bash
 ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner \
-  --config /home/car/autopilot_lab/src/fep_research/config/baseline_roll.yaml
+  --config /home/car/autopilot_lab/src/fep_research/config/layered_manual_roll_020.yaml
 ```
 
-如果只想检查命令是否安装成功：
+### ArduPilot attitude 主线
 
 ```bash
-ros2 run fep_research experiment_runner --help
-ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner --help
+ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner \
+  --config /home/car/autopilot_lab/src/fep_research/config/layered_attitude_roll_010.yaml
 ```
 
-## 研究范围
+### 新的默认汇总
 
-当前仓库还不是最终保护器实现，而是一套科研实验平台。它主要回答两个问题：
+```bash
+ros2 run fep_research analysis_runner
+```
 
-1. 激进输入下，哪些观测量最先失真。
-2. 系统从线性控制区走向危险包线边界时，边界如何出现、收缩和迁移。
+这条命令现在不再调用旧的 PX4-only `analysis_runner`，而是直接汇总 PX4 与 ArduPilot 的分层研究 run。
 
-PX4 侧已经形成从输入注入、在线观测、artifact 落盘到跨 run 分析和 identification 的 Phase 1-3 闭环。ArduPilot 侧目前的目标是先建立可比较的最小实验闭环，而不是立即复制 PX4 全量分析栈。
+## 当前实现状态
 
-## 重点入口
+- 已完成统一研究 schema：
+  - `study_family`
+  - `study_layer`
+  - `study_role`
+  - `oracle_profile`
+  - `mode_under_test`
+  - `parameter_group`
+  - `parameter_set_name`
+  - `parameter_overrides`
+  - `controlled_parameters`
+  - `input_contract`
+  - `output_contract`
+  - `attribution_boundary`
+- PX4 runner 已支持：
+  - 参数 `snapshot / apply / restore`
+  - `oracle_valid`
+  - `stress_class`
+  - `mechanism_flags`
+  - `rate layer` 触发建议
+  - attitude 层证据链回填：`vehicle_attitude_setpoint / vehicle_rates_setpoint / vehicle_angular_velocity / rate_ctrl_status / control_allocator_status / actuator_motors`
+- ArduPilot runner 已支持：
+  - `manual_whole_loop`
+  - `attitude_explicit`
+  - 参数 `snapshot / apply / restore`
+  - `.BIN` 离线解析
+  - 标准化导出：`ATT / RATE / CTUN / MOTB / RCOU`
+  - `oracle_valid`
+  - `stress_class`
+  - `mechanism_flags`
+- `rate_single_loop`
+  - schema 与触发条件已接入
+  - ArduPilot body-rate 入口已预留
+  - PX4 仍保留为条件层，当前不会作为第一批默认实验
 
-- `TODO.md`
-  - 当前阶段执行手册和门禁
-- `PJINFO.md`
-  - 项目背景、环境基线、当前状态
-- `intro.md`
-  - 面向导师/新读者的当前阶段说明
-- `AGENTLOG.md`
-  - 环境部署、迁移与验证日志
-- `PHASE1_ATTITUDE_REPRO.md`
-  - PX4 attitude 主链复现
-- `PHASE1_MANUAL_REPRO.md`
-  - PX4 manual 主链复现
-- `PHASE2_REPRO.md`
-  - PX4 监测与落盘流程
-- `PHASE3_ANALYSIS_REPRO.md`
-  - PX4 nominal / windy 汇总与边界分析
+## 归档说明
 
-## 代表性产物
-
-- PX4 nominal analysis:
-  - `artifacts/px4/analysis/20260316_083659_phase3_nominal/`
-- PX4 windy analysis:
-  - `artifacts/px4/analysis/20260316_070303_phase3_windy/`
-- PX4 identification:
-  - `artifacts/px4/identification/20260316_083830_nominal_attitude_repeats/`
-- PX4 新仓 smoke run:
-  - `artifacts/px4/runs/20260326_225500_attitude_baseline_roll/`
-- ArduPilot 新仓 smoke run:
-  - `artifacts/ardupilot/runs/20260326_230029_attitude_baseline_roll/`
-
-## 说明
-
-- `src/fep_research` 现在是兼容层，不再承载主要实现。
-- PX4 日志仍保留在 `/home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/`。
-- ArduPilot 固件仓仍保留在 `/home/car/ardupilot/`，不并入本 git 仓库。
-- `scripts/autopilot_lab_env.sh` 会补齐构建和运行所需的 Python 依赖，并 source ROS 2 与本工作区环境。
+- 顶层旧 Phase 文档已经退出主入口
+- 它们现在只保留在 `docs/`
+- 如果你看到 `PHASE1_* / PHASE2_* / PHASE3_*`，应把它们当成旧 PX4-only 归档材料，而不是当前仓库的默认研究口径

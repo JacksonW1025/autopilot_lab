@@ -43,6 +43,18 @@ class RunConfig:
     thrust_z_max: float = -0.35
     land_timeout_s: float = 8.0
     ready_timeout_s: float = 20.0
+    study_family: str = "aggressive_input_sensitivity"
+    study_layer: str = ""
+    study_role: str = ""
+    oracle_profile: str = ""
+    mode_under_test: str | dict[str, Any] = field(default_factory=dict)
+    parameter_group: str = ""
+    parameter_set_name: str = "baseline"
+    parameter_overrides: dict[str, Any] = field(default_factory=dict)
+    controlled_parameters: list[str] | dict[str, Any] = field(default_factory=dict)
+    input_contract: dict[str, Any] = field(default_factory=dict)
+    output_contract: dict[str, Any] = field(default_factory=dict)
+    attribution_boundary: str = ""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any], source_path: Path | None = None) -> "RunConfig":
@@ -83,10 +95,22 @@ class RunConfig:
             "thrust_z_max",
             "land_timeout_s",
             "ready_timeout_s",
+            "study_family",
+            "study_layer",
+            "study_role",
+            "oracle_profile",
+            "mode_under_test",
+            "parameter_group",
+            "parameter_set_name",
+            "parameter_overrides",
+            "controlled_parameters",
+            "input_contract",
+            "output_contract",
+            "attribution_boundary",
         }
         extras = {key: value for key, value in data.items() if key not in required and key not in optional_runtime}
         input_chain = str(data["input_chain"])
-        if input_chain not in {"attitude", "manual"}:
+        if input_chain not in {"attitude", "manual", "rate"}:
             raise ValueError(f"不支持的 input_chain: {input_chain}")
 
         profile_type = str(data["profile_type"])
@@ -130,6 +154,18 @@ class RunConfig:
             thrust_z_max=float(data.get("thrust_z_max", -0.35)),
             land_timeout_s=float(data.get("land_timeout_s", 8.0)),
             ready_timeout_s=float(data.get("ready_timeout_s", 20.0)),
+            study_family=str(data.get("study_family", "aggressive_input_sensitivity")),
+            study_layer=str(data.get("study_layer", "")),
+            study_role=str(data.get("study_role", "")),
+            oracle_profile=str(data.get("oracle_profile", "")),
+            mode_under_test=data.get("mode_under_test", {}),
+            parameter_group=str(data.get("parameter_group", "")),
+            parameter_set_name=str(data.get("parameter_set_name", "baseline")),
+            parameter_overrides=dict(data.get("parameter_overrides", {})),
+            controlled_parameters=data.get("controlled_parameters", {}),
+            input_contract=dict(data.get("input_contract", {})),
+            output_contract=dict(data.get("output_contract", {})),
+            attribution_boundary=str(data.get("attribution_boundary", "")),
         )
 
     @property
@@ -148,6 +184,8 @@ class RunConfig:
             return "/fmu/in/vehicle_attitude_setpoint"
         if self.input_chain == "manual":
             return "/fmu/in/manual_control_input"
+        if self.input_chain == "rate":
+            return "/fmu/in/vehicle_rates_setpoint"
         raise ValueError(f"不支持的 input_chain: {self.input_chain}")
 
     @property
@@ -155,6 +193,235 @@ class RunConfig:
         if self.input_chain != "manual":
             return ""
         return str(self.extras.get("manual_mode", "echo"))
+
+    @property
+    def resolved_study_layer(self) -> str:
+        if self.study_layer:
+            return self.study_layer
+        if self.input_chain == "manual":
+            return "manual_whole_loop"
+        if self.input_chain == "attitude":
+            return "attitude_explicit"
+        return "rate_single_loop"
+
+    @property
+    def resolved_study_role(self) -> str:
+        if self.study_role:
+            return self.study_role
+        if self.resolved_study_layer == "rate_single_loop":
+            return "conditional"
+        return "primary"
+
+    @property
+    def resolved_oracle_profile(self) -> str:
+        if self.oracle_profile:
+            return self.oracle_profile
+        if self.resolved_study_layer == "manual_whole_loop":
+            return "manual_whole_loop_v1"
+        if self.resolved_study_layer == "attitude_explicit":
+            return "attitude_tracking_v1"
+        return "rate_tracking_v1"
+
+    @property
+    def resolved_parameter_group(self) -> str:
+        if self.parameter_group:
+            return self.parameter_group
+        if self.resolved_study_layer == "manual_whole_loop":
+            return "manual_whole_loop_nominal"
+        if self.axis == "roll":
+            return "roll_rate_pid"
+        if self.axis == "pitch":
+            return "pitch_rate_pid"
+        if self.axis == "yaw":
+            return "yaw_rate_pid"
+        return "nominal_baseline"
+
+    @property
+    def resolved_attribution_boundary(self) -> str:
+        if self.attribution_boundary:
+            return self.attribution_boundary
+        if self.resolved_study_layer == "manual_whole_loop":
+            return "整机闭环 pilot-input sensitivity；不直接归因到 attitude/rate 单层参数。"
+        if self.resolved_study_layer == "attitude_explicit":
+            return "attitude 输入层及其以下控制链；不混入 manual mapping。"
+        return "rate inner-loop 及其以下执行器约束，用于加强参数归因。"
+
+    def _backend_key(self, backend: str) -> str:
+        backend_key = backend.strip().lower()
+        if backend_key in {"px4", "px4_ros2"}:
+            return "px4"
+        if backend_key in {"ardupilot", "ardupilot_mavlink"}:
+            return "ardupilot"
+        return backend_key
+
+    def _resolve_mapping_value(self, value: Any, backend: str) -> Any:
+        if not isinstance(value, dict):
+            return value
+        backend_key = self._backend_key(backend)
+        if backend_key in value:
+            return value[backend_key]
+        for alias in ("default", "all", "common", "shared"):
+            if alias in value:
+                return value[alias]
+        return value
+
+    def mode_under_test_for_backend(self, backend: str) -> str:
+        resolved = self._resolve_mapping_value(self.mode_under_test, backend)
+        if isinstance(resolved, str) and resolved.strip():
+            return resolved.strip()
+        backend_key = self._backend_key(backend)
+        if backend_key == "px4":
+            if self.resolved_study_layer == "manual_whole_loop":
+                return "POSCTL" if self.manual_mode == "flight" else "manual_echo"
+            if self.resolved_study_layer == "attitude_explicit":
+                return "OFFBOARD_ATTITUDE"
+            return "OFFBOARD_RATE"
+        if self.resolved_study_layer == "manual_whole_loop":
+            return str(self.extras.get("ardupilot_manual_mode", "STABILIZE"))
+        if self.resolved_study_layer == "attitude_explicit":
+            return "GUIDED_ATTITUDE"
+        return "GUIDED_RATE"
+
+    def parameter_overrides_for_backend(self, backend: str) -> dict[str, Any]:
+        resolved = self._resolve_mapping_value(self.parameter_overrides, backend)
+        return dict(resolved) if isinstance(resolved, dict) else {}
+
+    def controlled_parameters_for_backend(self, backend: str) -> list[str]:
+        resolved = self._resolve_mapping_value(self.controlled_parameters, backend)
+        if isinstance(resolved, list):
+            return [str(item) for item in resolved]
+        if isinstance(resolved, tuple):
+            return [str(item) for item in resolved]
+        if isinstance(resolved, dict):
+            return [str(key) for key in resolved]
+
+        backend_key = self._backend_key(backend)
+        if backend_key == "px4":
+            if self.resolved_study_layer == "manual_whole_loop":
+                return [
+                    "MC_ROLLRATE_P",
+                    "MC_ROLLRATE_I",
+                    "MC_ROLLRATE_D",
+                    "MC_PITCHRATE_P",
+                    "MC_PITCHRATE_I",
+                    "MC_PITCHRATE_D",
+                    "MPC_POS_MODE",
+                    "MPC_ACC_HOR",
+                    "MPC_JERK_MAX",
+                ]
+            return [
+                "MC_ROLLRATE_P",
+                "MC_ROLLRATE_I",
+                "MC_ROLLRATE_D",
+                "MC_PITCHRATE_P",
+                "MC_PITCHRATE_I",
+                "MC_PITCHRATE_D",
+            ]
+        if self.resolved_study_layer == "manual_whole_loop":
+            return [
+                "ATC_RAT_RLL_P",
+                "ATC_RAT_RLL_I",
+                "ATC_RAT_RLL_D",
+                "ATC_RAT_PIT_P",
+                "ATC_RAT_PIT_I",
+                "ATC_RAT_PIT_D",
+                "PSC_VELXY_P",
+                "LOIT_ACC_MAX",
+                "LOIT_SPEED",
+            ]
+        return [
+            "ATC_RAT_RLL_P",
+            "ATC_RAT_RLL_I",
+            "ATC_RAT_RLL_D",
+            "ATC_RAT_PIT_P",
+            "ATC_RAT_PIT_I",
+            "ATC_RAT_PIT_D",
+        ]
+
+    def input_contract_for_backend(self, backend: str) -> dict[str, Any]:
+        resolved = self._resolve_mapping_value(self.input_contract, backend)
+        if isinstance(resolved, dict) and resolved:
+            return dict(resolved)
+
+        if self.resolved_study_layer == "manual_whole_loop":
+            return {
+                "signals": ["roll", "pitch", "yaw", "throttle"],
+                "profile_source": "pilot-equivalent manual profile",
+                "notes": "整机飞手等价输入，经飞控内部映射进入闭环。",
+            }
+        if self.resolved_study_layer == "attitude_explicit":
+            return {
+                "signals": ["roll_body", "pitch_body", "yaw_body", "thrust_z"],
+                "profile_source": "explicit attitude setpoint",
+                "notes": "显式姿态设定点输入，不混入 manual stick mapping。",
+            }
+        return {
+            "signals": ["roll_rate", "pitch_rate", "yaw_rate", "thrust_z"],
+            "profile_source": "explicit body-rate setpoint",
+            "notes": "用于单层 rate inner-loop 分析。",
+        }
+
+    def output_contract_for_backend(self, backend: str) -> dict[str, Any]:
+        resolved = self._resolve_mapping_value(self.output_contract, backend)
+        if isinstance(resolved, dict) and resolved:
+            return dict(resolved)
+
+        backend_key = self._backend_key(backend)
+        if backend_key == "px4":
+            if self.resolved_study_layer == "manual_whole_loop":
+                return {
+                    "signals": [
+                        "vehicle_attitude",
+                        "vehicle_local_position",
+                        "vehicle_status",
+                        "vehicle_control_mode",
+                        "control_allocator_status",
+                        "actuator_motors",
+                    ]
+                }
+            if self.resolved_study_layer == "attitude_explicit":
+                return {
+                    "signals": [
+                        "vehicle_attitude",
+                        "vehicle_attitude_setpoint",
+                        "vehicle_rates_setpoint",
+                        "vehicle_angular_velocity",
+                        "rate_ctrl_status",
+                        "control_allocator_status",
+                        "actuator_motors",
+                    ]
+                }
+            return {
+                "signals": [
+                    "vehicle_angular_velocity",
+                    "vehicle_rates_setpoint",
+                    "rate_ctrl_status",
+                    "control_allocator_status",
+                    "actuator_motors",
+                ]
+            }
+        if self.resolved_study_layer == "manual_whole_loop":
+            return {"signals": ["ATT", "RATE", "CTUN", "MOTB", "RCOU", "LOCAL_POSITION_NED", "HEARTBEAT"]}
+        if self.resolved_study_layer == "attitude_explicit":
+            return {"signals": ["ATT", "RATE", "CTUN", "MOTB", "RCOU", "PIDR", "PIDP", "PIDY"]}
+        return {"signals": ["RATE", "MOTB", "RCOU", "PIDR", "PIDP", "PIDY"]}
+
+    def rate_layer_trigger_conditions(self) -> list[str]:
+        return [
+            "姿态层已经观察到显著差异，但这些差异无法由输入映射、altitude hold 或 manual shaping 解释。",
+            "当前研究因素本身属于 rate 相关参数，例如 MC_ROLLRATE_*、MC_PITCHRATE_*、ATC_RAT_RLL_*、ATC_RAT_PIT_*。",
+            "论文归因需要更强证据，需要明确拆开 attitude outer loop 与 rate inner loop。",
+        ]
+
+    def rate_layer_recommended_reasons(self) -> list[str]:
+        reasons: list[str] = []
+        if self.resolved_study_layer == "rate_single_loop":
+            reasons.append("study_layer_is_rate_single_loop")
+        if "rate" in self.resolved_parameter_group:
+            reasons.append("parameter_group_is_rate_related")
+        if bool(self.extras.get("require_rate_layer_evidence", False)):
+            reasons.append("config_requires_rate_layer_evidence")
+        return reasons
 
     @property
     def run_timeout_s(self) -> float:
@@ -197,9 +464,32 @@ class RunConfig:
         params.update(self.extras)
         return params
 
+    def study_metadata(self, backend: str) -> dict[str, Any]:
+        return {
+            "study_family": self.study_family,
+            "study_layer": self.resolved_study_layer,
+            "study_role": self.resolved_study_role,
+            "oracle_profile": self.resolved_oracle_profile,
+            "mode_under_test": self.mode_under_test_for_backend(backend),
+            "parameter_group": self.resolved_parameter_group,
+            "parameter_set_name": self.parameter_set_name,
+            "parameter_overrides": self.parameter_overrides_for_backend(backend),
+            "controlled_parameters": self.controlled_parameters_for_backend(backend),
+            "input_contract": self.input_contract_for_backend(backend),
+            "output_contract": self.output_contract_for_backend(backend),
+            "attribution_boundary": self.resolved_attribution_boundary,
+            "rate_layer_trigger_conditions": self.rate_layer_trigger_conditions(),
+            "rate_layer_recommended_reasons": self.rate_layer_recommended_reasons(),
+        }
+
     def build_run_id(self, when: datetime | None = None) -> str:
         timestamp = when or datetime.now(timezone.utc).astimezone()
-        return f"{timestamp:%Y%m%d_%H%M%S}_{self.input_chain}_{self.profile_type}_{self.axis}"
+        layer_token = {
+            "manual_whole_loop": "manual",
+            "attitude_explicit": "attitude",
+            "rate_single_loop": "rate",
+        }.get(self.resolved_study_layer, self.input_chain)
+        return f"{timestamp:%Y%m%d_%H%M%S}_{layer_token}_{self.profile_type}_{self.axis}"
 
 
 def load_run_config(path: str | Path) -> RunConfig:

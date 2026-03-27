@@ -12,11 +12,16 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         (f"share/{package_name}", ["package.xml"]),
     ],
-    install_requires=["setuptools", "numpy", "PyYAML"],
+    install_requires=["setuptools", "numpy", "PyYAML", "pymavlink"],
     zip_safe=True,
     maintainer="car",
     maintainer_email="1245080419@qq.com",
     description="Shared helpers for autopilot_lab backends.",
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
+    entry_points={
+        "console_scripts": [
+            "study_analysis_runner = fep_core.study_analysis_runner:main",
+        ],
+    },
 )

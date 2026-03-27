@@ -26,6 +26,25 @@ def ensure_run_directories(root: Path, run_id: str) -> dict[str, Path]:
     }
 
 
+def ensure_study_directories(root: Path, study_id: str) -> dict[str, Path]:
+    base_dir = root / study_id
+    reports_dir = base_dir / "reports"
+    tables_dir = base_dir / "tables"
+    plots_dir = base_dir / "plots"
+    base_dir.mkdir(parents=True, exist_ok=True)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    tables_dir.mkdir(parents=True, exist_ok=True)
+    plots_dir.mkdir(parents=True, exist_ok=True)
+    return {
+        "base_dir": base_dir,
+        "reports_dir": reports_dir,
+        "tables_dir": tables_dir,
+        "plots_dir": plots_dir,
+        "manifest_path": base_dir / "manifest.yaml",
+        "summary_path": reports_dir / "summary.md",
+    }
+
+
 def capture_host_snapshot() -> dict[str, str]:
     uptime = subprocess.run(["uptime"], check=True, capture_output=True, text=True).stdout.strip()
     loadavg = Path("/proc/loadavg").read_text(encoding="utf-8").strip()

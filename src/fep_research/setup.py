@@ -16,7 +16,7 @@ setup(
     zip_safe=True,
     maintainer="car",
     maintainer_email="1245080419@qq.com",
-    description="PX4 FEP Phase 0/1 research tooling for attitude-chain experiments.",
+    description="Compatibility CLI package for the layered sensitivity study platform.",
     license="Apache-2.0",
     extras_require={
         "test": [

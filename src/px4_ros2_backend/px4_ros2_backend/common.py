@@ -21,7 +21,13 @@ ARTIFACT_ROOT = PX4_RUNS_ROOT
 
 RECORDED_TOPICS = (
     "/fmu/out/vehicle_attitude",
+    "/fmu/out/vehicle_attitude_setpoint",
+    "/fmu/out/vehicle_angular_velocity",
+    "/fmu/out/vehicle_rates_setpoint",
     "/fmu/out/vehicle_local_position",
+    "/fmu/out/rate_ctrl_status",
+    "/fmu/out/control_allocator_status",
+    "/fmu/out/actuator_motors",
     "/fmu/out/vehicle_status",
     "/fmu/out/manual_control_setpoint",
     "/fmu/out/vehicle_control_mode",

@@ -1,140 +1,187 @@
-# autopilot_lab 部署与迁移日志
+# AGENTLOG.md
 
-## 概述
+## 目标
 
-- **目标平台**: Jetson AGX Orin 64G
-- **操作系统**: Ubuntu 22.04 aarch64
-- **主工作仓库**: `/home/car/autopilot_lab -> /mnt/nvme/autopilot_lab`
-- **PX4 固件仓库**: `/home/car/PX4-Autopilot -> /mnt/nvme/px4_work/PX4-Autopilot`
-- **ArduPilot 固件仓库**: `/home/car/ardupilot -> /mnt/nvme/UAVFuzzing/ardupilot-home`
-- **旧 PX4 工作区**: `/home/car/px4_ws`，保留为冻结基线
-- **最后更新**: `2026-03-27`
+把 `autopilot_lab` 从“PX4-only 激进输入实验仓”改造成“跨飞控的分层敏感性研究平台”，默认主线为：
 
-## 基础环境
+- `manual_whole_loop`
+- `attitude_explicit`
+- `rate_single_loop` 按需引入
 
-### 存储布局
+参考来源为 `~/RouthSearch` 的研究结构，而不是回退到旧的静态 PID 复现。
 
-- NVMe 挂载点: `/mnt/nvme`
-- 主研究仓: `/mnt/nvme/autopilot_lab`
-- PX4 固件: `/mnt/nvme/px4_work/PX4-Autopilot`
-- ArduPilot 固件: `/mnt/nvme/UAVFuzzing/ardupilot-home`
+## 2026-03-27 本轮改造
 
-### 已验证组件
+### 1. 研究 schema 升级
 
-- Gazebo Harmonic `8.10.0`
-- ROS 2 Humble
-- `ros-humble-ros-gz`
-- PX4 Autopilot `v1.15`
-- Micro XRCE-DDS Agent
-- ArduPilot SITL + `sim_vehicle.py`
+- 扩展 `src/fep_core/fep_core/config.py`
+- 新增字段：
+  - `study_family`
+  - `study_layer`
+  - `study_role`
+  - `oracle_profile`
+  - `mode_under_test`
+  - `parameter_group`
+  - `parameter_set_name`
+  - `parameter_overrides`
+  - `controlled_parameters`
+  - `input_contract`
+  - `output_contract`
+  - `attribution_boundary`
+- 默认解析逻辑已支持：
+  - `manual -> manual_whole_loop`
+  - `attitude -> attitude_explicit`
+  - `rate -> rate_single_loop`
 
-## 2026-03-08 基础环境搭建
+### 2. 共享 study artifact
 
-- 完成 ROS 2 Humble、Gazebo Harmonic、PX4 v1.15、Micro XRCE-DDS Agent 的安装与编译
-- 完成 NVMe 挂载与工作目录迁移
-- 验证 `MicroXRCEAgent`、PX4 SITL 与 Gazebo GUI 可正常运行
+- `src/fep_core/fep_core/paths.py`
+  - 新增 `STUDY_ARTIFACT_ROOT = artifacts/studies`
+- `src/fep_core/fep_core/io.py`
+  - 新增 `ensure_study_directories()`
+- `src/fep_core/fep_core/study_analysis_runner.py`
+  - 新增跨 backend study 汇总 CLI
+  - 汇总输出：
+    - `tables/merged_runs.csv`
+    - `reports/summary.md`
+    - `manifest.yaml`
 
-## 2026-03-10 至 2026-03-16 PX4 研究流水线
+### 3. 参数快照能力
 
-- 建立 `fep_research` 研究包和 `TODO.md`
-- 打通 attitude / manual 两条输入链
-- 固化 Phase 1-3 artifact 结构
-- 完成 nominal / windy 汇总分析与 identification 数据导出
-- 形成 PX4 历史 artifacts 基线：
-  - `runs`: 249
-  - `analysis`: 42
-  - `matrix`: 9
-  - `identification`: 5
+- `src/fep_core/fep_core/mav_params.py`
+  - 新增通用 MAVLink 参数工具：
+    - `connect_mavlink`
+    - `snapshot_parameters`
+    - `set_parameters`
+    - `close_mavlink`
+- `src/fep_core/setup.py`
+  - 增加 `pymavlink`
+  - 增加 `study_analysis_runner` 入口
 
-## 2026-03-26 至 2026-03-27 双 backend 迁移
+### 4. PX4 证据链升级
 
-### 目录与仓库调整
+- `src/px4_ros2_backend/px4_ros2_backend/common.py`
+  - 增补 attitude/rate/allocator/actuator 主题
+- `src/px4_ros2_backend/px4_ros2_backend/telemetry_recorder.py`
+  - 新增 CSV 落盘：
+    - `vehicle_attitude_setpoint`
+    - `vehicle_angular_velocity`
+    - `vehicle_rates_setpoint`
+    - `rate_ctrl_status`
+    - `control_allocator_status`
+    - `actuator_motors`
+- `src/px4_ros2_backend/px4_ros2_backend/experiment_runner.py`
+  - 已接入参数 `snapshot / apply / restore`
+  - 已写入 `study` metadata
+  - 已生成：
+    - `oracle_valid`
+    - `oracle_failure_reason`
+    - `stress_class`
+    - `mechanism_flags`
+    - `rate_layer_recommended`
+    - `rate_layer_reasons`
+  - `rate_single_loop` 当前在 PX4 仍明确标记为条件层，不作为第一批默认 runner
 
-- 新建独立 git 仓库 `/mnt/nvme/autopilot_lab`
-- 建立软链接 `/home/car/autopilot_lab -> /mnt/nvme/autopilot_lab`
-- 旧 `/home/car/px4_ws` 保留，不回写
-- `reference/` 和历史 PX4 artifacts 完整迁入新仓
-- `artifacts/` 统一改为：
-  - `artifacts/px4/`
-  - `artifacts/ardupilot/`
-- 根目录下旧兼容软链接已移除
+### 5. ArduPilot 分层 runner 重写
 
-### 代码结构调整
+- 完全替换 `src/ardupilot_mavlink_backend/ardupilot_mavlink_backend/experiment_runner.py`
+- 默认支持：
+  - `manual_whole_loop`
+    - `GUIDED takeoff -> STABILIZE -> MANUAL_CONTROL -> LAND`
+  - `attitude_explicit`
+    - `GUIDED takeoff -> SET_ATTITUDE_TARGET -> LAND`
+  - `rate_single_loop`
+    - 已预留 body-rate 模式发送接口
+- 已接入参数 `snapshot / apply / restore`
+- 已写入 `study` metadata
+- 已生成：
+  - `oracle_valid`
+  - `oracle_failure_reason`
+  - `stress_class`
+  - `mechanism_flags`
+  - `rate_layer_recommended`
 
-- 新增 `src/fep_core`
-  - 共享配置、路径、profile、artifact I/O
-- 新增 `src/px4_ros2_backend`
-  - PX4 ROS 2 专用实现
-- 新增 `src/ardupilot_mavlink_backend`
-  - ArduPilot MAVLink 专用实现
-- 保留 `src/fep_research`
-  - 兼容层，继续暴露 PX4 既有 CLI
-- 保留顶层 `src/px4_msgs` 与 `src/px4_ros_com` submodule
+### 6. ArduPilot `.BIN` 离线解析
 
-### 构建与运行修正
+- 新增 `src/ardupilot_mavlink_backend/ardupilot_mavlink_backend/bin_log_metrics.py`
+- 已支持解析并标准化导出：
+  - `ATT`
+  - `RATE`
+  - `CTUN`
+  - `MOTB`
+  - `RCOU`
+  - 可选 `PIDR / PIDP / PIDY`
+- 已输出基础指标：
+  - `tracking_error_peak`
+  - `tracking_error_rms`
+  - `response_delay_ms`
+  - `rate_tracking_error_peak`
+  - `rate_tracking_error_rms`
+  - `clip_frac`
+  - `thlimit_peak`
+  - `max_motor_output`
 
-- 新增 `scripts/autopilot_lab_env.sh`
-  - 安装用户态 Python 依赖
-  - source `/opt/ros/humble/setup.bash`
-  - source `install/setup.bash`
-- 处理 ROS Humble 与 `empy` 的兼容问题
-  - 当前采用 `empy<4`
-- 清除代码和文档中的旧工作区硬编码
-  - `/home/car/px4_ws`
-  - `/mnt/nvme/px4_work/px4_ws`
+### 7. 默认分析入口切换
 
-## 验证记录
+- `src/fep_research/fep_research/analysis_runner.py`
+  - 已不再转发到旧 PX4-only `analysis_runner`
+  - 现在直接转发到 `fep_core.study_analysis_runner`
+- `src/px4_ros2_backend/px4_ros2_backend/matrix_runner.py`
+  - 自动汇总已切到新的 study 汇总
 
-### 构建验证
+### 8. 新的分层配置
 
-- `python3 -m compileall` 通过
-- `colcon build --packages-up-to fep_core px4_ros2_backend fep_research ardupilot_mavlink_backend px4_msgs px4_ros_com` 通过
+- 新增：
+  - `src/fep_research/config/layered_manual_roll_020.yaml`
+  - `src/fep_research/config/layered_manual_roll_020_p120.yaml`
+  - `src/fep_research/config/layered_attitude_roll_010.yaml`
+  - `src/fep_research/config/layered_attitude_roll_010_p120.yaml`
+- 第一批参数组固定为 `roll_rate_pid`
+- `P+20%` 采用：
+  - PX4：`MC_ROLLRATE_P = 0.18`
+  - ArduPilot：`ATC_RAT_RLL_P = 0.162`
 
-### PX4 smoke
+### 9. 根文档替换
 
-- 命令:
-  - `ros2 run fep_research matrix_runner --world default --pattern baseline_roll.yaml`
-- 结果:
-  - 新仓 PX4 run 已成功落盘
-  - 代表性产物:
-    - `artifacts/px4/runs/20260326_225500_attitude_baseline_roll/`
+- 已重写：
+  - `README.md`
+  - `PJINFO.md`
+  - `AGENTLOG.md`
+- 顶层旧 Phase 文档已退出主入口，只保留在 `docs/`
 
-### ArduPilot smoke
+## 验证
 
-- 命令:
-  - `ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/baseline_roll.yaml`
-- 结果:
-  - 能启动外部 `/home/car/ardupilot` 的 SITL
-  - 能通过 `pymavlink` 建立连接并落盘遥测
-  - 代表性产物:
-    - `artifacts/ardupilot/runs/20260326_230029_attitude_baseline_roll/`
+### 编译
 
-## 当前使用方式
-
-先 source 环境：
+已通过：
 
 ```bash
-source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
+python3 -m compileall src/fep_core src/px4_ros2_backend src/ardupilot_mavlink_backend src/fep_research
 ```
 
-PX4：
+### 配置与导入
 
-```bash
-MicroXRCEAgent udp4 -p 8888
-cd /home/car/PX4-Autopilot
-make px4_sitl gz_x500
-ros2 run fep_research experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/baseline_roll.yaml
-```
+已验证：
 
-ArduPilot：
+- 新分层配置可被 `RunConfig` 正确解析
+- `study_metadata('px4')` / `study_metadata('ardupilot')` 能正确展开
 
-```bash
-ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/baseline_roll.yaml
-```
+### ArduPilot `.BIN` 解析
 
-## 当前注意事项
+已用以下参考日志做离线验证：
 
-- `src/fep_research` 现在是兼容层，不是主要实现位置
-- PX4 日志仍保留在 `/home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/`
-- ArduPilot backend 当前只实现了最小实验闭环，还没有 PX4 等价的完整分析深度
-- 后续所有新工作都应以 `autopilot_lab` 为准，不再以 `px4_ws` 为准
+- `/mnt/nvme/RouthSearch/routh_search/ardupilot/oracle_logs/base.BIN`
+
+### Study 汇总
+
+已成功生成新的 study artifact：
+
+- `artifacts/studies/20260327_041108_layered_sensitivity/`
+
+## 当前结论
+
+- 仓库默认研究口径已经切到论文导向的分层主线
+- 旧 PX4-only phase 叙事不再是默认入口
+- `manual + attitude` 已成为并列主实验层
+- `rate` 不再被默认忽略，但保持条件触发
+- 当前仓库已经具备继续做 `roll_rate_pid` baseline / `P+20%` 对比的基础能力
