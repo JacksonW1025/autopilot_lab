@@ -1,5 +1,11 @@
 # Phase 3 Analysis / Windy 复现说明
 
+> Archived: 这是旧 PX4-only Phase 文档，不再代表 `Dual-Backend M1` 的默认入口或默认结论。
+>
+> 当前权威状态看：`/home/car/autopilot_lab/docs/M1_STATUS.md`
+>
+> 当前默认入口看：`/home/car/autopilot_lab/README.md` 与 `/home/car/autopilot_lab/docs/intro.md`
+
 这份文档用于复现当前已经完成的 **Phase 3** 工作，范围包括：
 
 - `analysis_runner` 的跨 run 汇总
@@ -8,6 +14,8 @@
 - `windy.sdf` 下的 attitude `pulse / sweep` anchor
 - `windy.sdf` 下的 attitude `step / pulse / sweep` 边界收敛与解释
 - ULog 饱和指标的机制化汇总
+
+这里描述的是旧 PX4-only nominal / windy analysis，不对应当前 `Dual-Backend M1` 的 `accepted_runs.csv / rejected_runs.csv` 验收口径。
 
 当前这批工作已经不再属于 Phase 1。
 
@@ -24,8 +32,8 @@
 
 Phase 1 的 baseline / step / manual 主链复现仍保留在：
 
-- `/home/car/autopilot_lab/PHASE1_ATTITUDE_REPRO.md`
-- `/home/car/autopilot_lab/PHASE1_MANUAL_REPRO.md`
+- `/home/car/autopilot_lab/docs/PHASE1_ATTITUDE_REPRO.md`
+- `/home/car/autopilot_lab/docs/PHASE1_MANUAL_REPRO.md`
 
 ## 当前首选参考结果
 
@@ -419,7 +427,7 @@ ros2 run fep_research analysis_runner --world-filter windy
 - 是否出现 `land_timeout_force_disarm`
 - summary 的 `Axis Layers` 是否开始出现 `invalid`
 
-## 当前结论
+## 历史结论
 
 - 当前这批交付已经满足 **Phase 3 exit criteria**
 - `windy` 数据集已经覆盖 attitude `step / pulse / sweep` 首轮 profile
@@ -439,7 +447,7 @@ ros2 run fep_research analysis_runner --world-filter windy
 - `manual pitch / composite` 的首轮 `windy` anchor 已补齐，后续若继续扩 manual，更合理的是更激进幅值而不是重复当前 safe 点
 - `/clock` 仍留在 timing / phase 结论阶段再处理
 
-## Phase 3 完成判断
+## 按当时口径的完成判断
 
 - 当前已满足 `/home/car/autopilot_lab/TODO.md` 中的 `Phase 3 exit criteria`
 - 因此本阶段现在应视为 **Phase 3 completed**

@@ -24,6 +24,7 @@ GZ_RESOURCE_PATH = f"{PX4_ROOT}/Tools/simulation/gz/models:{WORLD_ROOT}"
 
 DEFAULT_PATTERNS = ("*.yaml",)
 ANALYSIS_WORLD_FILTERS = {"windy": "windy", "default": "nominal"}
+ROOTFS_STATE_FILES = ("dataman", "parameters.bson", "parameters_backup.bson")
 
 
 @dataclass(slots=True)
@@ -81,8 +82,19 @@ def _session_env(world: str) -> dict[str, str]:
     return env
 
 
+def _reset_px4_rootfs_state() -> None:
+    rootfs_dir = PX4_ROOT / "build/px4_sitl_default/rootfs"
+    for filename in ROOTFS_STATE_FILES:
+        path = rootfs_dir / filename
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            continue
+
+
 def _start_session(world: str, session_dir: Path) -> list[ManagedProcess]:
     env = _session_env(world)
+    _reset_px4_rootfs_state()
     processes = [
         _start_process(
             "gazebo",

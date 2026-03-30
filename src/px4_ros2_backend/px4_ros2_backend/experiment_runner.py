@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import rclpy
+from fep_core.milestone import capability_level, milestone_id, schema_version
 from fep_core.mav_params import close_mavlink, connect_mavlink, set_parameters, snapshot_parameters
 from rclpy.executors import SingleThreadedExecutor
 
@@ -24,6 +25,7 @@ from .artifacts import (
 )
 from .attitude_injector import AttitudeInjector
 from .manual_input_injector import ManualInputInjector
+from .rate_injector import RateInjector
 from .common import (
     RECORDED_TOPICS,
     RunConfig,
@@ -38,6 +40,7 @@ from .telemetry_recorder import TelemetryRecorder
 from .ulog_metrics import summarize_ulog
 
 PX4_PARAM_MASTER_DEFAULT = "udp:127.0.0.1:14550"
+MANUAL_MOTION_THRESHOLD_EPSILON = 1e-3
 
 
 def _preflight_checks() -> tuple[list[str], bool]:
@@ -181,6 +184,19 @@ def _oracle_decision(
             config.extras.get("oracle_manual_xy_displacement_limit_m", 25.0)
         ):
             return 0, "manual_xy_drift_high"
+    else:
+        if float(metrics.get("tracking_error_peak", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_rate_tracking_error_peak_limit", 0.60)
+        ):
+            return 0, "rate_tracking_error_peak_high"
+        if float(metrics.get("tracking_error_rms", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_rate_tracking_error_rms_limit", 0.30)
+        ):
+            return 0, "rate_tracking_error_rms_high"
+        if float(metrics.get("response_delay_ms", 0.0) or 0.0) >= float(
+            config.extras.get("oracle_rate_response_delay_ms_limit", 250.0)
+        ):
+            return 0, "rate_response_delay_high"
 
     return 1, "valid"
 
@@ -263,7 +279,7 @@ def _manual_xy_motion_anomaly(
     max_disp = max(
         math.hypot(_float_value(row["x"], 0.0) - x0, _float_value(row["y"], 0.0) - y0) for row in valid_rows
     )
-    if max_disp < motion_threshold:
+    if max_disp + MANUAL_MOTION_THRESHOLD_EPSILON < motion_threshold:
         return "manual_motion_not_observed"
     return None
 
@@ -284,7 +300,7 @@ def _manual_z_motion_anomaly(
         return "manual_motion_window_missing"
     z0 = _float_value(valid_rows[0]["z"], 0.0)
     max_disp = max(abs(_float_value(row["z"], 0.0) - z0) for row in valid_rows)
-    if max_disp < motion_threshold:
+    if max_disp + MANUAL_MOTION_THRESHOLD_EPSILON < motion_threshold:
         return "manual_motion_not_observed"
     return None
 
@@ -306,7 +322,7 @@ def _manual_yaw_motion_anomaly(
     max_yaw_delta = max(
         abs(_wrapped_angle_delta_rad(float(yaw0), _float_value(row.get("yaw"), 0.0) or 0.0)) for row in attitude_rows
     )
-    if max_yaw_delta < yaw_threshold:
+    if max_yaw_delta + MANUAL_MOTION_THRESHOLD_EPSILON < yaw_threshold:
         return "manual_motion_not_observed"
     return None
 
@@ -560,13 +576,13 @@ def _post_run_manual_anomalies(
     if not any(int(row.get("nav_state", -1)) == 2 for row in status_rows):
         return ["manual_posctl_not_reached"]
 
-    active_phase_names = {
-        "step": {"step_active"},
-        "pulse": {"pulse_active"},
-        "sweep": {"sweep_active"},
+    evaluation_phase_names = {
+        "step": {"step_active", "recover"},
+        "pulse": {"pulse_active", "recover"},
+        "sweep": {"sweep_active", "recover"},
     }.get(config.profile_type, set())
     active_command_trace = [
-        row for row in injector_report.get("command_trace", []) if str(row.get("phase", "")) in active_phase_names
+        row for row in injector_report.get("command_trace", []) if str(row.get("phase", "")) in evaluation_phase_names
     ]
     active_command_times = [
         int(row["publish_time_ns"])
@@ -576,7 +592,7 @@ def _post_run_manual_anomalies(
         return ["manual_profile_window_missing"]
 
     step_start_ns = min(active_command_times)
-    step_end_ns = max(active_command_times)
+    step_end_ns = max(max(active_command_times), int(end_ns))
     motion_threshold = float(config.extras.get("manual_motion_min_displacement_m", 0.20))
     z_motion_threshold = float(config.extras.get("manual_motion_min_z_displacement_m", motion_threshold))
 
@@ -626,6 +642,8 @@ def _run_purpose(config: RunConfig) -> str:
         if config.manual_mode == "flight":
             return f"验证 `{config.profile_type}` / `{config.axis}` 的 manual_control_input 对机体的真实控制效果。"
         return f"验证 `{config.profile_type}` / `{config.axis}` 的 manual_control_input 回显链与 artifact 落盘。"
+    if config.input_chain == "rate":
+        return f"验证 `{config.profile_type}` / `{config.axis}` 的 body-rate 主链闭环与 artifact 落盘。"
     return f"验证 `{config.profile_type}` / `{config.axis}` 的 attitude 主链闭环与 artifact 落盘。"
 
 
@@ -753,113 +771,6 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
     paths = ensure_run_directories(run_id)
     host_start = capture_host_snapshot()
 
-    if config.resolved_study_layer == "rate_single_loop":
-        anomalies = ["px4_rate_single_loop_not_implemented_yet"]
-        host_end = capture_host_snapshot()
-        end_time = datetime.now(timezone.utc).astimezone()
-        metrics = _placeholder_metrics(config, None)
-        metrics["run_id"] = run_id
-        metrics["backend"] = "px4_ros2"
-        metrics["study_layer"] = study["study_layer"]
-        metrics["study_role"] = study["study_role"]
-        metrics["mode_under_test"] = study["mode_under_test"]
-        metrics["parameter_group"] = study["parameter_group"]
-        metrics["parameter_set_name"] = study["parameter_set_name"]
-        metrics["oracle_valid"] = 0
-        metrics["oracle_failure_reason"] = "rate_layer_not_implemented_px4"
-        metrics["stress_class"] = "stressed"
-        metrics["mechanism_flags"] = "rate_layer_not_implemented"
-        metrics["rate_layer_recommended"] = 1
-        metrics["rate_layer_reasons"] = "study_layer_is_rate_single_loop"
-        metrics["attribution_boundary"] = config.resolved_attribution_boundary
-        write_single_row_csv(
-            paths["metrics_path"],
-            metrics,
-            [
-                "run_id",
-                "backend",
-                "study_layer",
-                "study_role",
-                "mode_under_test",
-                "parameter_group",
-                "parameter_set_name",
-                "input_chain",
-                "profile_type",
-                "axis",
-                "input_peak",
-                "input_rate_peak",
-                "tracking_error_peak",
-                "tracking_error_rms",
-                "response_delay_ms",
-                "nav_state_change",
-                "failsafe_event",
-                "start_xy_radius_m",
-                "end_xy_radius_m",
-                "xy_radius_peak_m",
-                "xy_displacement_peak_m",
-                "ulog_saturation_metric",
-                "ulog_parse_status",
-                "oracle_valid",
-                "oracle_failure_reason",
-                "stress_class",
-                "mechanism_flags",
-                "rate_layer_recommended",
-                "rate_layer_reasons",
-                "attribution_boundary",
-            ],
-        )
-        notes_text = _build_notes(
-            config,
-            run_id,
-            "invalid_runtime",
-            start_time,
-            end_time,
-            host_start,
-            host_end,
-            False,
-            anomalies,
-            {"message_counts": {}, "event_counts": {}},
-            {
-                "completion_reason": "rate_layer_not_implemented_px4",
-                "experiment_start_time_ns": None,
-                "landing_command_time_ns": None,
-                "completion_time_ns": None,
-                "command_trace": [],
-                "anomalies": [],
-            },
-            None,
-            None,
-            None,
-            None,
-            None,
-        )
-        paths["notes_path"].write_text(notes_text, encoding="utf-8")
-        write_yaml(
-            paths["manifest_path"],
-            {
-                "run_id": run_id,
-                "backend": "px4_ros2",
-                "phase": config.phase,
-                "input_chain": config.input_chain,
-                "input_topic": config.input_topic,
-                "profile_type": config.profile_type,
-                "profile_params": config.profile_params(),
-                "start_time": start_time.isoformat(),
-                "end_time": end_time.isoformat(),
-                "status": "invalid_runtime",
-                "study": study,
-                "px4_log_path": None,
-                "prestart_xy_gate": None,
-                "clock_bridge": None,
-                "xy_motion_summary": None,
-                "ros_topics_recorded": list(RECORDED_TOPICS),
-                "parameter_snapshot_before": {},
-                "parameter_snapshot_after": {},
-                "anomaly_summary": anomalies,
-            },
-        )
-        return 1, paths["base_dir"]
-
     clock_bridge_handle = None
     clock_bridge_summary: dict[str, Any] = {
         "started": False,
@@ -885,8 +796,10 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
         injector = ManualInputInjector(config)
     elif config.input_chain == "attitude":
         injector = AttitudeInjector(config)
+    elif config.input_chain == "rate":
+        injector = RateInjector(config)
     else:
-        raise ValueError(f"PX4 当前只支持 manual 与 attitude 主线，暂不支持 input_chain={config.input_chain}")
+        raise ValueError(f"PX4 不支持 input_chain={config.input_chain}")
     executor = SingleThreadedExecutor()
     executor.add_node(recorder)
     executor.add_node(injector)
@@ -941,7 +854,8 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
         recorder.destroy_node()
         rclpy.shutdown()
         stop_clock_bridge(clock_bridge_handle)
-        anomalies.extend(_restore_px4_parameters(parameter_master, parameter_snapshot_before))
+        if parameter_snapshot_after != parameter_snapshot_before:
+            anomalies.extend(_restore_px4_parameters(parameter_master, parameter_snapshot_before))
         close_mavlink(parameter_master)
 
     host_end = capture_host_snapshot()
@@ -998,6 +912,8 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
             config,
             active_command_trace,
             rows["vehicle_attitude"],
+            rows["vehicle_angular_velocity"],
+            rows["vehicle_rates_setpoint"],
             rows["manual_control_setpoint"],
             rows["vehicle_local_position"],
             rows["vehicle_status"],
@@ -1095,6 +1011,9 @@ def run_experiment(config: RunConfig) -> tuple[int, Path]:
     manifest = {
         "run_id": run_id,
         "backend": "px4_ros2",
+        "schema_version": schema_version(),
+        "milestone_id": milestone_id(),
+        "capability_level": capability_level(),
         "phase": config.phase,
         "input_chain": config.input_chain,
         "input_topic": config.input_topic,

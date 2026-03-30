@@ -29,18 +29,19 @@ def _actual_value(actual: dict[str, Any], channel: str) -> float:
     return _float_value(actual.get(channel, 0.0))
 
 
-def _nearest_actual_values(
-    command_trace: list[dict[str, Any]],
+def _nearest_actual_values_for_key(
+    reference_rows: list[dict[str, Any]],
     actual_rows: list[dict[str, Any]],
+    reference_time_key: str,
 ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    if not command_trace or not actual_rows:
+    if not reference_rows or not actual_rows:
         return []
 
     actual_times = [int(row["received_time_ns"]) for row in actual_rows]
     aligned: list[tuple[dict[str, Any], dict[str, Any]]] = []
-    for command in command_trace:
-        command_time = int(command["publish_time_ns"])
-        index = bisect.bisect_left(actual_times, command_time)
+    for reference in reference_rows:
+        reference_time = int(reference[reference_time_key])
+        index = bisect.bisect_left(actual_times, reference_time)
         candidates = []
         if index < len(actual_rows):
             candidates.append(actual_rows[index])
@@ -48,9 +49,16 @@ def _nearest_actual_values(
             candidates.append(actual_rows[index - 1])
         if not candidates:
             continue
-        closest = min(candidates, key=lambda row: abs(int(row["received_time_ns"]) - command_time))
-        aligned.append((command, closest))
+        closest = min(candidates, key=lambda row: abs(int(row["received_time_ns"]) - reference_time))
+        aligned.append((reference, closest))
     return aligned
+
+
+def _nearest_actual_values(
+    command_trace: list[dict[str, Any]],
+    actual_rows: list[dict[str, Any]],
+) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    return _nearest_actual_values_for_key(command_trace, actual_rows, "publish_time_ns")
 
 
 def _manual_nav_state_changed(
@@ -114,6 +122,8 @@ def compute_metrics(
     config: RunConfig,
     command_trace: list[dict[str, Any]],
     attitude_rows: list[dict[str, Any]],
+    angular_velocity_rows: list[dict[str, Any]],
+    rate_setpoint_rows: list[dict[str, Any]],
     manual_rows: list[dict[str, Any]],
     local_position_rows: list[dict[str, Any]],
     status_rows: list[dict[str, Any]],
@@ -127,11 +137,19 @@ def compute_metrics(
             config.axis, "roll"
         )
         actual_rows = manual_rows
+        aligned = _nearest_actual_values(command_trace, actual_rows)
+        rate_desired_rows: list[dict[str, Any]] = []
     else:
-        axis_column = {"roll": "roll", "pitch": "pitch", "yaw": "yaw"}.get(config.axis, "roll")
-        actual_rows = attitude_rows
-
-    aligned = _nearest_actual_values(command_trace, actual_rows)
+        if config.input_chain == "rate":
+            axis_column = {"roll": "xyz_x", "pitch": "xyz_y", "yaw": "xyz_z"}.get(config.axis, "xyz_x")
+            actual_rows = angular_velocity_rows
+            aligned = _nearest_actual_values_for_key(rate_setpoint_rows, actual_rows, "received_time_ns")
+            rate_desired_rows = rate_setpoint_rows
+        else:
+            axis_column = {"roll": "roll", "pitch": "pitch", "yaw": "yaw"}.get(config.axis, "roll")
+            actual_rows = attitude_rows
+            aligned = _nearest_actual_values(command_trace, actual_rows)
+            rate_desired_rows = []
 
     if composite_manual:
         active_channels = [
@@ -165,6 +183,10 @@ def compute_metrics(
         for command, actual in aligned:
             for channel in active_channels:
                 errors.append(_command_value(command, channel) - _actual_value(actual, channel))
+    elif config.input_chain == "rate":
+        desired_column = {"roll": "roll", "pitch": "pitch", "yaw": "yaw"}.get(config.axis, "roll")
+        for desired_row, actual in aligned:
+            errors.append(_float_value(desired_row.get(desired_column, 0.0)) - _float_value(actual.get(axis_column, 0.0)))
     else:
         for command, actual in aligned:
             errors.append(_float_value(command["profile_value"]) - _float_value(actual[axis_column]))
@@ -205,6 +227,37 @@ def compute_metrics(
                 if delays_ms:
                     response_delay_ms = min(delays_ms)
                     break
+            elif config.input_chain == "rate":
+                desired_column = {"roll": "roll", "pitch": "pitch", "yaw": "yaw"}.get(config.axis, "roll")
+                input_cross_time_ns = None
+                for row in rate_desired_rows:
+                    desired_value = _float_value(row.get(desired_column, 0.0))
+                    if abs(desired_value) >= threshold:
+                        input_cross_time_ns = int(row["received_time_ns"])
+                        break
+
+                if input_cross_time_ns is None:
+                    continue
+
+                baseline_samples = [
+                    _float_value(row.get(axis_column, 0.0))
+                    for row in actual_rows
+                    if int(row["received_time_ns"]) < input_cross_time_ns
+                ]
+                baseline_actual = sum(baseline_samples) / len(baseline_samples) if baseline_samples else 0.0
+
+                crossed = False
+                for row in actual_rows:
+                    if int(row["received_time_ns"]) < input_cross_time_ns:
+                        continue
+                    actual_delta = _float_value(row.get(axis_column, 0.0)) - baseline_actual
+                    if abs(actual_delta) >= threshold:
+                        response_delay_ms = (int(row["received_time_ns"]) - input_cross_time_ns) / 1_000_000.0
+                        crossed = True
+                        break
+
+                if crossed:
+                    break
             else:
                 input_cross_time_ns = None
                 for row in command_trace:
@@ -238,8 +291,16 @@ def compute_metrics(
 
     failsafe_event = 0
     unexpected_nav_state = 0
+    status_window_end_ns = end_time_ns
+    if status_window_end_ns is None and start_time_ns is not None:
+        status_window_end_ns = start_time_ns + int(config.active_duration_s * 1e9)
     if status_rows:
         for row in status_rows:
+            received_time_ns = int(row["received_time_ns"])
+            if start_time_ns is not None and received_time_ns < start_time_ns:
+                continue
+            if status_window_end_ns is not None and received_time_ns > status_window_end_ns:
+                break
             if str(row.get("failsafe", "False")).lower() == "true" or int(row.get("failure_detector_status", 0)) != 0:
                 failsafe_event = 1
                 break
@@ -249,12 +310,11 @@ def compute_metrics(
         elif start_time_ns is None:
             unexpected_nav_state = 1
         else:
-            landing_guard_ns = end_time_ns or (start_time_ns + int(config.active_duration_s * 1e9))
             for row in status_rows:
                 received_time_ns = int(row["received_time_ns"])
                 if received_time_ns < start_time_ns:
                     continue
-                if received_time_ns > landing_guard_ns:
+                if status_window_end_ns is not None and received_time_ns > status_window_end_ns:
                     break
                 if int(row["nav_state"]) != VehicleStatus.NAVIGATION_STATE_OFFBOARD:
                     unexpected_nav_state = 1

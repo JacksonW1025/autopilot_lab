@@ -1,123 +1,96 @@
 # autopilot_lab 项目简介与当前实验状况
 
-## 1. 文档目的
+## 1. 当前状态
 
-本文面向第一次接触当前仓库的老师或协作者，回答三件事：
+`autopilot_lab` 现在的主口径是 `Dual-Backend M1` 分层实验平台：
 
-1. `autopilot_lab` 现在到底是什么。
-2. 它和旧 `px4_ws` 的关系是什么。
-3. 目前哪些结论已经稳定，哪些还只是新 backend 的起步状态。
+- backend：PX4 + ArduPilot
+- 主能力：`manual_whole_loop`、`attitude_explicit`、`rate_single_loop`
+- 主特征：bootstrap、doctor、fresh matrix、strict study analysis、legacy 隔离
 
-## 2. 一句话概括当前状态
+截至 `2026-03-30`，当前已完成真实 M1 验收闭环：
 
-`autopilot_lab` 是新的主研究仓库。它保留了原来 PX4 + ROS 2 的完整实验链路，同时新增了 ArduPilot + MAVLink backend，并把共享逻辑抽到了 `fep_core`。
+- `doctor_lab.sh` 已 ready
+- 双 backend canonical roll smoke 已真跑通过
+- 本轮 12 个新 run 已全部进入 accepted
+- 最小 CI `scripts/ci_minimal.sh` 已通过
 
-也就是说，当前阶段的重点不是“把两套飞控完全做成同一套代码”，而是先把研究平台从单一 PX4 工作区提升为可容纳两个 backend 的统一实验仓库。
+当前权威状态页：
 
-## 3. 为什么要从 `px4_ws` 迁到 `autopilot_lab`
+- `docs/M1_STATUS.md`
 
-旧 `px4_ws` 的问题不在于功能不够，而在于结构已经明显偏向 PX4 ROS 2：
+## 2. 新仓与旧仓关系
 
-- 研究逻辑、PX4 topic 接口、artifact 路径和 CLI 都混在同一个包里
-- 历史分析代码默认假设底层一定是 PX4 ULog
-- 文档、目录和运行方式也默认这是一个单 backend 的 ROS 2 工作区
+- 主开发仓：`/home/car/autopilot_lab -> /mnt/nvme/autopilot_lab`
+- 旧冻结仓：`/home/car/px4_ws`
 
-如果继续在旧结构上硬接 ArduPilot，后果会很直接：
+后续开发只在 `autopilot_lab` 上继续推进；`px4_ws` 保持冻结。
 
-- 共享研究逻辑和 PX4 接口逻辑无法分离
-- ArduPilot 明明不依赖 ROS 2 runtime，却会被迫伪装成 PX4 风格节点
-- 后续做 cross-backend 对比时，artifact 与 manifest 的口径会越来越乱
+## 3. M1 已补齐的关键点
 
-因此现在采用的新结构是：
+### 3.1 环境与入口
 
-- `src/fep_core`
-  - 后端无关层
-- `src/px4_ros2_backend`
-  - PX4 ROS 2 实现
-- `src/ardupilot_mavlink_backend`
-  - ArduPilot MAVLink 实现
-- `src/fep_research`
-  - PX4 兼容入口层
+- 新增 `milestone.lock.json`
+- 新增 `scripts/bootstrap_lab.sh`
+- 新增 `scripts/doctor_lab.sh`
+- 新增 `scripts/smoke_lab.sh`
+- 新增 `scripts/ci_minimal.sh`
+- 默认入口切到 backend-native CLI
 
-## 4. 旧仓和新仓的关系
+### 3.2 运行与实验层
 
-- 新仓：
-  - `/home/car/autopilot_lab -> /mnt/nvme/autopilot_lab`
-- 旧仓：
-  - `/home/car/px4_ws`
+- PX4 `rate_single_loop` 已从占位分支补成可运行主能力
+- ArduPilot matrix 已支持 `repeat`、`session_dir` 和 fresh session lifecycle
+- PX4 / ArduPilot 的新 run 都写入统一里程碑元数据
 
-当前策略很明确：
+### 3.3 汇总与可信性层
 
-- 旧仓保留，不回写，不反向同步
-- 新仓作为后续主开发仓
-- PX4 历史代码、`reference/` 和历史 PX4 artifacts 都已经迁入新仓
+- `study_analysis_runner` 默认只接收当前里程碑 `accepted` runs
+- 历史 runs 默认被标记为 `legacy`
+- schema 不完整的新 runs 会被标为 `rejected`
+- 新汇总默认输出 `accepted_runs.csv` 和 `rejected_runs.csv`
 
-这意味着后续如果继续做 PX4，只在 `autopilot_lab` 上推进；`px4_ws` 只作为冻结基线存在。
+## 4. 当前可信结论
 
-## 5. 当前已经完成了什么
+截至 `2026-03-30`，现在可以明确说：
 
-### 5.1 PX4 侧
+- PX4 与 ArduPilot 都已经纳入同一套分层 study 口径
+- `manual / attitude / rate` 三层都已在 roll canonical smoke 上完成双 backend 验证
+- 主汇总默认不会再把旧 schema runs 静默混入当前结论
+- 最新 smoke 的 12 个新 run 过滤后 `accepted=12`、`rejected=0`
+- 全仓最新 study manifest 计数为 `accepted=39`、`legacy=253`、`rejected=20`，这是汇总口径，不是这轮 smoke 的失败数
+- 当前环境已经达到一个可用于论文实验初步环境建设的里程碑
 
-PX4 侧原有能力已经保留：
+## 5. 仍需记住的边界
 
-- `ros2 run fep_research ...` 的入口保持兼容
-- Phase 1-3 代码已经迁入并可在新仓编译
-- 历史 `runs / analysis / matrix / identification` 已迁到 `artifacts/px4/`
-- 新仓下已完成一次 PX4 smoke run 验证
+- 历史 artifacts 仍然存在，而且默认被隔离为 `legacy`
+- M1 的 canonical smoke 只锁定 `roll` 轴
+- 当前研究扩展顺序是先补 pitch，再做 yaw/composite
+- `fep_research` 仍保留兼容入口，但不再是默认前门
 
-因此，PX4 当前不是“准备迁移”，而是“已经迁完并能继续跑”。
+## 6. 推荐使用方式
 
-### 5.2 ArduPilot 侧
+首次环境准备：
 
-ArduPilot 目前处于“最小闭环已建立”的状态：
+```bash
+/home/car/autopilot_lab/scripts/bootstrap_lab.sh
+/home/car/autopilot_lab/scripts/doctor_lab.sh
+```
 
-- backend 位于 `src/ardupilot_mavlink_backend`
-- 通过外部 `/home/car/ardupilot` 启动 SITL
-- 通过 `pymavlink` 建立连接、接收心跳、记录遥测并落盘
-- 已能写出 `manifest.yaml`、`metrics.csv`、`telemetry/*.csv`
-- 已能记录 `ardupilot_tlog_path` 与 `ardupilot_bin_log_path`
+统一 smoke：
 
-但需要明确：
+```bash
+/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1
+```
 
-- 这还不是 PX4 Phase 3 等价实现
-- 这还没有 ArduPilot 版的完整 failure attribution / identification
-- 当前只能说 ArduPilot backend 已经具备后续扩展所需的基础闭环
+最小 CI：
 
-## 6. 当前哪些结论是可信的
+```bash
+/home/car/autopilot_lab/scripts/ci_minimal.sh
+```
 
-截至 `2026-03-27`，当前可以明确说：
+严格汇总：
 
-- PX4 侧的研究流水线已经在新仓保持可用
-- 旧 PX4 历史结果已经完成迁移，且目录口径稳定在 `artifacts/px4/...`
-- `fep_research` 兼容层已经保住现有 PX4 ROS 2 节点入口
-- ArduPilot backend 已经能完成最小 run 并生成标准化 artifacts
-
-当前还不能夸大说：
-
-- ArduPilot 已经和 PX4 在分析深度上完全对齐
-- 两个 backend 已经可以直接做严格的一一对比结论
-- 新 backend 已经完成针对 FEP 研究问题的完整统计与机理解释
-
-## 7. 当前 artifact 口径
-
-现在统一只使用下面两棵目录：
-
-- `artifacts/px4/`
-- `artifacts/ardupilot/`
-
-其中：
-
-- `artifacts/px4/`
-  - 保存历史和后续 PX4 run、analysis、matrix、identification
-- `artifacts/ardupilot/`
-  - 保存 ArduPilot run、matrix 和后续回填结果
-
-旧 `artifacts/runs` 这类兼容软链接已经移除，避免后续路径继续混乱。
-
-## 8. 当前最值得记住的结论
-
-如果只看当前阶段最核心的一点，可以概括为：
-
-这个项目已经从“PX4 单 backend 的 ROS 2 工作区”升级成了“保留 PX4 兼容性、并为 ArduPilot 留出正式接入口的双 backend 研究仓库”。
-
-换句话说，当前最大的进展不是多跑了几组仿真，而是把后续两套飞控并行研究的代码组织和数据组织先搭稳了。
+```bash
+ros2 run fep_core study_analysis_runner
+```

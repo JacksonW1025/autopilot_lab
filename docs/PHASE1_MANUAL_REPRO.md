@@ -1,5 +1,11 @@
 # Phase 1 Manual 实验复现说明
 
+> Archived: 这是旧 PX4-only Phase 文档，不再代表 `Dual-Backend M1` 的默认入口或默认结论。
+>
+> 当前权威状态看：`/home/car/autopilot_lab/docs/M1_STATUS.md`
+>
+> 当前默认入口看：`/home/car/autopilot_lab/README.md` 与 `/home/car/autopilot_lab/docs/intro.md`
+
 这份文档用于复现当前已经完成的 `manual_control_input` 基础链路验证，以及已打通的 manual flight 验证。
 
 当前验证目标只有一条：
@@ -485,7 +491,7 @@ PY
 - `vehicle_status.csv` 中出现 `nav_state=2 (POSCTL)`
 - step 窗口里能观察到真实机体位移或姿态变化
 
-## 下一步
+## 历史后续方向
 
 当前 manual 主链已经完成：
 
@@ -495,7 +501,9 @@ PY
 - `0.80 / 4s` 的单轴梯度验证
 - `composite` profile：`moderate` 已通过，`aggressive t035` 已通过
 
-下一步如果要更进一步，应做下面二选一之一：
+按当时的 Phase 1 语境，如果要更进一步，应做下面二选一之一：
 
 - 做 `composite` profile，或把 `duration` 再拉长到 `5-6s`
 - 在保持当前 hybrid takeoff 的前提下提高 manual 分析指标，补自动位移/姿态摘要
+
+按 `2026-03-30` 的当前主线，这里已经是历史后续方向；现在的研究扩展顺序以 `/home/car/autopilot_lab/docs/M1_STATUS.md` 为准：先补 pitch，再做 yaw/composite。

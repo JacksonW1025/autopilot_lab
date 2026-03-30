@@ -19,4 +19,12 @@ setup(
     description="PX4 ROS 2 backend for autopilot_lab.",
     license="Apache-2.0",
     extras_require={"test": ["pytest"]},
+    entry_points={
+        "console_scripts": [
+            "px4_experiment_runner = px4_ros2_backend.experiment_runner:main",
+            "px4_matrix_runner = px4_ros2_backend.matrix_runner:main",
+            "px4_rate_injector = px4_ros2_backend.rate_injector:main",
+            "px4_analysis_runner = px4_ros2_backend.analysis_runner:main",
+        ],
+    },
 )

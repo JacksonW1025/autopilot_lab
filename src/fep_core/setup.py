@@ -22,6 +22,7 @@ setup(
     entry_points={
         "console_scripts": [
             "study_analysis_runner = fep_core.study_analysis_runner:main",
+            "study_validate = fep_core.artifact_validator:main",
         ],
     },
 )

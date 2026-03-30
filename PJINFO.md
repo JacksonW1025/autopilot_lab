@@ -6,8 +6,8 @@
 
 - 核心目标：围绕 FEP / PIO 前期研究，建立可用于论文实验的多飞控分层敏感性平台
 - 研究对象：PX4 与 ArduPilot 两套 SITL 控制链
-- 当前主线：`manual_whole_loop + attitude_explicit`
-- 条件层：`rate_single_loop`
+- 当前主线：roll 三层双 backend 已验证的 `manual_whole_loop + attitude_explicit + rate_single_loop`
+- 当前扩展顺序：先补 pitch，再做 yaw/composite
 - 参考方法来源：`~/RouthSearch`
   - 借鉴 `mode-specific task`
   - 借鉴 `offline oracle`
@@ -50,7 +50,7 @@
 
 ### `rate_single_loop`
 
-- 当前不是第一批默认实验
+- roll canonical smoke 已进入并通过
 - 引入条件：
   - attitude 层差异无法由输入映射或 altitude hold 解释
   - 研究参数本身就是 rate PID
@@ -71,9 +71,17 @@
 - manual `P+20%`：`src/fep_research/config/layered_manual_roll_020_p120.yaml`
 - attitude baseline：`src/fep_research/config/layered_attitude_roll_010.yaml`
 - attitude `P+20%`：`src/fep_research/config/layered_attitude_roll_010_p120.yaml`
+- rate baseline：`src/fep_research/config/layered_rate_roll_010.yaml`
+- rate `P+20%`：`src/fep_research/config/layered_rate_roll_010_p120.yaml`
 
 ## 当前状态
 
+- [2026-03-30] `scripts/doctor_lab.sh` 已返回 `status=ready`
+- [2026-03-30] 已真实执行 `/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1`
+- [2026-03-30] 最新双 backend matrix 各 6 行 completed，新产生的 12 个 run 过滤后全部进入 accepted
+- [2026-03-30] 最新 study manifest 全局计数为 `accepted=39`、`legacy=253`、`rejected=20`
+- [2026-03-30] `scripts/ci_minimal.sh` 已落地并通过
+- [2026-03-30] 当前状态单一事实源固定为 `docs/M1_STATUS.md`
 - [2026-03-27] 根文档默认口径已从 PX4-only phase 流水线切到分层敏感性研究平台
 - [2026-03-27] `fep_core.config` 已加入 `study_* / oracle / parameter / attribution` schema
 - [2026-03-27] `fep_core` 已加入 study artifact 目录和跨 backend `study_analysis_runner`
@@ -102,6 +110,10 @@
 
 ## 最近变更
 
+- 新增 `docs/M1_STATUS.md`
+- 新增 `scripts/ci_minimal.sh`
+- 完成 roll 三层双 backend 真实 smoke 验收，并确认新 12 run 全部进入 `accepted_runs.csv`
+- 当前研究扩展顺序固定为：先补 pitch，再做 yaw/composite
 - 新增 `artifacts/studies/<timestamp>_layered_sensitivity/`
 - 新增分层配置：
   - `layered_manual_roll_020.yaml`
@@ -117,6 +129,24 @@
 
 ```bash
 source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
+```
+
+环境体检：
+
+```bash
+/home/car/autopilot_lab/scripts/doctor_lab.sh
+```
+
+统一 smoke：
+
+```bash
+/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1
+```
+
+最小 CI：
+
+```bash
+/home/car/autopilot_lab/scripts/ci_minimal.sh
 ```
 
 PX4 manual：

@@ -1,5 +1,11 @@
 # Phase 1 Attitude 实验复现说明
 
+> Archived: 这是旧 PX4-only Phase 文档，不再代表 `Dual-Backend M1` 的默认入口或默认结论。
+>
+> 当前权威状态看：`/home/car/autopilot_lab/docs/M1_STATUS.md`
+>
+> 当前默认入口看：`/home/car/autopilot_lab/README.md` 与 `/home/car/autopilot_lab/docs/intro.md`
+
 这份文档用于复现当前已经完成的 `attitude` 主链实验，包括：
 
 - `baseline`
@@ -10,11 +16,11 @@
 
 `manual_control_input` 的 ground echo 验证已经单独整理在：
 
-- `/home/car/autopilot_lab/PHASE1_MANUAL_REPRO.md`
+- `/home/car/autopilot_lab/docs/PHASE1_MANUAL_REPRO.md`
 
 当前如果要复现 nominal/windy 汇总、`analysis_runner` 或 `windy` 下的 attitude `pulse/sweep` anchor，请改看：
 
-- `/home/car/autopilot_lab/PHASE3_ANALYSIS_REPRO.md`
+- `/home/car/autopilot_lab/docs/PHASE3_ANALYSIS_REPRO.md`
 
 当前实现采用新的 hybrid takeoff 口径：
 
@@ -244,4 +250,6 @@ tail -n 60 "${LATEST_RUN}/notes.md"
 pgrep -af 'MicroXRCEAgent udp4 -p 8888|px4_sitl_default/bin/px4|gz sim|ros2 run fep_research experiment_runner'
 ```
 
-如果后续要继续 Phase 1，下一步应从 `manual_control_input` 主链开始，而不是继续放大 `roll/pitch` 幅值。
+按当时的 Phase 1 语境，这里的后续方向是先回到 `manual_control_input` 主链，而不是继续放大 `roll/pitch` 幅值。
+
+按 `2026-03-30` 的当前主线，这个结论已经归档；现在的扩展顺序以 `/home/car/autopilot_lab/docs/M1_STATUS.md` 为准：先补 pitch，再做 yaw/composite。

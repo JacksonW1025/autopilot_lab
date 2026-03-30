@@ -34,6 +34,7 @@ ARDUPILOT_TLOG_ROOT = ARDUPILOT_LOG_ROOT / "tlog"
 CONFIG_ROOT = WORKSPACE_ROOT / "src/fep_research/config"
 REFERENCE_ROOT = WORKSPACE_ROOT / "reference"
 SCRIPTS_ROOT = WORKSPACE_ROOT / "scripts"
+MILESTONE_LOCK_PATH = WORKSPACE_ROOT / "milestone.lock.json"
 
 
 def runs_root_for_backend(backend: str) -> Path:

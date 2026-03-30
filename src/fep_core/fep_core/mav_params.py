@@ -21,6 +21,23 @@ def close_mavlink(master: mavutil.mavfile | None) -> None:
         pass
 
 
+def _param_id_text(param_id: Any) -> str:
+    if isinstance(param_id, bytes):
+        return param_id.decode("ascii", errors="ignore").rstrip("\x00")
+    if isinstance(param_id, str):
+        return param_id.rstrip("\x00")
+    return str(param_id).rstrip("\x00")
+
+
+def _param_value_float(value: Any) -> float | None:
+    if value in ("", None):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def fetch_parameter(master: mavutil.mavfile, name: str, timeout_s: float = 5.0) -> float | None:
     master.mav.param_request_read_send(master.target_system, master.target_component, name.encode("ascii"), -1)
     deadline = time.monotonic() + timeout_s
@@ -28,29 +45,28 @@ def fetch_parameter(master: mavutil.mavfile, name: str, timeout_s: float = 5.0) 
         message = master.recv_match(type="PARAM_VALUE", blocking=True, timeout=0.5)
         if message is None:
             continue
-        message_name = message.param_id.decode("ascii", errors="ignore").rstrip("\x00")
+        message_name = _param_id_text(message.param_id)
         if message_name == name:
-            return float(message.param_value)
+            value = _param_value_float(message.param_value)
+            if value is not None:
+                return value
     return None
 
 
 def set_parameter(master: mavutil.mavfile, name: str, value: float, timeout_s: float = 5.0) -> bool:
-    master.mav.param_set_send(
-        master.target_system,
-        master.target_component,
-        name.encode("ascii"),
-        float(value),
-        mavutil.mavlink.MAV_PARAM_TYPE_REAL32,
-    )
     deadline = time.monotonic() + timeout_s
     while time.monotonic() < deadline:
-        message = master.recv_match(type="PARAM_VALUE", blocking=True, timeout=0.5)
-        if message is None:
-            continue
-        message_name = message.param_id.decode("ascii", errors="ignore").rstrip("\x00")
-        if message_name != name:
-            continue
-        return abs(float(message.param_value) - float(value)) < 1e-4
+        master.mav.param_set_send(
+            master.target_system,
+            master.target_component,
+            name.encode("ascii"),
+            float(value),
+            mavutil.mavlink.MAV_PARAM_TYPE_REAL32,
+        )
+        remaining_s = max(0.1, min(1.0, deadline - time.monotonic()))
+        current = fetch_parameter(master, name, timeout_s=remaining_s)
+        if current is not None and abs(float(current) - float(value)) < 1e-4:
+            return True
     return False
 
 

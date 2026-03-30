@@ -185,3 +185,39 @@ python3 -m compileall src/fep_core src/px4_ros2_backend src/ardupilot_mavlink_ba
 - `manual + attitude` 已成为并列主实验层
 - `rate` 不再被默认忽略，但保持条件触发
 - 当前仓库已经具备继续做 `roll_rate_pid` baseline / `P+20%` 对比的基础能力
+
+## 2026-03-30 M1 smoke-first closure
+
+### 1. 验收闭环
+
+- `scripts/doctor_lab.sh` 已返回 `status=ready`
+- 已真实执行 `/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1`
+- 最新 matrix：
+  - PX4：`artifacts/px4/matrix/20260330_022930_default/runs.csv`
+  - ArduPilot：`artifacts/ardupilot/matrix/20260330_023431_ardupilot/runs.csv`
+- 双 backend 共 12 个新 run 全部完成；过滤后 `accepted=12`、`rejected=0`
+- backend 分布为 `px4_ros2=6`、`ardupilot_mavlink=6`
+- layer 分布为 `manual_whole_loop=4`、`attitude_explicit=4`、`rate_single_loop=4`
+- 最新 study manifest 为 `artifacts/studies/20260330_023843_layered_sensitivity/manifest.yaml`
+- 全仓当前里程碑计数为 `accepted=39`、`legacy=253`、`rejected=20`；这不是本轮 smoke 的失败数
+
+### 2. 关键修复摘要
+
+- PX4：补齐 fresh session 的 persistent state 清理，修正 manual gate 窗口与 rate metrics 的 failsafe 统计边界
+- ArduPilot：修正 readiness / arming / local-position 投影 / param snapshot 读写容错，稳定 fresh session 生命周期
+- validator：只接受 `status=completed` 且 schema 完整的 run 进入 accepted
+
+### 3. 回归门
+
+- 新增 `scripts/ci_minimal.sh`
+- 当前最小 smoke-free 回归门为：
+  - `python3 -m pytest -q tests`
+  - `python3 -m py_compile ...`
+  - `scripts/doctor_lab.sh --help`
+
+### 4. 当前路线
+
+- roll 三层双 backend 已验证完成
+- 下一步先补 pitch
+- 再做 yaw/composite
+- 不再把“继续拉 manual duration/composite”作为当前主路线

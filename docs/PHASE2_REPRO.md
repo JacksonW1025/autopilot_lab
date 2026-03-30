@@ -1,8 +1,16 @@
 # Phase 2 Monitoring / Logging 复现说明
 
+> Archived: 这是旧 PX4-only Phase 文档，不再代表 `Dual-Backend M1` 的默认入口或默认结论。
+>
+> 当前权威状态看：`/home/car/autopilot_lab/docs/M1_STATUS.md`
+>
+> 当前默认入口看：`/home/car/autopilot_lab/README.md` 与 `/home/car/autopilot_lab/docs/intro.md`
+
 这份文档用于复现当前已经完成的 **Phase 2: Monitoring & Logging** 工作。
 
-当前我判断 Phase 2 **已经完成**，因为 `/home/car/autopilot_lab/TODO.md` 中的 Phase 2 exit criteria 已满足：
+它保留为旧 PX4-only logging 结构参考，不定义当前 `Dual-Backend M1` 的完成状态。
+
+按当时的 PX4-only 口径，Phase 2 **已经完成**，因为 `/home/car/autopilot_lab/TODO.md` 中的 Phase 2 exit criteria 已满足：
 
 - 在线 5 个标准 topic 都能稳定录制
 - 每次 run 都能把 `.ulg` 绝对路径写入 `manifest.yaml`
@@ -209,10 +217,10 @@ cat "${LATEST_RUN}/metrics.csv"
 对应复现文档：
 
 - Phase 1:
-  - `/home/car/autopilot_lab/PHASE1_ATTITUDE_REPRO.md`
-  - `/home/car/autopilot_lab/PHASE1_MANUAL_REPRO.md`
+  - `/home/car/autopilot_lab/docs/PHASE1_ATTITUDE_REPRO.md`
+  - `/home/car/autopilot_lab/docs/PHASE1_MANUAL_REPRO.md`
 - Phase 3:
-  - `/home/car/autopilot_lab/PHASE3_ANALYSIS_REPRO.md`
+  - `/home/car/autopilot_lab/docs/PHASE3_ANALYSIS_REPRO.md`
 
 ## 实验结束后的收尾
 
