@@ -7,10 +7,11 @@ usage() {
   cat <<'EOF'
 Usage: ci_minimal.sh
 
-Run the smoke-free M1 regression gate:
+Run the minimal regression gate for the global linearity platform:
 - python3 -m pytest -q tests
 - python3 -m py_compile for Python files under src/, tests/, scripts/
 - scripts/doctor_lab.sh --help
+- scripts/smoke_linearity.sh
 EOF
 }
 
@@ -29,4 +30,5 @@ if [[ ${#PY_FILES[@]} -gt 0 ]]; then
 fi
 
 scripts/doctor_lab.sh --help >/dev/null
+scripts/smoke_linearity.sh >/dev/null
 echo "ci_status=passed"

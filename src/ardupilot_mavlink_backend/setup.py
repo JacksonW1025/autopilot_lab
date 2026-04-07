@@ -21,9 +21,8 @@ setup(
     extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
-            "ardupilot_experiment_runner = ardupilot_mavlink_backend.experiment_runner:main",
-            "ardupilot_matrix_runner = ardupilot_mavlink_backend.matrix_runner:main",
-            "ardupilot_log_backfill = ardupilot_mavlink_backend.log_backfill:main",
+            "ardupilot_linearity_capture = ardupilot_mavlink_backend.linearity_capture:main",
+            "ardupilot_linearity_matrix = ardupilot_mavlink_backend.linearity_matrix:main",
         ],
     },
 )

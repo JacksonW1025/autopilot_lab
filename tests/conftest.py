@@ -6,7 +6,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 for package_root in (
-    ROOT / "src" / "fep_core",
+    ROOT / "src" / "linearity_core",
+    ROOT / "src" / "linearity_analysis",
+    ROOT / "src" / "linearity_study",
     ROOT / "src" / "px4_ros2_backend",
     ROOT / "src" / "ardupilot_mavlink_backend",
 ):

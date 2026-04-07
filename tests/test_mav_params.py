@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fep_core.mav_params import fetch_parameter, set_parameter
+from linearity_core.mav_params import fetch_parameter, set_parameter
 
 
 class _FakeMessage:

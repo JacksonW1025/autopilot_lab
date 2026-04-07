@@ -1,0 +1,27 @@
+plan_name: default_schema_ablation
+x_schemas:
+  - commands_only
+  - commands_plus_state
+  - commands_plus_state_history
+  - pooled_backend_mode_augmented
+  - full_augmented
+y_schemas:
+  - next_raw_state
+  - delta_state
+  - selected_state_subset
+  - future_state_horizon
+  - actuator_response
+  - window_summary_response
+models:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+pooling_modes:
+  - pooled
+  - stratified
+stratify_by:
+  - backend
+  - mode
+output_study_name: default_schema_ablation
+reporting:
+  top_k: 10

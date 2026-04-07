@@ -4,7 +4,7 @@ import subprocess
 import time
 from pathlib import Path
 
-from fep_core.paths import ARDUPILOT_ROOT
+from linearity_core.paths import ARDUPILOT_ROOT
 from pymavlink import mavutil
 
 

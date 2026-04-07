@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import rclpy
-from fep_core.config import RunConfig, clamp, euler_to_quaternion, load_run_config, quaternion_to_euler
-from fep_core.paths import PX4_LOG_ROOT, PX4_RUNS_ROOT, WORKSPACE_ROOT
+from linearity_core.config import RunConfig, clamp, euler_to_quaternion, load_run_config, quaternion_to_euler
+from linearity_core.paths import PX4_LOG_ROOT, PX4_RAW_ROOT as PX4_RUNS_ROOT, WORKSPACE_ROOT
 from rclpy.context import Context
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
@@ -71,7 +71,7 @@ def read_clock_topic_available() -> bool:
 def read_clock_sample(timeout_s: float = 3.0) -> tuple[int, int] | None:
     context = Context()
     rclpy.init(args=None, context=context)
-    node = Node("fep_clock_probe", context=context)
+    node = Node("linearity_clock_probe", context=context)
     executor = SingleThreadedExecutor(context=context)
     executor.add_node(node)
     qos = QoSProfile(
@@ -114,7 +114,7 @@ def read_clock_topic_advancing(sample_gap_s: float = 1.0) -> bool:
 def wait_for_ros_topics(topic_names: tuple[str, ...], timeout_s: float = 30.0) -> bool:
     context = Context()
     rclpy.init(args=None, context=context)
-    node = Node("fep_topic_probe", context=context)
+    node = Node("linearity_topic_probe", context=context)
     executor = SingleThreadedExecutor(context=context)
     executor.add_node(node)
     deadline = time.monotonic() + timeout_s
@@ -153,7 +153,7 @@ def start_clock_bridge(log_path: Path | None = None) -> ClockBridgeHandle | None
     command = (
         "source /opt/ros/humble/setup.bash && "
         f"source {shlex.quote(str(WORKSPACE_ROOT / 'install/setup.bash'))} && "
-        f"exec ros2 run fep_research gz_clock_bridge --gz-topic {shlex.quote(gz_topic)} --ros-topic /clock"
+        f"exec ros2 run px4_ros2_backend gz_clock_bridge --gz-topic {shlex.quote(gz_topic)} --ros-topic /clock"
     )
     if log_path is not None:
         log_path.parent.mkdir(parents=True, exist_ok=True)

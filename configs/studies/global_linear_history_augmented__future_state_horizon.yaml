@@ -1,0 +1,61 @@
+study_name: global_linear_history_augmented__future_state_horizon
+backend: synthetic
+flight_mode:
+  px4: POSCTL
+  ardupilot: STABILIZE
+scenario: temporal
+config_profile: history_augmented
+seed: 29
+repeat_count: 3
+sampling_rate_hz: 20.0
+x_schema: commands_plus_state_history
+y_schema: future_state_horizon
+x_include_groups: []
+x_exclude_groups: []
+y_include_groups:
+  - selected_state_subset
+y_exclude_groups: []
+feature_map: identity
+run_level_covariates_as_inputs: true
+stratify_by:
+  - backend
+pooling_mode: compare_both
+history_length: 4
+prediction_horizon: 3
+prediction_horizon_unit: steps
+parameter_sweep: {}
+internal_signals_enabled: true
+perturbation_strategy: random_combo
+model:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+sparsity:
+  threshold: 0.05
+  ridge_alpha: 0.5
+  lasso_alpha: 0.03
+  bootstrap_repeats: 6
+  stability_selection_threshold: 0.6
+reporting:
+  stability_repeats: 3
+input_type: manual
+axis: pitch
+profile_type: random
+amplitude: 0.3
+bias: 0.0
+start_after_s: 0.5
+duration_s: 4.0
+hold_s: 1.0
+hover_thrust: -0.69
+timing_required: false
+warmup_cycles: 5
+synthetic:
+  sample_count: 540
+  noise_std: 0.02
+  sparse_matrix_density: 0.16
+  backend_identity_cycle:
+    - px4
+    - ardupilot
+  mode_cycle:
+    - POSCTL
+    - STABILIZE

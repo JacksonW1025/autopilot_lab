@@ -4,16 +4,11 @@
 
 ## 项目背景
 
-- 核心目标：围绕 FEP / PIO 前期研究，建立可用于论文实验的多飞控分层敏感性平台
-- 研究对象：PX4 与 ArduPilot 两套 SITL 控制链
-- 当前主线：roll 三层双 backend 已验证的 `manual_whole_loop + attitude_explicit + rate_single_loop`
-- 当前扩展顺序：先补 pitch，再做 yaw/composite
-- 参考方法来源：`~/RouthSearch`
-  - 借鉴 `mode-specific task`
-  - 借鉴 `offline oracle`
-  - 借鉴 `valid/invalid boundary`
-  - 借鉴 `parameter factor`
-  - 不把当前仓库改回纯 PID 边界复现仓
+- 核心目标：建立一个面向 UAV 输入-响应全局线性关系验证的研究平台
+- 默认主线：`数据采集 -> X/Y 构造 -> 全局拟合 -> 稀疏性分析 -> 结论`
+- 研究问题：在某个 study scope 下，是否存在固定的 `Y ≈ fX (+ b)`，以及 `f` 是否稀疏
+- 当前重点：大胆探索 `X` 与 `Y` 的定义，并比较哪组 schema 最支持全局线性假设
+- PX4 真实链路默认采用 `ROS 直录 + ULog 缺口回填`
 
 ## 环境基线
 
@@ -24,104 +19,69 @@
 - 主仓库：`/home/car/autopilot_lab -> /mnt/nvme/autopilot_lab`
 - PX4 固件：`/home/car/PX4-Autopilot`
 - ArduPilot 固件：`/home/car/ardupilot`
-- RouthSearch 参考路径：`~/RouthSearch`
-
-## 当前默认研究口径
-
-### `manual_whole_loop`
-
-- 目标：评估飞手激进输入下的整机闭环响应敏感度
-- PX4：`manual -> POSCTL`
-- ArduPilot：`MANUAL_CONTROL -> STABILIZE`
-- 输入：`roll / pitch / yaw / throttle`
-- 输出：姿态、位置、模式变化、执行器约束
-- 主标签：`oracle_valid`
-- 归因边界：只说明整机闭环，不直接归因到 `attitude / rate`
-
-### `attitude_explicit`
-
-- 目标：分析 `attitude setpoint -> actual attitude` 的参数敏感度
-- PX4：显式 offboard attitude
-- ArduPilot：`GUIDED + SET_ATTITUDE_TARGET`
-- 输入：attitude setpoint + controlled thrust
-- 输出：actual attitude，必要时加 actual rates
-- 主标签：`oracle_valid`
-- 归因边界：只说明 attitude 层及其以下控制链
-
-### `rate_single_loop`
-
-- roll canonical smoke 已进入并通过
-- 引入条件：
-  - attitude 层差异无法由输入映射或 altitude hold 解释
-  - 研究参数本身就是 rate PID
-  - 论文需要更强归因证据
 
 ## 目录与接口
 
-- 共享层：`src/fep_core`
+- 共享层：`src/linearity_core`
+- 分析层：`src/linearity_analysis`
+- 编排层：`src/linearity_study`
 - PX4 backend：`src/px4_ros2_backend`
 - ArduPilot backend：`src/ardupilot_mavlink_backend`
-- 兼容入口：`src/fep_research`
-- 归档文档：`docs/`
-- Study 汇总输出：`artifacts/studies/`
+- Raw run：`artifacts/raw/`
+- Study 输出：`artifacts/studies/`
+- 阶段报告：`docs/STAGE_REPORT_2026-04-07.md`
 
 ## 当前默认配置
 
-- manual baseline：`src/fep_research/config/layered_manual_roll_020.yaml`
-- manual `P+20%`：`src/fep_research/config/layered_manual_roll_020_p120.yaml`
-- attitude baseline：`src/fep_research/config/layered_attitude_roll_010.yaml`
-- attitude `P+20%`：`src/fep_research/config/layered_attitude_roll_010_p120.yaml`
-- rate baseline：`src/fep_research/config/layered_rate_roll_010.yaml`
-- rate `P+20%`：`src/fep_research/config/layered_rate_roll_010_p120.yaml`
+- `configs/studies/global_linear_commands_only__next_raw_state.yaml`
+- `configs/studies/global_linear_commands_plus_state__delta_state.yaml`
+- `configs/studies/global_linear_pooled_backend_augmented__selected_state_subset.yaml`
+- `configs/studies/global_linear_with_pid_sweep__delta_state.yaml`
+- `configs/studies/global_linear_history_augmented__future_state_horizon.yaml`
+- `configs/studies/global_linear_full_augmented__window_summary_response.yaml`
+- `configs/ablations/default_schema_ablation.yaml`
+- 真实 PX4：
+  - `configs/studies/px4_real_nominal_posctl_capture.yaml`
+  - `configs/studies/px4_real_nominal_offboard_attitude_capture.yaml`
+  - `configs/studies/px4_real_nominal_broad_ablation_analysis.yaml`
+  - `configs/ablations/px4_real_broad_ablation_balanced.yaml`
 
 ## 当前状态
 
-- [2026-03-30] `scripts/doctor_lab.sh` 已返回 `status=ready`
-- [2026-03-30] 已真实执行 `/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1`
-- [2026-03-30] 最新双 backend matrix 各 6 行 completed，新产生的 12 个 run 过滤后全部进入 accepted
-- [2026-03-30] 最新 study manifest 全局计数为 `accepted=39`、`legacy=253`、`rejected=20`
-- [2026-03-30] `scripts/ci_minimal.sh` 已落地并通过
-- [2026-03-30] 当前状态单一事实源固定为 `docs/M1_STATUS.md`
-- [2026-03-27] 根文档默认口径已从 PX4-only phase 流水线切到分层敏感性研究平台
-- [2026-03-27] `fep_core.config` 已加入 `study_* / oracle / parameter / attribution` schema
-- [2026-03-27] `fep_core` 已加入 study artifact 目录和跨 backend `study_analysis_runner`
-- [2026-03-27] PX4 telemetry recorder 已补 attitude 层证据链：
-  - `vehicle_attitude_setpoint`
-  - `vehicle_rates_setpoint`
-  - `vehicle_angular_velocity`
-  - `rate_ctrl_status`
-  - `control_allocator_status`
-  - `actuator_motors`
-- [2026-03-27] PX4 `experiment_runner` 已接入：
-  - 参数 `snapshot / apply / restore`
-  - `oracle_valid / oracle_failure_reason`
-  - `stress_class`
-  - `mechanism_flags`
-  - `rate_layer_recommended`
-- [2026-03-27] ArduPilot `experiment_runner` 已从最小 smoke runner 改成分层 runner
-- [2026-03-27] ArduPilot 已补 `.BIN` 离线解析：
-  - `ATT`
-  - `RATE`
-  - `CTUN`
-  - `MOTB`
-  - `RCOU`
-- [2026-03-27] `ros2 run fep_research analysis_runner` 已切到新的分层 study 汇总
-- [2026-03-27] 旧顶层 Phase 文档已退出主入口，现仅保留在 `docs/`
+- [2026-04-06] `linearity_core / linearity_study / linearity_analysis` 已形成当前平台默认前门
+- [2026-04-06] study config 已支持 `x_schema / y_schema / pooling_mode / history_length / prediction_horizon / ablation_plan`
+- [2026-04-06] 分析产物已统一为 `f / b / sparsity_mask / metrics / markdown report / summary json`
+- [2026-04-07] PX4 raw capture 已支持 ULog 缺口回填，可补齐 rate / actuator / internal telemetry
+- [2026-04-07] 条件数诊断已拆分为 `raw_condition_number` 与 `effective_condition_number`
+- [2026-04-07] 当前权威 study 为 `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced`
+- [2026-04-07] 当前权威 raw run 为：
+  - `artifacts/raw/px4/20260407_025915_px4_manual_broad_composite_r1`
+  - `artifacts/raw/px4/20260407_030010_px4_attitude_broad_composite_r1`
+- [2026-04-07] 当前真实 PX4 最优主组合为 `commands_plus_state_history x next_raw_state | ols_affine | pooled`
+- [2026-04-07] 当前结果摘要：
+  - `median_test_r2 ≈ 0.9726`
+  - `commands_only -> commands_plus_state` 提升 `≈ 1.0442`
+  - `commands_plus_state -> history` 提升 `≈ 0.0064`
+  - `actuator_response` 已进入有效比较
+- [2026-04-07] 当前 `doctor_lab.sh` 口径为 `status=ready` 与 `px4_real_ready=true`
+- [2026-04-07] 当前测试口径为 `python3 -m pytest -q tests -> 23 passed`
 
 ## 最近变更
 
-- 新增 `docs/M1_STATUS.md`
-- 新增 `scripts/ci_minimal.sh`
-- 完成 roll 三层双 backend 真实 smoke 验收，并确认新 12 run 全部进入 `accepted_runs.csv`
-- 当前研究扩展顺序固定为：先补 pitch，再做 yaw/composite
-- 新增 `artifacts/studies/<timestamp>_layered_sensitivity/`
-- 新增分层配置：
-  - `layered_manual_roll_020.yaml`
-  - `layered_manual_roll_020_p120.yaml`
-  - `layered_attitude_roll_010.yaml`
-  - `layered_attitude_roll_010_p120.yaml`
-- 新增 ArduPilot `.BIN` 指标提取模块：
-  - `src/ardupilot_mavlink_backend/ardupilot_mavlink_backend/bin_log_metrics.py`
+- 新增 `src/linearity_core`
+- 新增 `src/linearity_study`
+- 新增 `src/linearity_analysis`
+- 新增 `docs/RESEARCH_GOAL.md`
+- 新增 `docs/XY_SCHEMA_GUIDE.md`
+- 新增 `docs/EXPERIMENT_PROTOCOL.md`
+- 新增 `docs/DATA_SCHEMA.md`
+- 新增 `docs/STAGE_REPORT_2026-04-07.md`
+- 新增 `scripts/run_linearity_study.sh`
+- 新增 `scripts/compare_schemas.sh`
+- 新增 `scripts/smoke_linearity.sh`
+- 新增 `scripts/run_px4_broad_ablation.sh`
+- 新增 PX4 ULog telemetry backfill
+- 新增 raw/effective conditioning diagnostics
 
 ## 常用命令
 
@@ -140,7 +100,7 @@ source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 统一 smoke：
 
 ```bash
-/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1
+/home/car/autopilot_lab/scripts/smoke_linearity.sh
 ```
 
 最小 CI：
@@ -149,42 +109,31 @@ source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 /home/car/autopilot_lab/scripts/ci_minimal.sh
 ```
 
-PX4 manual：
+单次 study：
 
 ```bash
-MicroXRCEAgent udp4 -p 8888
-cd /home/car/PX4-Autopilot
-make px4_sitl gz_x500
-ros2 run fep_research experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/layered_manual_roll_020.yaml
+ros2 run linearity_study linearity_run_study \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml
 ```
 
-PX4 attitude：
+统一分析：
 
 ```bash
-ros2 run fep_research experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/layered_attitude_roll_010.yaml
+ros2 run linearity_analysis linearity_analyze \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
+  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
 ```
 
-ArduPilot manual：
+真实 PX4 broad ablation：
 
 ```bash
-ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/layered_manual_roll_020.yaml
-```
-
-ArduPilot attitude：
-
-```bash
-ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner --config /home/car/autopilot_lab/src/fep_research/config/layered_attitude_roll_010.yaml
-```
-
-跨 backend study 汇总：
-
-```bash
-ros2 run fep_research analysis_runner
+/home/car/autopilot_lab/scripts/run_px4_broad_ablation.sh \
+  --plan /home/car/autopilot_lab/configs/ablations/px4_real_broad_ablation_balanced.yaml
 ```
 
 ## 注意事项
 
 - 所有文档和交互统一使用简体中文
-- `~/RouthSearch` 是旧 ISSTA 工作的唯一参考代码口径
 - 如需系统级操作，可以使用 `sudo`
-- 旧 `px4_ws` 与旧 Phase 文档不再作为默认开发入口
+- 当前阶段日常建议入口是 balanced PX4 broad ablation
+- `effective_condition_number` 当前仍偏大，现阶段视作诊断信号，不视作阻断项

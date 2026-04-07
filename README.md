@@ -1,55 +1,70 @@
 # autopilot_lab
 
-`autopilot_lab` 现在的默认状态是 `Dual-Backend M1` 分层实验平台。
+`autopilot_lab` 是一个面向 UAV 输入-响应全局线性关系验证的研究平台。默认问题是：
 
-- backend：PX4 + ArduPilot
-- 主能力：`manual_whole_loop`、`attitude_explicit`、`rate_single_loop`
-- 默认目标：可 bootstrap、可 doctor、可 fresh 批跑、可 strict 汇总
+> 在给定 study scope 下，是否存在固定的全局线性或仿射映射 `Y ≈ fX (+ b)`，并且 `f` 是否稀疏？
 
-## M1 口径
+平台主线固定为：
 
-- 当前里程碑：`dual_backend_m1`
-- schema 版本：`2`
-- capability：`manual_attitude_rate`
-- 默认主汇总聚焦当前里程碑的 `accepted` runs
-- 历史 runs 默认按 `legacy` 隔离，不进入主 summary
+- 数据采集
+- X/Y 构造
+- 全局拟合
+- 稀疏性分析
+- 结论与 schema 对比
 
-## 当前已验证状态
+## 当前状态
 
-截至 `2026-03-30`，当前已经确认：
+当前权威实验固定为：
 
-- `scripts/doctor_lab.sh` 返回 `status=ready`
-- 已真实执行 `/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1`
-- 双 backend 的 6 组 canonical roll smoke 共 12 个新 run 全部进入 `accepted_runs.csv`
-- `scripts/ci_minimal.sh` 已通过
+- raw run: `artifacts/raw/px4/20260407_025915_px4_manual_broad_composite_r1`
+- raw run: `artifacts/raw/px4/20260407_030010_px4_attitude_broad_composite_r1`
+- study: `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced`
 
-精确的 artifact 路径、计数口径与当前边界统一见：
+当前结果摘要：
 
-- `docs/M1_STATUS.md`
+- best schema: `commands_plus_state_history x next_raw_state | ols_affine | pooled`
+- best sparse/stable schema: `commands_plus_state_history x next_raw_state | ridge_affine | pooled`
+- `median_test_r2 ≈ 0.9726`
+- `commands_only -> commands_plus_state` 提升 `≈ 1.0442`
+- `commands_plus_state -> history` 提升 `≈ 0.0064`
+- `actuator_response` 已进入有效比较
+- `raw_condition_number = inf`
+- `effective_condition_number ≈ 1259416.2092`
+
+详细状态见 [`docs/STAGE_REPORT_2026-04-07.md`](docs/STAGE_REPORT_2026-04-07.md)。
 
 ## 仓库结构
 
 ```text
 autopilot_lab/
 ├── artifacts/
-│   ├── ardupilot/
-│   ├── px4/
+│   ├── raw/
+│   └── studies/
+├── configs/
+│   ├── ablations/
 │   └── studies/
 ├── docs/
 ├── scripts/
-├── milestone.lock.json
+├── lab.lock.json
 └── src/
-    ├── fep_core/
+    ├── linearity_core/
+    ├── linearity_analysis/
+    ├── linearity_study/
     ├── px4_ros2_backend/
     ├── ardupilot_mavlink_backend/
-    ├── fep_research/
     ├── px4_msgs/
     └── px4_ros_com/
 ```
 
-## 环境准备
+## Quick Start
 
-首次环境准备：
+加载环境：
+
+```bash
+source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
+```
+
+环境准备：
 
 ```bash
 /home/car/autopilot_lab/scripts/bootstrap_lab.sh
@@ -61,140 +76,137 @@ autopilot_lab/
 /home/car/autopilot_lab/scripts/doctor_lab.sh
 ```
 
-最小 CI：
+默认 smoke：
 
 ```bash
-/home/car/autopilot_lab/scripts/ci_minimal.sh
+/home/car/autopilot_lab/scripts/smoke_linearity.sh
 ```
 
-只加载环境时：
+默认真实 PX4 broad ablation：
 
 ```bash
-source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
+/home/car/autopilot_lab/scripts/run_px4_broad_ablation.sh \
+  --plan /home/car/autopilot_lab/configs/ablations/px4_real_broad_ablation_balanced.yaml
 ```
 
 ## 默认入口
 
-PX4 单次实验：
+主实验入口：
 
 ```bash
-ros2 run px4_ros2_backend px4_experiment_runner \
-  --config /home/car/autopilot_lab/src/fep_research/config/layered_attitude_roll_010.yaml
+ros2 run linearity_study linearity_run_study \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml
 ```
 
-PX4 matrix：
+统一分析入口：
 
 ```bash
-ros2 run px4_ros2_backend px4_matrix_runner \
-  --world default \
-  --pattern layered_manual_roll_020.yaml \
-  --pattern layered_manual_roll_020_p120.yaml \
-  --pattern layered_attitude_roll_010.yaml \
-  --pattern layered_attitude_roll_010_p120.yaml \
-  --pattern layered_rate_roll_010.yaml \
-  --pattern layered_rate_roll_010_p120.yaml
+ros2 run linearity_analysis linearity_analyze \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
+  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
 ```
 
-ArduPilot 单次实验：
+Schema 对比入口：
 
 ```bash
-ros2 run ardupilot_mavlink_backend ardupilot_experiment_runner \
-  --config /home/car/autopilot_lab/src/fep_research/config/layered_attitude_roll_010.yaml
+ros2 run linearity_analysis linearity_compare_schemas \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
+  --plan /home/car/autopilot_lab/configs/ablations/default_schema_ablation.yaml \
+  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
 ```
 
-ArduPilot matrix：
+Shell 包装：
 
 ```bash
-ros2 run ardupilot_mavlink_backend ardupilot_matrix_runner \
-  --pattern layered_manual_roll_020.yaml \
-  --pattern layered_manual_roll_020_p120.yaml \
-  --pattern layered_attitude_roll_010.yaml \
-  --pattern layered_attitude_roll_010_p120.yaml \
-  --pattern layered_rate_roll_010.yaml \
-  --pattern layered_rate_roll_010_p120.yaml
+/home/car/autopilot_lab/scripts/run_linearity_study.sh \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml
+
+/home/car/autopilot_lab/scripts/compare_schemas.sh \
+  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
+  --plan /home/car/autopilot_lab/configs/ablations/default_schema_ablation.yaml \
+  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
 ```
 
-严格汇总：
+## 真实 PX4 主报告
+
+当前真实 PX4 scope 固定为：
+
+- backend: `px4`
+- airframe: `gz_x500`
+- world: `default`
+- scenario: `nominal`
+- modes: `POSCTL` 与 `OFFBOARD_ATTITUDE`
+
+当前链路采用：
+
+- ROS 直录可见 topic
+- 对缺失的 rate / actuator / internal topic 做 `.ulg` 缺口回填
+
+当前默认配置：
+
+- `configs/studies/px4_real_nominal_posctl_capture.yaml`
+- `configs/studies/px4_real_nominal_offboard_attitude_capture.yaml`
+- `configs/studies/px4_real_nominal_broad_ablation_analysis.yaml`
+- `configs/ablations/px4_real_broad_ablation_balanced.yaml`
+
+当前权威报告产物：
+
+- `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced/reports/summary.md`
+- `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced/reports/schema_comparison.md`
+- `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced/summary/study_summary.json`
+
+## 内置 Schema
+
+X 侧：
+
+- `commands_only`
+- `commands_plus_state`
+- `commands_plus_state_history`
+- `commands_plus_controller_params`
+- `commands_plus_state_plus_params`
+- `pooled_backend_mode_augmented`
+- `full_augmented`
+- `feature_mapped_linear`
+
+Y 侧：
+
+- `next_raw_state`
+- `delta_state`
+- `selected_state_subset`
+- `future_state_horizon`
+- `actuator_response`
+- `tracking_error_response`
+- `window_summary_response`
+- `stability_proxy_response`
+
+## 产物结构
+
+Raw run：
+
+- `artifacts/raw/<backend>/<run_id>/`
+
+Study 输出：
+
+- `prepared/sample_table.csv`
+- `prepared/schema_inventory.yaml`
+- `fits/<combo>/<model>/matrix_f.csv`
+- `fits/<combo>/<model>/bias_b.csv`
+- `fits/<combo>/<model>/sparsity_mask.csv`
+- `fits/<combo>/<model>/metrics.json`
+- `reports/summary.md`
+- `reports/schema_comparison.md`
+- `summary/study_summary.json`
+
+## 文档
+
+- `docs/RESEARCH_GOAL.md`
+- `docs/XY_SCHEMA_GUIDE.md`
+- `docs/EXPERIMENT_PROTOCOL.md`
+- `docs/DATA_SCHEMA.md`
+- `docs/STAGE_REPORT_2026-04-07.md`
+
+## 回归门
 
 ```bash
-ros2 run fep_core study_analysis_runner
+/home/car/autopilot_lab/scripts/ci_minimal.sh
 ```
-
-显式纳入 legacy：
-
-```bash
-ros2 run fep_core study_analysis_runner --include-legacy
-```
-
-单独校验 artifacts：
-
-```bash
-ros2 run fep_core study_validate
-```
-
-## Canonical Smoke
-
-M1 固定 6 组 canonical smoke：
-
-- `layered_manual_roll_020.yaml`
-- `layered_manual_roll_020_p120.yaml`
-- `layered_attitude_roll_010.yaml`
-- `layered_attitude_roll_010_p120.yaml`
-- `layered_rate_roll_010.yaml`
-- `layered_rate_roll_010_p120.yaml`
-
-统一 smoke 入口：
-
-```bash
-/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1
-```
-
-## Legacy 策略
-
-- 缺 `schema_version` 或 `milestone_id` 的历史 runs 会被标成 `legacy`
-- `legacy` 默认不进入 `accepted_runs.csv`
-- 主 summary 默认只基于当前里程碑 `accepted` runs
-- 本轮新 smoke run 过滤后没有 rejected，但全仓 `rejected_runs.csv` 当前并不为空
-- 历史 artifacts 不删除、不自动迁移、不静默混入主结论
-
-## 当前实现状态
-
-- `manual_whole_loop`
-  - PX4 / ArduPilot 都可运行
-- `attitude_explicit`
-  - PX4 / ArduPilot 都可运行
-- `rate_single_loop`
-  - 已进入 canonical roll smoke 并在 PX4 / ArduPilot 双 backend 上通过
-  - 研究归因上仍按条件层使用，不把它写成 pitch/yaw/composite 已完成
-- strict study analysis
-  - 默认过滤 legacy 和 schema 不完整 runs
-  - 全仓 `rejected_runs.csv` 可能包含旧 `legacy` 或未进入 accepted 的历史行
-- backend-native CLI
-  - 已作为默认入口保留
-- `fep_research`
-  - 继续保留兼容 shim，不再是默认 front door
-
-## M1 验收标准
-
-M1 完成的最低标准是：
-
-- `bootstrap_lab.sh` 能完成依赖与构建
-- `doctor_lab.sh` 返回 `status=ready`
-- 双 backend 都能 fresh 跑完 6 组 canonical smoke
-- 每个新 run 都带完整 `schema_version/milestone_id/capability_level`
-- 默认 summary 不再出现空 `study_layer`
-- PX4 不再产出 `rate_layer_not_implemented`
-
-## 当前已达成结果
-
-截至 `2026-03-30`，当前已达成：
-
-- `/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1` 已真实跑通
-- 最新两份 matrix 各 6 行，全部 `status=completed`、`exit_code=0`
-- 本轮 12 个新 run 过滤后为 `accepted=12`、`rejected=0`
-- backend 分布为 `px4_ros2=6`、`ardupilot_mavlink=6`
-- layer 分布为 `manual_whole_loop=4`、`attitude_explicit=4`、`rate_single_loop=4`
-- 最新 study manifest 的全局计数是 `accepted=39`、`legacy=253`、`rejected=20`
-- 上述全局计数不是“本轮 smoke 失败”，它是当前里程碑下的全仓汇总口径
-- `scripts/ci_minimal.sh` 已通过
-- 当前扩展顺序保持为：先补 pitch，再做 yaw/composite
