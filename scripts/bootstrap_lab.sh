@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LOCK_PATH="${ROOT_DIR}/milestone.lock.json"
+LOCK_PATH="${ROOT_DIR}/lab.lock.json"
 DRY_RUN=0
 SKIP_SYSTEM_DEPS=0
 SKIP_PYTHON_DEPS=0
@@ -12,12 +12,12 @@ usage() {
   cat <<'EOF'
 Usage: bootstrap_lab.sh [--dry-run] [--skip-system-deps] [--skip-python-deps] [--skip-build]
 
-Bootstrap the Dual-Backend M1 environment:
+Bootstrap the global linearity study environment:
   1. validate external repositories
   2. initialize submodules
   3. install system and Python dependencies
   4. build the workspace
-  5. validate backend-native CLIs
+  5. validate linearity study CLIs
 EOF
 }
 
@@ -109,7 +109,7 @@ if [[ $SKIP_BUILD -eq 0 ]]; then
 fi
 
 if [[ $DRY_RUN -eq 1 ]]; then
-  echo "[dry-run] validate backend-native CLIs after build"
+  echo "[dry-run] validate linearity study CLIs after build"
   exit 0
 fi
 

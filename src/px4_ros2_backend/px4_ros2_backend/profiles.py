@@ -1,3 +1,3 @@
-from fep_core.profiles import CommandSample, ProfileGenerator
+from linearity_core.excitation import CommandSample, ExcitationGenerator as ProfileGenerator
 
 __all__ = ["CommandSample", "ProfileGenerator"]

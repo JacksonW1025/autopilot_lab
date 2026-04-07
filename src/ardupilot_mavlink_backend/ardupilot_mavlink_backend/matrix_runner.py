@@ -5,11 +5,10 @@ import csv
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fep_core.config import load_run_config
-from fep_core.paths import ARDUPILOT_MATRIX_ROOT, CONFIG_ROOT, ARDUPILOT_RUNS_ROOT, PX4_RUNS_ROOT
-from fep_core.study_analysis_runner import run_study_analysis
+from linearity_core.config import load_study_config
+from linearity_core.paths import ARDUPILOT_MATRIX_ROOT, CONFIG_ROOT
 
-from .experiment_runner import run_experiment
+from .experiment_runner import run_capture
 
 
 def _discover_configs(patterns: tuple[str, ...]) -> list[Path]:
@@ -46,11 +45,10 @@ def run_matrix(
     rows: list[dict[str, str]] = []
     jobs = [(config_path, repeat_index) for repeat_index in range(1, max(repeat, 1) + 1) for config_path in config_paths]
     for index, (config_path, repeat_index) in enumerate(jobs, start=1):
-        config = load_run_config(config_path)
-        suffix = f"_r{repeat_index}" if repeat > 1 else ""
-        session_dir = matrix_dir / f"{index:02d}_{config_path.stem}{suffix}"
+        config = load_study_config(config_path).with_repeat_index(repeat_index)
+        session_dir = matrix_dir / f"{index:02d}_{config_path.stem}_r{repeat_index}"
         session_dir.mkdir(parents=True, exist_ok=True)
-        exit_code, artifact_dir = run_experiment(
+        exit_code, artifact_dir = run_capture(
             config,
             vehicle=vehicle,
             frame=frame,
@@ -69,17 +67,16 @@ def run_matrix(
             }
         )
         _write_runs_csv(matrix_dir / "runs.csv", rows)
-    run_study_analysis([PX4_RUNS_ROOT, ARDUPILOT_RUNS_ROOT])
     return matrix_dir, rows
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="按 fresh/headless 口径批量执行 ArduPilot matrix，并在结束后生成新的分层 study 汇总。")
-    parser.add_argument("--pattern", action="append", dest="patterns", help="Config glob, repeatable.")
+    parser = argparse.ArgumentParser(description="批量执行 ArduPilot raw linearity capture。")
+    parser.add_argument("--pattern", action="append", dest="patterns", help="study config glob，可重复。")
     parser.add_argument("--vehicle", default="ArduCopter")
     parser.add_argument("--frame", default="quad")
     parser.add_argument("--skip-sitl", action="store_true")
-    parser.add_argument("--repeat", type=int, default=1, help="每个 config fresh 重复次数，默认 1。")
+    parser.add_argument("--repeat", type=int, default=1, help="每个 config fresh 重复次数。")
     args = parser.parse_args(argv)
 
     patterns = tuple(args.patterns or ["*.yaml"])

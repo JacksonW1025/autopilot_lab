@@ -1,0 +1,68 @@
+{
+  "platform_name": "global_linearity_lab",
+  "ros_distro": "humble",
+  "gazebo": "harmonic",
+  "python_modules": [
+    "PyYAML",
+    "numpy",
+    "pymavlink",
+    "pyulog",
+    "rclpy"
+  ],
+  "python_pip_modules": [
+    "empy<4",
+    "PyYAML",
+    "numpy",
+    "pymavlink",
+    "MAVProxy",
+    "pyulog"
+  ],
+  "system_commands": [
+    "ros2",
+    "colcon",
+    "gz",
+    "MicroXRCEAgent"
+  ],
+  "backend_clis": [
+    "linearity_run_study",
+    "linearity_analyze",
+    "linearity_compare_schemas",
+    "px4_linearity_capture",
+    "px4_linearity_matrix",
+    "ardupilot_linearity_capture",
+    "ardupilot_linearity_matrix"
+  ],
+  "external_roots": {
+    "AUTOPILOT_LAB_ROOT": "/home/car/autopilot_lab",
+    "PX4_ROOT": "/home/car/PX4-Autopilot",
+    "ARDUPILOT_ROOT": "/home/car/ardupilot"
+  },
+  "external_revisions": {
+    "px4": "30e763b6780061d70a14894e3e8b06e6a656f9b8",
+    "ardupilot": "e010f97906087a3a1975e1c4fcc1f88a249599ce"
+  },
+  "default_smoke_config": "configs/studies/global_linear_commands_only__next_raw_state.yaml",
+  "default_ablation_plan": "configs/ablations/default_schema_ablation.yaml",
+  "example_study_configs": [
+    "configs/studies/global_linear_commands_only__next_raw_state.yaml",
+    "configs/studies/global_linear_commands_plus_state__delta_state.yaml",
+    "configs/studies/global_linear_pooled_backend_augmented__selected_state_subset.yaml",
+    "configs/studies/global_linear_with_pid_sweep__delta_state.yaml",
+    "configs/studies/global_linear_history_augmented__future_state_horizon.yaml",
+    "configs/studies/global_linear_full_augmented__window_summary_response.yaml",
+    "configs/studies/px4_real_nominal_posctl_capture.yaml",
+    "configs/studies/px4_real_nominal_offboard_attitude_capture.yaml",
+    "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml"
+  ],
+  "real_px4": {
+    "world": "default",
+    "airframe": "gz_x500",
+    "capture_configs": [
+      "configs/studies/px4_real_nominal_posctl_capture.yaml",
+      "configs/studies/px4_real_nominal_offboard_attitude_capture.yaml"
+    ],
+    "analysis_config": "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml",
+    "ablation_plan": "configs/ablations/px4_real_broad_ablation.yaml",
+    "script": "scripts/run_px4_broad_ablation.sh"
+  }
+}

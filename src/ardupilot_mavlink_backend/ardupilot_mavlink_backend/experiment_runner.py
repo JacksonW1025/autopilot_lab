@@ -9,72 +9,37 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fep_core.config import RunConfig, clamp, euler_to_quaternion, load_run_config
-from fep_core.io import capture_host_snapshot, ensure_run_directories, write_single_row_csv, write_yaml
-from fep_core.milestone import capability_level, milestone_id, schema_version
-from fep_core.mav_params import fetch_parameter, set_parameter, set_parameters, snapshot_parameters
-from fep_core.paths import ARDUPILOT_ROOT, ARDUPILOT_RUNS_ROOT
-from fep_core.profiles import ProfileGenerator
+from linearity_core.config import RunConfig, clamp, euler_to_quaternion, load_run_config
+from linearity_core.excitation import ExcitationGenerator
+from linearity_core.io import capture_host_snapshot, ensure_raw_run_directories, write_rows_csv, write_yaml
+from linearity_core.mav_params import fetch_parameter, set_parameter, set_parameters, snapshot_parameters
+from linearity_core.paths import ARDUPILOT_ROOT, ARDUPILOT_RAW_ROOT
 from pymavlink import mavutil
 
-from .bin_log_metrics import summarize_bin_log
-from .session import (
-    cleanup_residual_processes,
-    connect,
-    start_sitl as start_sitl_process,
-    stop_process,
-    wait_for_message,
-    wait_for_mode,
-    wait_for_takeoff_altitude,
-)
+from .bin_log_extract import extract_bin_log
+from .session import cleanup_residual_processes, connect, start_sitl as start_sitl_process, stop_process, wait_for_mode
 
 
-BACKEND_NAME = "ardupilot_mavlink"
+BACKEND_NAME = "ardupilot"
 DEFAULT_MASTER = "tcp:127.0.0.1:5760"
 EARTH_RADIUS_M = 6378137.0
 ATTITUDE_FIELDNAMES = ["received_time_ns", "roll", "pitch", "yaw", "rollspeed", "pitchspeed", "yawspeed"]
 LOCAL_POSITION_FIELDNAMES = ["received_time_ns", "x", "y", "z", "vx", "vy", "vz"]
 HEARTBEAT_FIELDNAMES = ["received_time_ns", "base_mode", "custom_mode", "system_status"]
 STATUS_FIELDNAMES = ["received_time_ns", "voltage_battery", "current_battery", "battery_remaining", "drop_rate_comm"]
-INPUT_TRACE_FIELDNAMES = ["publish_time_ns", "elapsed_s", "profile_value", "roll_body", "pitch_body", "yaw_body", "thrust_z", "phase"]
-METRICS_FIELDNAMES = [
-    "run_id",
-    "backend",
-    "study_layer",
-    "study_role",
-    "mode_under_test",
-    "parameter_group",
-    "parameter_set_name",
-    "input_chain",
-    "profile_type",
-    "axis",
-    "input_peak",
-    "heartbeat_count",
-    "attitude_samples",
-    "local_position_samples",
-    "status_samples",
-    "failsafe_event",
-    "tracking_error_peak",
-    "tracking_error_rms",
-    "rate_tracking_error_peak",
-    "rate_tracking_error_rms",
-    "response_delay_ms",
-    "start_xy_radius_m",
-    "end_xy_radius_m",
-    "xy_radius_peak_m",
-    "xy_displacement_peak_m",
-    "clip_frac",
-    "thlimit_peak",
-    "max_motor_output",
-    "oracle_valid",
-    "oracle_failure_reason",
-    "stress_class",
-    "mechanism_flags",
-    "rate_layer_recommended",
-    "rate_layer_reasons",
-    "attribution_boundary",
-    "bin_parse_status",
-    "bin_message_counts",
+INPUT_TRACE_FIELDNAMES = [
+    "publish_time_ns",
+    "elapsed_s",
+    "profile_value",
+    "roll_body",
+    "pitch_body",
+    "yaw_body",
+    "thrust_z",
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "phase",
 ]
 
 
@@ -144,55 +109,6 @@ def _wait_for_armed(master: mavutil.mavfile, timeout_s: float = 15.0) -> bool:
     return master.motors_armed()
 
 
-def _arm_and_takeoff(master: mavutil.mavfile, target_altitude_m: float) -> list[str]:
-    anomalies: list[str] = []
-    if not _set_mode(master, "GUIDED"):
-        anomalies.append("guided_mode_unavailable")
-        return anomalies
-    if not wait_for_mode(master, "GUIDED", timeout_s=10.0):
-        anomalies.append("guided_mode_not_confirmed")
-        return anomalies
-    try:
-        master.arducopter_arm()
-        if not _wait_for_armed(master, timeout_s=15.0):
-            anomalies.append("arm_failed")
-            return anomalies
-    except Exception:
-        anomalies.append("arm_failed")
-        return anomalies
-    try:
-        master.mav.command_long_send(
-            master.target_system,
-            master.target_component,
-            mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            target_altitude_m,
-        )
-    except Exception:
-        anomalies.append("takeoff_command_failed")
-        return anomalies
-    if not wait_for_takeoff_altitude(master, target_altitude_m, timeout_s=20.0):
-        anomalies.append("takeoff_altitude_not_reached")
-    return anomalies
-
-
-def _wait_for_position_message(master: mavutil.mavfile, timeout_s: float = 10.0):
-    deadline = time.monotonic() + timeout_s
-    while time.monotonic() < deadline:
-        message = master.recv_match(blocking=True, timeout=0.5)
-        if message is None:
-            continue
-        if message.get_type() in {"LOCAL_POSITION_NED", "GLOBAL_POSITION_INT"}:
-            return message
-    return None
-
-
 def _wait_for_vehicle_ready(master: mavutil.mavfile, timeout_s: float = 20.0) -> list[str]:
     deadline = time.monotonic() + timeout_s
     position_ready = False
@@ -228,10 +144,10 @@ def _wait_for_vehicle_ready(master: mavutil.mavfile, timeout_s: float = 20.0) ->
 def _arm_vehicle(master: mavutil.mavfile, mode_name: str, timeout_s: float = 15.0) -> list[str]:
     anomalies: list[str] = []
     if not _set_mode(master, mode_name):
-        anomalies.append(f"mode_under_test_unavailable:{mode_name}")
+        anomalies.append(f"mode_unavailable:{mode_name}")
         return anomalies
     if not wait_for_mode(master, mode_name, timeout_s=10.0):
-        anomalies.append(f"mode_under_test_not_confirmed:{mode_name}")
+        anomalies.append(f"mode_not_confirmed:{mode_name}")
         return anomalies
     deadline = time.monotonic() + timeout_s
     while time.monotonic() < deadline:
@@ -288,13 +204,7 @@ def _send_attitude_target(master: mavutil.mavfile, roll: float, pitch: float, ya
     )
 
 
-def _send_rate_target(
-    master: mavutil.mavfile,
-    roll_rate: float,
-    pitch_rate: float,
-    yaw_rate: float,
-    thrust_z: float,
-) -> None:
+def _send_rate_target(master: mavutil.mavfile, roll_rate: float, pitch_rate: float, yaw_rate: float, thrust_z: float) -> None:
     type_mask = mavutil.mavlink.ATTITUDE_TARGET_TYPEMASK_ATTITUDE_IGNORE
     master.mav.set_attitude_target_send(
         int(time.time() * 1000) & 0xFFFFFFFF,
@@ -417,16 +327,11 @@ def _write_telemetry_csv(path: Path, rows: list[dict[str, Any]], fieldnames: lis
 
 def _prepare_parameters(master: mavutil.mavfile, config: RunConfig) -> tuple[dict[str, Any], dict[str, Any], list[str]]:
     parameter_names = list(dict.fromkeys(config.controlled_parameters_for_backend("ardupilot")))
-    parameter_names.extend(
-        name for name in config.parameter_overrides_for_backend("ardupilot") if name not in parameter_names
-    )
+    parameter_names.extend(name for name in config.parameter_overrides_for_backend("ardupilot") if name not in parameter_names)
     if "ARMING_CHECK" not in parameter_names:
         parameter_names.append("ARMING_CHECK")
-    if not parameter_names:
-        return {}, {}, []
-
-    anomalies: list[str] = []
     before = snapshot_parameters(master, parameter_names, timeout_s=2.0)
+    anomalies: list[str] = []
     overrides = config.parameter_overrides_for_backend("ardupilot")
     if overrides:
         apply_results = set_parameters(master, overrides, timeout_s=2.0)
@@ -458,166 +363,43 @@ def _restore_parameters(master: mavutil.mavfile, snapshot_before: dict[str, Any]
         results = set_parameters(master, restore_values, timeout_s=2.0)
     except Exception as exc:
         return [f"parameter_restore_failed:{type(exc).__name__}"]
-
     failed = [name for name, ok in results.items() if not ok]
     if failed:
         return [f"parameter_restore_failed:{','.join(failed)}"]
     return []
 
 
-def _xy_motion_metrics(position_rows: list[dict[str, Any]]) -> dict[str, Any]:
-    if not position_rows:
-        return {
-            "start_xy_radius_m": math.nan,
-            "end_xy_radius_m": math.nan,
-            "xy_radius_peak_m": math.nan,
-            "xy_displacement_peak_m": math.nan,
-        }
-    x0 = float(position_rows[0]["x"])
-    y0 = float(position_rows[0]["y"])
-    start_xy_radius_m = math.hypot(x0, y0)
-    end_xy_radius_m = math.hypot(float(position_rows[-1]["x"]), float(position_rows[-1]["y"]))
-    xy_radius_peak_m = max(math.hypot(float(row["x"]), float(row["y"])) for row in position_rows)
-    xy_displacement_peak_m = max(
-        math.hypot(float(row["x"]) - x0, float(row["y"]) - y0) for row in position_rows
-    )
-    return {
-        "start_xy_radius_m": round(start_xy_radius_m, 3),
-        "end_xy_radius_m": round(end_xy_radius_m, 3),
-        "xy_radius_peak_m": round(xy_radius_peak_m, 3),
-        "xy_displacement_peak_m": round(xy_displacement_peak_m, 3),
-    }
-
-
-def _mechanism_flags(metrics: dict[str, Any], anomalies: list[str]) -> list[str]:
-    flags: list[str] = []
-    if metrics.get("failsafe_event") == 1:
-        flags.append("failsafe")
-    if any(item.startswith("parameter_") for item in anomalies):
-        flags.append("parameter_session_issue")
-    if float(metrics.get("clip_frac", 0.0) or 0.0) >= 0.02:
-        flags.append("motor_clipping")
-    if float(metrics.get("thlimit_peak", 0.0) or 0.0) >= 1.0:
-        flags.append("thrust_limited")
-    if float(metrics.get("tracking_error_peak", 0.0) or 0.0) >= 0.25:
-        flags.append("tracking_error_high")
-    if float(metrics.get("response_delay_ms", 0.0) or 0.0) >= 250.0:
-        flags.append("response_delay_high")
-    if float(metrics.get("xy_displacement_peak_m", 0.0) or 0.0) >= 15.0:
-        flags.append("xy_drift_high")
-    return flags
-
-
-def _stress_class(metrics: dict[str, Any], run_status: str, mechanism_flags: list[str]) -> str:
-    if run_status != "completed" or metrics.get("failsafe_event") == 1:
-        return "saturated"
-    if any(flag in mechanism_flags for flag in {"motor_clipping", "thrust_limited", "xy_drift_high"}):
-        return "saturated"
-    if any(flag in mechanism_flags for flag in {"tracking_error_high", "response_delay_high"}):
-        return "stressed"
-    return "nominal"
-
-
-def _oracle_decision(config: RunConfig, metrics: dict[str, Any], run_status: str, anomalies: list[str]) -> tuple[int, str]:
-    if run_status != "completed":
-        return 0, f"run_status:{run_status}"
-    if metrics.get("failsafe_event") == 1:
-        return 0, "failsafe_event"
-    if "bin_log_missing" in anomalies:
-        return 0, "missing_bin_log"
-    if config.resolved_study_layer == "manual_whole_loop":
-        if float(metrics.get("xy_displacement_peak_m", 0.0) or 0.0) >= float(
-            config.extras.get("oracle_manual_xy_displacement_limit_m", 25.0)
-        ):
-            return 0, "manual_xy_drift_high"
-    elif config.resolved_study_layer == "attitude_explicit":
-        if float(metrics.get("tracking_error_peak", 0.0) or 0.0) >= float(
-            config.extras.get("oracle_attitude_tracking_error_peak_limit", 0.35)
-        ):
-            return 0, "attitude_tracking_error_peak_high"
-        if float(metrics.get("tracking_error_rms", 0.0) or 0.0) >= float(
-            config.extras.get("oracle_attitude_tracking_error_rms_limit", 0.20)
-        ):
-            return 0, "attitude_tracking_error_rms_high"
-        if float(metrics.get("response_delay_ms", 0.0) or 0.0) >= float(
-            config.extras.get("oracle_attitude_response_delay_ms_limit", 400.0)
-        ):
-            return 0, "attitude_response_delay_high"
-    else:
-        if float(metrics.get("rate_tracking_error_peak", 0.0) or 0.0) >= float(
-            config.extras.get("oracle_rate_tracking_error_peak_limit", 0.60)
-        ):
-            return 0, "rate_tracking_error_peak_high"
-    return 1, "valid"
-
-
-def _rate_layer_recommendation(
-    config: RunConfig,
-    oracle_valid: int,
-    mechanism_flags: list[str],
-) -> tuple[int, list[str]]:
-    reasons = list(config.rate_layer_recommended_reasons())
-    if config.resolved_study_layer == "attitude_explicit" and oracle_valid == 0 and not mechanism_flags:
-        reasons.append("attitude_difference_unexplained_by_current_mechanisms")
-    if config.resolved_study_layer == "attitude_explicit" and "tracking_error_high" in mechanism_flags:
-        reasons.append("attitude_tracking_difference_needs_rate_attribution")
-    deduped = list(dict.fromkeys(reasons))
-    return (1 if deduped else 0), deduped
-
-
-def _notes_text(
-    run_id: str,
-    config: RunConfig,
-    study: dict[str, Any],
-    run_status: str,
-    anomalies: list[str],
-    metrics: dict[str, Any],
-    bin_log_path: str | None,
-    tlog_path: Path,
-    vehicle: str,
-    frame: str,
-) -> str:
+def _notes_text(run_id: str, config: RunConfig, status: str, anomalies: list[str], bin_log_path: str | None, tlog_path: Path) -> str:
     return "\n".join(
         [
             f"# {run_id}",
+            "- ardupilot raw linearity capture",
+            f"- status: {status}",
             f"- backend: {BACKEND_NAME}",
-            f"- vehicle/frame: {vehicle}/{frame}",
-            f"- study_layer: {study['study_layer']}",
-            f"- study_role: {study['study_role']}",
-            f"- mode_under_test: {study['mode_under_test']}",
-            f"- parameter_group: {study['parameter_group']}",
-            f"- parameter_set_name: {study['parameter_set_name']}",
-            f"- takeoff_altitude_m: {config.takeoff_altitude_m}",
-            f"- manual_throttle_bias: {float(config.extras.get('ardupilot_manual_throttle_bias', 0.65))}",
-            f"- manual_throttle_scale: {float(config.extras.get('ardupilot_manual_throttle_scale', 0.30))}",
-            f"- controlled_parameters: {', '.join(study['controlled_parameters'])}",
-            f"- status: {run_status}",
-            f"- oracle_valid: {metrics.get('oracle_valid', '')}",
-            f"- oracle_failure_reason: {metrics.get('oracle_failure_reason', '')}",
-            f"- stress_class: {metrics.get('stress_class', '')}",
+            f"- input_type: {config.input_type}",
+            f"- flight_mode: {config.mode_under_test_for_backend('ardupilot')}",
+            f"- x_schema: {config.x_schema}",
+            f"- y_schema: {config.y_schema}",
             f"- ardupilot_bin_log_path: {bin_log_path or 'missing'}",
             f"- ardupilot_tlog_path: {tlog_path}",
             f"- anomalies: {', '.join(anomalies) if anomalies else 'none'}",
-            f"- attribution_boundary: {config.resolved_attribution_boundary}",
         ]
     )
 
 
-def run_experiment(
+def run_capture(
     config: RunConfig,
     vehicle: str = "ArduCopter",
     frame: str = "quad",
     master_uri: str = DEFAULT_MASTER,
     start_sitl: bool = True,
     connect_timeout_s: float = 60.0,
-    arm_and_takeoff: bool = True,
     sitl_log_path: Path | None = None,
 ) -> tuple[int, Path]:
     start_time = datetime.now(timezone.utc).astimezone()
-    run_id = config.build_run_id(start_time)
-    study = config.study_metadata("ardupilot")
-    paths = ensure_run_directories(ARDUPILOT_RUNS_ROOT, run_id)
-    resolved_sitl_log_path = sitl_log_path or (paths["base_dir"] / "ardupilot_sitl.log")
+    run_id = config.build_run_id(start_time, repeat_index=config.repeat_index)
+    paths = ensure_raw_run_directories("ardupilot", run_id, root=ARDUPILOT_RAW_ROOT)
+    resolved_sitl_log_path = sitl_log_path or (paths["logs_dir"] / "ardupilot_sitl.log")
     tlog_path = paths["telemetry_dir"] / "ardupilot.tlog"
 
     bin_before = _snapshot_logs(ARDUPILOT_ROOT, (".bin",))
@@ -628,14 +410,16 @@ def run_experiment(
     position_rows: list[dict[str, Any]] = []
     heartbeat_rows: list[dict[str, Any]] = []
     status_rows: list[dict[str, Any]] = []
-    profile = ProfileGenerator(config)
+    profile = ExcitationGenerator(config)
     position_origin: dict[str, float] | None = None
 
     process = None
     master: mavutil.mavfile | None = None
-    run_status = "completed"
+    status = "completed"
+    failure_reason = ""
     parameter_snapshot_before: dict[str, Any] = {}
     parameter_snapshot_after: dict[str, Any] = {}
+    extracted_bin_summary: dict[str, Any] = {}
 
     try:
         if start_sitl:
@@ -643,41 +427,35 @@ def run_experiment(
             process = start_sitl_process(run_id, vehicle, frame, resolved_sitl_log_path)
 
         master = connect(master_uri, tlog_path, connect_timeout_s)
-        readiness_anomalies = _wait_for_vehicle_ready(
-            master,
-            timeout_s=float(config.extras.get("ardupilot_ready_timeout_s", 20.0)),
-        )
+        readiness_anomalies = _wait_for_vehicle_ready(master, timeout_s=float(config.extras.get("ardupilot_ready_timeout_s", 20.0)))
         anomalies.extend(readiness_anomalies)
         if readiness_anomalies:
-            run_status = "invalid_runtime"
+            status = "failed"
+            failure_reason = "vehicle_not_ready"
+
         parameter_snapshot_before, parameter_snapshot_after, parameter_anomalies = _prepare_parameters(master, config)
         anomalies.extend(parameter_anomalies)
         anomalies.extend(_prepare_runtime_arming(master, parameter_snapshot_after))
-        if "arming_check_disable_failed" in anomalies:
-            run_status = "invalid_runtime"
+        if "arming_check_disable_failed" in anomalies and status == "completed":
+            status = "failed"
+            failure_reason = "arming_check_disable_failed"
 
-        desired_mode = study["mode_under_test"]
-        arming_mode = desired_mode if config.resolved_study_layer == "manual_whole_loop" else "GUIDED_NOGPS"
-        if run_status == "completed":
-            anomalies.extend(_arm_vehicle(master, arming_mode))
-            if any(
-                item in {
-                    "arm_failed",
-                    f"mode_under_test_unavailable:{arming_mode}",
-                    f"mode_under_test_not_confirmed:{arming_mode}",
-                }
-                for item in anomalies
-            ):
-                run_status = "invalid_runtime"
+        if status == "completed":
+            desired_mode = config.mode_under_test_for_backend("ardupilot")
+            arming_anomalies = _arm_vehicle(master, desired_mode)
+            anomalies.extend(arming_anomalies)
+            if arming_anomalies:
+                status = "failed"
+                failure_reason = "arm_failed"
 
         started = time.monotonic()
         end_deadline = started + profile.total_duration_s + float(config.extras.get("ardupilot_tail_s", 2.0))
         manual_bias = float(config.extras.get("ardupilot_manual_throttle_bias", 0.65))
         manual_scale = float(config.extras.get("ardupilot_manual_throttle_scale", 0.30))
 
-        while run_status == "completed" and time.monotonic() < end_deadline:
+        while status == "completed" and time.monotonic() < end_deadline:
             elapsed_s = time.monotonic() - started
-            if config.resolved_study_layer == "manual_whole_loop":
+            if config.input_type == "manual":
                 profile_value, roll, pitch, yaw, throttle, phase = profile.manual_targets_at(elapsed_s)
                 throttle_norm = manual_bias
                 if config.axis in {"throttle", "composite"}:
@@ -692,10 +470,14 @@ def run_experiment(
                         "pitch_body": pitch,
                         "yaw_body": yaw,
                         "thrust_z": throttle_norm,
+                        "command_roll": roll,
+                        "command_pitch": pitch,
+                        "command_yaw": yaw,
+                        "command_throttle": throttle_norm,
                         "phase": phase,
                     }
                 )
-            elif config.resolved_study_layer == "attitude_explicit":
+            elif config.input_type == "attitude":
                 profile_value, roll_body, pitch_body, yaw_body, thrust_z, phase = profile.attitude_targets_at(elapsed_s)
                 _send_attitude_target(master, roll_body, pitch_body, yaw_body, thrust_z)
                 input_profile_rows.append(
@@ -707,6 +489,10 @@ def run_experiment(
                         "pitch_body": pitch_body,
                         "yaw_body": yaw_body,
                         "thrust_z": thrust_z,
+                        "command_roll": roll_body,
+                        "command_pitch": pitch_body,
+                        "command_yaw": yaw_body,
+                        "command_throttle": thrust_z,
                         "phase": phase,
                     }
                 )
@@ -722,34 +508,25 @@ def run_experiment(
                         "pitch_body": pitch_rate,
                         "yaw_body": yaw_rate,
                         "thrust_z": thrust_z,
+                        "command_roll": roll_rate,
+                        "command_pitch": pitch_rate,
+                        "command_yaw": yaw_rate,
+                        "command_throttle": thrust_z,
                         "phase": phase,
                     }
                 )
-            position_origin = _append_message_rows(
-                master,
-                attitude_rows,
-                position_rows,
-                heartbeat_rows,
-                status_rows,
-                position_origin,
-            )
+            position_origin = _append_message_rows(master, attitude_rows, position_rows, heartbeat_rows, status_rows, position_origin)
             time.sleep(config.period_s)
     except Exception as exc:
         anomalies.append(f"runtime_error:{type(exc).__name__}")
-        run_status = "invalid_runtime"
+        status = "failed"
+        failure_reason = failure_reason or f"runtime_error:{type(exc).__name__}"
     finally:
         if master is not None:
             try:
                 _land_vehicle(master)
                 time.sleep(float(config.extras.get("ardupilot_land_settle_s", 2.0)))
-                position_origin = _append_message_rows(
-                    master,
-                    attitude_rows,
-                    position_rows,
-                    heartbeat_rows,
-                    status_rows,
-                    position_origin,
-                )
+                position_origin = _append_message_rows(master, attitude_rows, position_rows, heartbeat_rows, status_rows, position_origin)
                 if parameter_snapshot_after != parameter_snapshot_before:
                     anomalies.extend(_restore_parameters(master, parameter_snapshot_before))
                 master.close()
@@ -767,6 +544,10 @@ def run_experiment(
         destination = paths["telemetry_dir"] / "ardupilot.BIN"
         shutil.copy2(bin_log_path, destination)
         copied_bin_path = str(destination)
+        try:
+            extracted_bin_summary = extract_bin_log(destination, paths["telemetry_dir"])
+        except Exception as exc:
+            anomalies.append(f"bin_parse_failed:{type(exc).__name__}")
     else:
         anomalies.append("bin_log_missing")
 
@@ -774,131 +555,64 @@ def run_experiment(
     _write_telemetry_csv(paths["telemetry_dir"] / "local_position.csv", position_rows, LOCAL_POSITION_FIELDNAMES)
     _write_telemetry_csv(paths["telemetry_dir"] / "heartbeat.csv", heartbeat_rows, HEARTBEAT_FIELDNAMES)
     _write_telemetry_csv(paths["telemetry_dir"] / "sys_status.csv", status_rows, STATUS_FIELDNAMES)
-    _write_telemetry_csv(paths["input_trace_path"], input_profile_rows, INPUT_TRACE_FIELDNAMES)
-
-    metrics: dict[str, Any] = {
-        "run_id": run_id,
-        "backend": BACKEND_NAME,
-        "study_layer": study["study_layer"],
-        "study_role": study["study_role"],
-        "mode_under_test": study["mode_under_test"],
-        "parameter_group": study["parameter_group"],
-        "parameter_set_name": study["parameter_set_name"],
-        "input_chain": config.input_chain,
-        "profile_type": config.profile_type,
-        "axis": config.axis,
-        "input_peak": abs(config.amplitude),
-        "heartbeat_count": len(heartbeat_rows),
-        "attitude_samples": len(attitude_rows),
-        "local_position_samples": len(position_rows),
-        "status_samples": len(status_rows),
-        "failsafe_event": int(any(row["system_status"] >= mavutil.mavlink.MAV_STATE_CRITICAL for row in heartbeat_rows)),
-        "tracking_error_peak": math.nan,
-        "tracking_error_rms": math.nan,
-        "rate_tracking_error_peak": math.nan,
-        "rate_tracking_error_rms": math.nan,
-        "response_delay_ms": math.nan,
-        "clip_frac": 0.0,
-        "thlimit_peak": math.nan,
-        "max_motor_output": math.nan,
-    }
-    metrics.update(_xy_motion_metrics(position_rows))
-
-    if copied_bin_path is not None:
-        try:
-            metrics.update(summarize_bin_log(config, copied_bin_path, telemetry_dir=paths["telemetry_dir"]))
-        except Exception as exc:
-            anomalies.append(f"bin_parse_failed:{type(exc).__name__}")
-            metrics["bin_parse_status"] = "parse_failed"
-    else:
-        metrics["bin_parse_status"] = "missing"
-
-    if metrics["failsafe_event"] == 1:
-        run_status = "invalid_runtime"
-
-    mechanism_flags = _mechanism_flags(metrics, anomalies)
-    metrics["stress_class"] = _stress_class(metrics, run_status, mechanism_flags)
-    oracle_valid, oracle_failure_reason = _oracle_decision(config, metrics, run_status, anomalies)
-    metrics["oracle_valid"] = oracle_valid
-    metrics["oracle_failure_reason"] = oracle_failure_reason
-    metrics["mechanism_flags"] = ",".join(mechanism_flags)
-    rate_layer_recommended, rate_layer_reasons = _rate_layer_recommendation(config, oracle_valid, mechanism_flags)
-    metrics["rate_layer_recommended"] = rate_layer_recommended
-    metrics["rate_layer_reasons"] = ",".join(rate_layer_reasons)
-    metrics["attribution_boundary"] = config.resolved_attribution_boundary
-
-    write_single_row_csv(
-        paths["metrics_path"],
-        metrics,
-        METRICS_FIELDNAMES,
-    )
+    write_rows_csv(paths["input_trace_path"], input_profile_rows, INPUT_TRACE_FIELDNAMES)
 
     manifest = {
+        "kind": "linearity_raw_run",
+        "raw_schema_version": 1,
         "run_id": run_id,
         "backend": BACKEND_NAME,
-        "schema_version": schema_version(),
-        "milestone_id": milestone_id(),
-        "capability_level": capability_level(),
-        "phase": config.phase,
-        "input_chain": config.input_chain,
+        "status": status,
+        "failure_reason": failure_reason,
+        "study_name": config.study_name,
+        "study_config": config.to_dict(),
+        "flight_mode": config.mode_under_test_for_backend("ardupilot"),
+        "scenario": config.scenario,
+        "config_profile": config.config_profile,
+        "seed": config.seed,
+        "repeat_index": config.repeat_index,
+        "input_type": config.input_type,
         "profile_type": config.profile_type,
-        "profile_params": config.profile_params(),
-        "start_time": start_time.isoformat(),
-        "end_time": end_time.isoformat(),
-        "status": run_status,
+        "axis": config.axis,
         "vehicle": vehicle,
         "frame": frame,
         "master_uri": master_uri,
-        "mode_under_test": study["mode_under_test"],
-        "takeoff_altitude_m": config.takeoff_altitude_m,
-        "manual_throttle_bias": float(config.extras.get("ardupilot_manual_throttle_bias", 0.65)),
-        "manual_throttle_scale": float(config.extras.get("ardupilot_manual_throttle_scale", 0.30)),
-        "study": study,
+        "start_time": start_time.isoformat(),
+        "end_time": end_time.isoformat(),
         "ardupilot_bin_log_path": copied_bin_path or bin_log_path,
         "ardupilot_tlog_path": str(tlog_path),
         "host_snapshot_start": host_start,
         "host_snapshot_end": host_end,
         "parameter_snapshot_before": parameter_snapshot_before,
         "parameter_snapshot_after": parameter_snapshot_after,
-        "anomaly_summary": anomalies,
+        "bin_extract_summary": extracted_bin_summary,
+        "anomaly_summary": sorted(dict.fromkeys(anomalies)),
+        "telemetry_files": sorted(path.name for path in paths["telemetry_dir"].glob("*.csv")),
     }
     write_yaml(paths["manifest_path"], manifest)
     paths["notes_path"].write_text(
-        _notes_text(
-            run_id,
-            config,
-            study,
-            run_status,
-            anomalies,
-            metrics,
-            copied_bin_path or bin_log_path,
-            tlog_path,
-            vehicle,
-            frame,
-        ),
+        _notes_text(run_id, config, status, sorted(dict.fromkeys(anomalies)), copied_bin_path or bin_log_path, tlog_path),
         encoding="utf-8",
     )
-    return (0 if run_status == "completed" else 1), paths["base_dir"]
+    return (0 if status == "completed" else 1), paths["base_dir"]
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="运行 ArduPilot 分层敏感性实验并写入研究产物。")
-    parser.add_argument("--config", type=Path, required=True, help="YAML 配置路径。")
+    parser = argparse.ArgumentParser(description="运行 ArduPilot raw linearity capture，并写出新的 raw artifact。")
+    parser.add_argument("--config", type=Path, required=True, help="study config YAML 路径。")
     parser.add_argument("--vehicle", default="ArduCopter", help="ArduPilot vehicle，默认 ArduCopter。")
     parser.add_argument("--frame", default="quad", help="SITL frame，默认 quad。")
     parser.add_argument("--master", default=DEFAULT_MASTER, help="MAVLink master URI，默认 tcp:127.0.0.1:5760。")
     parser.add_argument("--skip-sitl", action="store_true", help="连接已有实例，不启动 sim_vehicle.py。")
-    parser.add_argument("--no-arm-and-takeoff", action="store_true", help="跳过 GUIDED 起飞流程。")
     args = parser.parse_args(argv)
 
     config = load_run_config(args.config)
-    exit_code, artifact_dir = run_experiment(
+    exit_code, artifact_dir = run_capture(
         config,
         vehicle=args.vehicle,
         frame=args.frame,
         master_uri=args.master,
         start_sitl=not args.skip_sitl,
-        arm_and_takeoff=not args.no_arm_and_takeoff,
     )
     print(f"artifact_dir={artifact_dir}")
     raise SystemExit(exit_code)

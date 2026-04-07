@@ -21,10 +21,10 @@ setup(
     extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
-            "px4_experiment_runner = px4_ros2_backend.experiment_runner:main",
-            "px4_matrix_runner = px4_ros2_backend.matrix_runner:main",
+            "px4_linearity_capture = px4_ros2_backend.linearity_capture:main",
+            "px4_linearity_matrix = px4_ros2_backend.linearity_matrix:main",
             "px4_rate_injector = px4_ros2_backend.rate_injector:main",
-            "px4_analysis_runner = px4_ros2_backend.analysis_runner:main",
+            "gz_clock_bridge = px4_ros2_backend.gz_clock_bridge:main",
         ],
     },
 )

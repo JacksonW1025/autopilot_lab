@@ -2,222 +2,57 @@
 
 ## 目标
 
-把 `autopilot_lab` 从“PX4-only 激进输入实验仓”改造成“跨飞控的分层敏感性研究平台”，默认主线为：
+围绕 `Y ≈ fX (+ b)` 构建一个可持续推进的 UAV 全局线性研究平台。默认主线固定为：
 
-- `manual_whole_loop`
-- `attitude_explicit`
-- `rate_single_loop` 按需引入
+- 构造候选 `X`
+- 构造候选 `Y`
+- 拟合全局线性/仿射矩阵 `f`
+- 估计稀疏性
+- 比较不同 `X/Y schema`
 
-参考来源为 `~/RouthSearch` 的研究结构，而不是回退到旧的静态 PID 复现。
+## 2026-04-06
 
-## 2026-03-27 本轮改造
+- 建立 `linearity_core / linearity_study / linearity_analysis` 三层结构
+- 统一 study config、sample table、fit artifact、study summary 的输出口径
+- 新增 `linearity_run_study / linearity_analyze / linearity_compare_schemas`
+- 新增 `scripts/run_linearity_study.sh`、`scripts/compare_schemas.sh`、`scripts/smoke_linearity.sh`
+- 建立 synthetic backendless smoke 与基础测试集
 
-### 1. 研究 schema 升级
+## 2026-04-07
 
-- 扩展 `src/fep_core/fep_core/config.py`
-- 新增字段：
-  - `study_family`
-  - `study_layer`
-  - `study_role`
-  - `oracle_profile`
-  - `mode_under_test`
-  - `parameter_group`
-  - `parameter_set_name`
-  - `parameter_overrides`
-  - `controlled_parameters`
-  - `input_contract`
-  - `output_contract`
-  - `attribution_boundary`
-- 默认解析逻辑已支持：
-  - `manual -> manual_whole_loop`
-  - `attitude -> attitude_explicit`
-  - `rate -> rate_single_loop`
+### 真实 PX4 主报告链路
 
-### 2. 共享 study artifact
+- 固定真实 PX4 scope：`gz_x500/default + nominal + POSCTL/OFFBOARD_ATTITUDE`
+- 新增真实 capture config、analysis config 与 balanced broad ablation plan
+- `scripts/run_px4_broad_ablation.sh` 成为当前真实 PX4 主入口
+- 当前权威 raw run：
+  - `artifacts/raw/px4/20260407_025915_px4_manual_broad_composite_r1`
+  - `artifacts/raw/px4/20260407_030010_px4_attitude_broad_composite_r1`
+- 当前权威 study：
+  - `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced`
 
-- `src/fep_core/fep_core/paths.py`
-  - 新增 `STUDY_ARTIFACT_ROOT = artifacts/studies`
-- `src/fep_core/fep_core/io.py`
-  - 新增 `ensure_study_directories()`
-- `src/fep_core/fep_core/study_analysis_runner.py`
-  - 新增跨 backend study 汇总 CLI
-  - 汇总输出：
-    - `tables/merged_runs.csv`
-    - `reports/summary.md`
-    - `manifest.yaml`
+### PX4 telemetry 与 conditioning
 
-### 3. 参数快照能力
+- PX4 raw capture 现支持 `ROS 直录 + ULog 缺口回填`
+- 已补齐 rate / actuator / internal telemetry 的分析输入链路
+- 条件数诊断现拆分为：
+  - `raw_condition_number`
+  - `effective_condition_number`
+- `selected_state_subset` 已按 `output_semantics` 解释，不再混淆当前态与未来响应
 
-- `src/fep_core/fep_core/mav_params.py`
-  - 新增通用 MAVLink 参数工具：
-    - `connect_mavlink`
-    - `snapshot_parameters`
-    - `set_parameters`
-    - `close_mavlink`
-- `src/fep_core/setup.py`
-  - 增加 `pymavlink`
-  - 增加 `study_analysis_runner` 入口
+### 当前结果
 
-### 4. PX4 证据链升级
+- best schema: `commands_plus_state_history x next_raw_state | ols_affine | pooled`
+- best sparse/stable schema: `commands_plus_state_history x next_raw_state | ridge_affine | pooled`
+- `median_test_r2 ≈ 0.9726`
+- `commands_only -> commands_plus_state` 提升 `≈ 1.0442`
+- `commands_plus_state -> history` 提升 `≈ 0.0064`
+- `actuator_response` 已进入有效比较
+- `raw_condition_number = inf`
+- `effective_condition_number ≈ 1259416.2092`
 
-- `src/px4_ros2_backend/px4_ros2_backend/common.py`
-  - 增补 attitude/rate/allocator/actuator 主题
-- `src/px4_ros2_backend/px4_ros2_backend/telemetry_recorder.py`
-  - 新增 CSV 落盘：
-    - `vehicle_attitude_setpoint`
-    - `vehicle_angular_velocity`
-    - `vehicle_rates_setpoint`
-    - `rate_ctrl_status`
-    - `control_allocator_status`
-    - `actuator_motors`
-- `src/px4_ros2_backend/px4_ros2_backend/experiment_runner.py`
-  - 已接入参数 `snapshot / apply / restore`
-  - 已写入 `study` metadata
-  - 已生成：
-    - `oracle_valid`
-    - `oracle_failure_reason`
-    - `stress_class`
-    - `mechanism_flags`
-    - `rate_layer_recommended`
-    - `rate_layer_reasons`
-  - `rate_single_loop` 当前在 PX4 仍明确标记为条件层，不作为第一批默认 runner
+### 当前文档入口
 
-### 5. ArduPilot 分层 runner 重写
-
-- 完全替换 `src/ardupilot_mavlink_backend/ardupilot_mavlink_backend/experiment_runner.py`
-- 默认支持：
-  - `manual_whole_loop`
-    - `GUIDED takeoff -> STABILIZE -> MANUAL_CONTROL -> LAND`
-  - `attitude_explicit`
-    - `GUIDED takeoff -> SET_ATTITUDE_TARGET -> LAND`
-  - `rate_single_loop`
-    - 已预留 body-rate 模式发送接口
-- 已接入参数 `snapshot / apply / restore`
-- 已写入 `study` metadata
-- 已生成：
-  - `oracle_valid`
-  - `oracle_failure_reason`
-  - `stress_class`
-  - `mechanism_flags`
-  - `rate_layer_recommended`
-
-### 6. ArduPilot `.BIN` 离线解析
-
-- 新增 `src/ardupilot_mavlink_backend/ardupilot_mavlink_backend/bin_log_metrics.py`
-- 已支持解析并标准化导出：
-  - `ATT`
-  - `RATE`
-  - `CTUN`
-  - `MOTB`
-  - `RCOU`
-  - 可选 `PIDR / PIDP / PIDY`
-- 已输出基础指标：
-  - `tracking_error_peak`
-  - `tracking_error_rms`
-  - `response_delay_ms`
-  - `rate_tracking_error_peak`
-  - `rate_tracking_error_rms`
-  - `clip_frac`
-  - `thlimit_peak`
-  - `max_motor_output`
-
-### 7. 默认分析入口切换
-
-- `src/fep_research/fep_research/analysis_runner.py`
-  - 已不再转发到旧 PX4-only `analysis_runner`
-  - 现在直接转发到 `fep_core.study_analysis_runner`
-- `src/px4_ros2_backend/px4_ros2_backend/matrix_runner.py`
-  - 自动汇总已切到新的 study 汇总
-
-### 8. 新的分层配置
-
-- 新增：
-  - `src/fep_research/config/layered_manual_roll_020.yaml`
-  - `src/fep_research/config/layered_manual_roll_020_p120.yaml`
-  - `src/fep_research/config/layered_attitude_roll_010.yaml`
-  - `src/fep_research/config/layered_attitude_roll_010_p120.yaml`
-- 第一批参数组固定为 `roll_rate_pid`
-- `P+20%` 采用：
-  - PX4：`MC_ROLLRATE_P = 0.18`
-  - ArduPilot：`ATC_RAT_RLL_P = 0.162`
-
-### 9. 根文档替换
-
-- 已重写：
-  - `README.md`
-  - `PJINFO.md`
-  - `AGENTLOG.md`
-- 顶层旧 Phase 文档已退出主入口，只保留在 `docs/`
-
-## 验证
-
-### 编译
-
-已通过：
-
-```bash
-python3 -m compileall src/fep_core src/px4_ros2_backend src/ardupilot_mavlink_backend src/fep_research
-```
-
-### 配置与导入
-
-已验证：
-
-- 新分层配置可被 `RunConfig` 正确解析
-- `study_metadata('px4')` / `study_metadata('ardupilot')` 能正确展开
-
-### ArduPilot `.BIN` 解析
-
-已用以下参考日志做离线验证：
-
-- `/mnt/nvme/RouthSearch/routh_search/ardupilot/oracle_logs/base.BIN`
-
-### Study 汇总
-
-已成功生成新的 study artifact：
-
-- `artifacts/studies/20260327_041108_layered_sensitivity/`
-
-## 当前结论
-
-- 仓库默认研究口径已经切到论文导向的分层主线
-- 旧 PX4-only phase 叙事不再是默认入口
-- `manual + attitude` 已成为并列主实验层
-- `rate` 不再被默认忽略，但保持条件触发
-- 当前仓库已经具备继续做 `roll_rate_pid` baseline / `P+20%` 对比的基础能力
-
-## 2026-03-30 M1 smoke-first closure
-
-### 1. 验收闭环
-
-- `scripts/doctor_lab.sh` 已返回 `status=ready`
-- 已真实执行 `/home/car/autopilot_lab/scripts/smoke_lab.sh --backend all --repeat 1`
-- 最新 matrix：
-  - PX4：`artifacts/px4/matrix/20260330_022930_default/runs.csv`
-  - ArduPilot：`artifacts/ardupilot/matrix/20260330_023431_ardupilot/runs.csv`
-- 双 backend 共 12 个新 run 全部完成；过滤后 `accepted=12`、`rejected=0`
-- backend 分布为 `px4_ros2=6`、`ardupilot_mavlink=6`
-- layer 分布为 `manual_whole_loop=4`、`attitude_explicit=4`、`rate_single_loop=4`
-- 最新 study manifest 为 `artifacts/studies/20260330_023843_layered_sensitivity/manifest.yaml`
-- 全仓当前里程碑计数为 `accepted=39`、`legacy=253`、`rejected=20`；这不是本轮 smoke 的失败数
-
-### 2. 关键修复摘要
-
-- PX4：补齐 fresh session 的 persistent state 清理，修正 manual gate 窗口与 rate metrics 的 failsafe 统计边界
-- ArduPilot：修正 readiness / arming / local-position 投影 / param snapshot 读写容错，稳定 fresh session 生命周期
-- validator：只接受 `status=completed` 且 schema 完整的 run 进入 accepted
-
-### 3. 回归门
-
-- 新增 `scripts/ci_minimal.sh`
-- 当前最小 smoke-free 回归门为：
-  - `python3 -m pytest -q tests`
-  - `python3 -m py_compile ...`
-  - `scripts/doctor_lab.sh --help`
-
-### 4. 当前路线
-
-- roll 三层双 backend 已验证完成
-- 下一步先补 pitch
-- 再做 yaw/composite
-- 不再把“继续拉 manual duration/composite”作为当前主路线
+- `README.md`
+- `PJINFO.md`
+- `docs/STAGE_REPORT_2026-04-07.md`

@@ -1,0 +1,58 @@
+study_name: global_linear_commands_only__next_raw_state
+backend: synthetic
+flight_mode: POSCTL
+scenario: nominal
+config_profile: commands_only_baseline
+seed: 7
+repeat_count: 1
+sampling_rate_hz: 20.0
+x_schema: commands_only
+y_schema: next_raw_state
+x_include_groups: []
+x_exclude_groups: []
+y_include_groups: []
+y_exclude_groups: []
+feature_map: identity
+run_level_covariates_as_inputs: []
+stratify_by:
+  - backend
+  - mode
+pooling_mode: pooled
+history_length: 0
+prediction_horizon: 1
+prediction_horizon_unit: steps
+parameter_sweep: {}
+internal_signals_enabled: false
+perturbation_strategy: single_variable_sweep
+model:
+  - ols_affine
+sparsity:
+  threshold: 0.05
+  ridge_alpha: 0.5
+  lasso_alpha: 0.03
+  bootstrap_repeats: 6
+  stability_selection_threshold: 0.6
+reporting:
+  stability_repeats: 3
+input_type: manual
+axis: roll
+profile_type: broad
+amplitude: 0.4
+bias: 0.0
+start_after_s: 0.5
+duration_s: 4.0
+hold_s: 1.0
+hover_thrust: -0.69
+timing_required: false
+warmup_cycles: 5
+manual_mode: flight
+synthetic:
+  sample_count: 180
+  noise_std: 0.02
+  sparse_matrix_density: 0.16
+  backend_identity_cycle:
+    - px4
+    - ardupilot
+  mode_cycle:
+    - POSCTL
+    - STABILIZE

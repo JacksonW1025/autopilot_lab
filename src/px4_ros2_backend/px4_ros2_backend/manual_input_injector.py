@@ -26,7 +26,7 @@ from .profiles import CommandSample, ProfileGenerator
 
 class ManualInputInjector(Node):
     def __init__(self, config: RunConfig) -> None:
-        super().__init__("fep_manual_input_injector")
+        super().__init__("linearity_manual_input_injector")
         self._config = config
         self._profile = ProfileGenerator(config)
         self._lock = Lock()

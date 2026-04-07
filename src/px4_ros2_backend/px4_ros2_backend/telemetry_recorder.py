@@ -195,7 +195,7 @@ class TelemetryRecorder(Node):
     }
 
     def __init__(self) -> None:
-        super().__init__("fep_telemetry_recorder")
+        super().__init__("linearity_telemetry_recorder")
         self._lock = Lock()
         self._rows: dict[str, list[dict[str, Any]]] = {
             "vehicle_attitude": [],

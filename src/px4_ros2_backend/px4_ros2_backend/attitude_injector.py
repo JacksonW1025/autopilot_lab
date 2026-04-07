@@ -25,7 +25,7 @@ from .profiles import CommandSample, ProfileGenerator
 
 class AttitudeInjector(Node):
     def __init__(self, config: RunConfig) -> None:
-        super().__init__("fep_attitude_injector")
+        super().__init__("linearity_attitude_injector")
         self._config = config
         self._profile = ProfileGenerator(config)
         self._lock = Lock()

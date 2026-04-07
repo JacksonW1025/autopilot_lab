@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fep_core.io import (
+from linearity_core.io import (
     capture_host_snapshot,
-    ensure_run_directories as ensure_backend_run_directories,
+    ensure_raw_run_directories as ensure_backend_run_directories,
     write_rows_csv,
     write_single_row_csv,
     write_yaml,
 )
-from fep_core.paths import PX4_LOG_ROOT, PX4_RUNS_ROOT
+from linearity_core.paths import PX4_LOG_ROOT, PX4_RAW_ROOT as PX4_RUNS_ROOT
 
 
 def ensure_run_directories(run_id: str) -> dict[str, Path]:
-    return ensure_backend_run_directories(PX4_RUNS_ROOT, run_id)
+    return ensure_backend_run_directories("px4", run_id, root=PX4_RUNS_ROOT)
 
 
 def snapshot_ulog_files(log_root: Path = PX4_LOG_ROOT) -> dict[str, float]:
