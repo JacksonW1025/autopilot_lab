@@ -192,16 +192,21 @@ class ManualInputInjector(Node):
         return clearance_m is not None and clearance_m < min_clearance_m
 
     def _takeoff_target_reached(self) -> bool:
-        if self._takeoff_target_z is None or not bool(self._vehicle_local_position.z_valid):
-            return False
-        position_ok = abs(float(self._vehicle_local_position.z) - self._takeoff_target_z) <= (
-            self._config.takeoff_position_tolerance_m
-        )
+        position_ok = False
+        if self._takeoff_target_z is not None and bool(self._vehicle_local_position.z_valid):
+            position_ok = abs(float(self._vehicle_local_position.z) - self._takeoff_target_z) <= (
+                self._config.takeoff_position_tolerance_m
+            )
         velocity_ok = True
         if bool(self._vehicle_local_position.v_z_valid):
             velocity_ok = abs(float(self._vehicle_local_position.vz)) <= self._config.takeoff_velocity_tolerance_m
-        clearance_ok = self._has_valid_clearance(self._config.min_takeoff_clearance_m)
-        return position_ok and velocity_ok and clearance_ok
+        clearance_m = self._estimated_clearance_m()
+        clearance_ok = clearance_m is not None and clearance_m >= self._config.min_takeoff_clearance_m
+        target_clearance_ok = (
+            clearance_m is not None
+            and clearance_m >= max(self._config.min_takeoff_clearance_m, self._config.takeoff_altitude_m - self._config.takeoff_position_tolerance_m)
+        )
+        return velocity_ok and (position_ok or (clearance_ok and target_clearance_ok))
 
     def _record_command(
         self,

@@ -68,11 +68,19 @@ def _start_process(name: str, command: str, log_path: Path, env: dict[str, str],
     return ManagedProcess(name=name, process=process, log_path=log_path)
 
 
+def _headless_enabled() -> bool:
+    if os.environ.get("AUTOPILOT_LAB_HEADLESS", "").strip() == "1":
+        return True
+    if os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"):
+        return False
+    return True
+
+
 def _session_env(world: str) -> dict[str, str]:
     env = os.environ.copy()
     env["PX4_GZ_WORLD"] = world
     env["PX4_GZ_STANDALONE"] = "1"
-    env["HEADLESS"] = "1"
+    env["HEADLESS"] = "1" if _headless_enabled() else "0"
     env["GZ_SIM_RESOURCE_PATH"] = GZ_RESOURCE_PATH
     env.setdefault("GZ_VERSION", "harmonic")
     env.setdefault("ROS_DOMAIN_ID", "0")
@@ -91,11 +99,12 @@ def _reset_px4_rootfs_state() -> None:
 
 def _start_session(world: str, session_dir: Path) -> list[ManagedProcess]:
     env = _session_env(world)
+    headless = env.get("HEADLESS") == "1"
     _reset_px4_rootfs_state()
     processes = [
         _start_process(
             "gazebo",
-            f"exec gz sim -r -s {shlex.quote(str(WORLD_ROOT / f'{world}.sdf'))}",
+            f"exec gz sim -r {'-s ' if headless else ''}{shlex.quote(str(WORLD_ROOT / f'{world}.sdf'))}",
             session_dir / "gazebo.log",
             env,
         ),

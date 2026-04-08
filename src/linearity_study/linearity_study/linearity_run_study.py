@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 from linearity_analysis.linearity_analyze import run_analysis
@@ -15,11 +16,20 @@ def run_study(config_path: Path, *, output_root: Path | None = None, skip_analys
         raw_root = output_root.parent / "raw" if output_root is not None else None
         raw_dirs = generate_synthetic_raw_runs(config, output_root=raw_root)
     elif config.backend == "px4":
-        from px4_ros2_backend.linearity_capture import run_capture
+        from px4_ros2_backend.linearity_matrix import run_matrix
 
-        for repeat_index in range(1, config.repeat_count + 1):
-            _, raw_dir = run_capture(config.with_repeat_index(repeat_index))
-            raw_dirs.append(raw_dir)
+        world = str(config.extras.get("world", os.environ.get("PX4_GZ_WORLD", "default"))).strip() or "default"
+        if config.source_path is None:
+            raise ValueError("PX4 study config 必须来自文件路径，才能自动启动可视化会话。")
+        _, rows = run_matrix(world, [config.source_path.resolve()], repeat=config.repeat_count)
+        raw_dirs = [Path(row["artifact_dir"]) for row in rows if row.get("artifact_dir")]
+        failed_rows = [row for row in rows if row.get("status") != "completed"]
+        if failed_rows:
+            details = ", ".join(
+                f"{Path(row['config']).name}: status={row['status']} session={row['session_dir']}"
+                for row in failed_rows
+            )
+            raise RuntimeError(f"PX4 study capture 未全部完成: {details}")
     elif config.backend == "ardupilot":
         from ardupilot_mavlink_backend.linearity_capture import run_capture
 
