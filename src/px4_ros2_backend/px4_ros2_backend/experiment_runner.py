@@ -394,14 +394,21 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="运行 PX4 raw linearity capture，并写出新的 raw artifact。")
     parser.add_argument("--config", type=Path, required=True, help="study config YAML 路径。")
+    parser.add_argument("--world", default="", help="Gazebo world 名称，默认读取 config/existing env，缺省为 default。")
     args = parser.parse_args(argv)
 
     from linearity_core.config import load_study_config
 
     config = load_study_config(args.config)
-    exit_code, artifact_dir = run_capture(config)
-    print(f"artifact_dir={artifact_dir}")
-    raise SystemExit(exit_code)
+    from .matrix_runner import run_matrix
+
+    world = args.world.strip() or str(config.extras.get("world", os.environ.get("PX4_GZ_WORLD", "default"))).strip() or "default"
+    _, rows = run_matrix(world, [args.config.resolve()], repeat=1)
+    row = rows[-1]
+    artifact_dir = row.get("artifact_dir", "")
+    if artifact_dir:
+        print(f"artifact_dir={artifact_dir}")
+    raise SystemExit(0 if row.get("status") == "completed" else 1)
 
 
 if __name__ == "__main__":
