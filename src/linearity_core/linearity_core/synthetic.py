@@ -9,6 +9,7 @@ import numpy as np
 from .canonical import ACTUATOR_COLUMNS, STATE_COLUMNS
 from .config import StudyConfig
 from .io import ensure_raw_run_directories, write_rows_csv, write_yaml
+from .research_contract import apply_manifest_research_contract, build_acceptance_block
 
 
 def _parameter_row(config: StudyConfig) -> dict[str, float]:
@@ -106,9 +107,26 @@ def generate_synthetic_raw_runs(config: StudyConfig, output_root: Path | None = 
             rows.append(row)
 
         write_rows_csv(paths["canonical_samples_path"], rows)
-        manifest = {
+        nonzero_command_samples = int(
+            sum(
+                any(abs(float(row[name])) > 1e-9 for name in ("command_roll", "command_pitch", "command_yaw", "command_throttle"))
+                for row in rows
+            )
+        )
+        acceptance = build_acceptance_block(
+            experiment_started=True,
+            active_phase_present=True,
+            expected_active_samples=sample_count,
+            active_sample_count=sample_count,
+            active_nonzero_command_samples=nonzero_command_samples,
+            failsafe_during_experiment=False,
+            missing_topics_blocking=[],
+            accepted=True,
+            rejection_reasons=[],
+        )
+        manifest = apply_manifest_research_contract(
+            {
             "kind": "linearity_raw_run",
-            "raw_schema_version": 1,
             "run_id": run_id,
             "backend": "synthetic",
             "status": "completed",
@@ -127,7 +145,10 @@ def generate_synthetic_raw_runs(config: StudyConfig, output_root: Path | None = 
                 "noise_std": noise_std,
             },
             "study_config": run_config.to_dict(),
-        }
+            },
+            research_tier=run_config.research_tier,
+            acceptance=acceptance,
+        )
         write_yaml(paths["manifest_path"], manifest)
         paths["notes_path"].write_text(
             "\n".join(

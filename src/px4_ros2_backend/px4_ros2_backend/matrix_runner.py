@@ -52,6 +52,21 @@ def _discover_configs(patterns: tuple[str, ...]) -> list[Path]:
     return configs
 
 
+def _resolve_config_paths(explicit_configs: tuple[str, ...], patterns: tuple[str, ...]) -> list[Path]:
+    configs: list[Path] = []
+    seen: set[Path] = set()
+    for value in explicit_configs:
+        resolved = Path(value).expanduser().resolve()
+        if resolved not in seen:
+            configs.append(resolved)
+            seen.add(resolved)
+    for resolved in _discover_configs(patterns):
+        if resolved not in seen:
+            configs.append(resolved)
+            seen.add(resolved)
+    return configs
+
+
 def _start_process(name: str, command: str, log_path: Path, env: dict[str, str], cwd: Path | None = None) -> ManagedProcess:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("w", encoding="utf-8") as handle:
@@ -191,12 +206,13 @@ def run_matrix(world: str, config_paths: list[Path], repeat: int = 1) -> tuple[P
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="批量执行 PX4 raw linearity capture。")
     parser.add_argument("--world", default="default", help="Gazebo world 名称。")
+    parser.add_argument("--config", action="append", dest="configs", help="显式 study config 路径，可重复。")
     parser.add_argument("--pattern", action="append", dest="patterns", help="study config glob，可重复。")
     parser.add_argument("--repeat", type=int, default=1, help="每个 config fresh 重复次数。")
     args = parser.parse_args(argv)
 
     patterns = tuple(args.patterns or DEFAULT_PATTERNS)
-    configs = _discover_configs(patterns)
+    configs = _resolve_config_paths(tuple(args.configs or ()), patterns)
     matrix_dir, rows = run_matrix(args.world, configs, repeat=args.repeat)
     print(f"matrix_dir={matrix_dir}")
     print(f"jobs={len(rows)}")

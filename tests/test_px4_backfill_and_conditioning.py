@@ -342,6 +342,174 @@ def _write_px4_reference_epoch_csvs(telemetry_dir: Path, input_trace_path: Path)
     )
 
 
+def _write_px4_acceptance_fixture(
+    telemetry_dir: Path,
+    input_trace_path: Path,
+    *,
+    phases: list[str],
+    experiment_started: bool,
+    completion_reason: str,
+    nonzero_active_count: int | None = None,
+    failsafe_from_index: int | None = None,
+) -> dict[str, object]:
+    base_received_offset = 7_000_000
+    timestamps = [1_000_000 + index * 50_000 for index in range(len(phases))]
+    timestamp_samples = [value - 2_000 for value in timestamps]
+    active_indices = [index for index, phase in enumerate(phases) if phase.endswith("_active") or phase == "experiment"]
+    if nonzero_active_count is None:
+        nonzero_active_count = len(active_indices)
+    active_nonzero_indices = set(active_indices[: max(0, nonzero_active_count)])
+
+    write_rows_csv(
+        input_trace_path,
+        [
+            {
+                "publish_time_ns": timestamp * 1000 + base_received_offset,
+                "elapsed_s": 0.05 * index,
+                "profile_value": 0.2 if index in active_nonzero_indices else 0.0,
+                "roll_body": 0.2 if index in active_nonzero_indices else 0.0,
+                "pitch_body": 0.0,
+                "yaw_body": 0.0,
+                "thrust_z": -0.7 if index in active_nonzero_indices else 0.0,
+                "command_roll": 0.2 if index in active_nonzero_indices else 0.0,
+                "command_pitch": 0.0,
+                "command_yaw": 0.0,
+                "command_throttle": -0.7 if index in active_nonzero_indices else 0.0,
+                "phase": phase,
+            }
+            for index, (timestamp, phase) in enumerate(zip(timestamps, phases, strict=False))
+        ],
+    )
+    write_rows_csv(
+        telemetry_dir / "vehicle_attitude.csv",
+        [
+            {
+                "received_time_ns": timestamp * 1000 + base_received_offset,
+                "timestamp": timestamp,
+                "timestamp_sample": timestamp_sample,
+                "q_w": 1.0,
+                "q_x": 0.0,
+                "q_y": 0.0,
+                "q_z": 0.0,
+                "roll": 0.01 * index,
+                "pitch": 0.0,
+                "yaw": 0.0,
+            }
+            for index, (timestamp, timestamp_sample) in enumerate(zip(timestamps, timestamp_samples, strict=False))
+        ],
+    )
+    write_rows_csv(
+        telemetry_dir / "vehicle_angular_velocity.csv",
+        [
+            {
+                "received_time_ns": timestamp * 1000 + base_received_offset,
+                "timestamp": timestamp,
+                "timestamp_sample": timestamp_sample,
+                "xyz_x": 0.01 * index,
+                "xyz_y": 0.0,
+                "xyz_z": 0.0,
+                "xyz_derivative_x": 0.001,
+                "xyz_derivative_y": 0.0,
+                "xyz_derivative_z": 0.0,
+            }
+            for index, (timestamp, timestamp_sample) in enumerate(zip(timestamps, timestamp_samples, strict=False))
+        ],
+    )
+    write_rows_csv(
+        telemetry_dir / "vehicle_local_position.csv",
+        [
+            {
+                "received_time_ns": timestamp * 1000 + base_received_offset,
+                "timestamp": timestamp,
+                "timestamp_sample": timestamp_sample,
+                "x": 0.1 * index,
+                "y": 0.0,
+                "z": -1.0,
+                "vx": 0.0,
+                "vy": 0.0,
+                "vz": 0.0,
+                "heading": 0.0,
+                "dist_bottom": 1.2,
+                "dist_bottom_valid": True,
+                "xy_valid": True,
+                "z_valid": True,
+                "v_xy_valid": True,
+                "v_z_valid": True,
+            }
+            for index, (timestamp, timestamp_sample) in enumerate(zip(timestamps, timestamp_samples, strict=False))
+        ],
+    )
+    write_rows_csv(
+        telemetry_dir / "vehicle_status.csv",
+        [
+            {
+                "received_time_ns": timestamp * 1000 + base_received_offset,
+                "timestamp": timestamp,
+                "arming_state": 2,
+                "nav_state": 14,
+                "nav_state_user_intention": 14,
+                "failsafe": 1 if failsafe_from_index is not None and index >= failsafe_from_index else 0,
+                "failsafe_defer_state": 0,
+                "failure_detector_status": 0,
+                "pre_flight_checks_pass": 1,
+                "gcs_connection_lost": 0,
+                "latest_arming_reason": 0,
+                "latest_disarming_reason": 0,
+                "vehicle_type": 2,
+            }
+            for index, timestamp in enumerate(timestamps)
+        ],
+    )
+    write_rows_csv(
+        telemetry_dir / "vehicle_control_mode.csv",
+        [
+            {
+                "received_time_ns": timestamp * 1000 + base_received_offset,
+                "timestamp": timestamp,
+                "flag_armed": True,
+                "flag_control_manual_enabled": True,
+                "flag_control_auto_enabled": False,
+                "flag_control_offboard_enabled": False,
+                "flag_control_position_enabled": True,
+                "flag_control_velocity_enabled": False,
+                "flag_control_altitude_enabled": True,
+                "flag_control_acceleration_enabled": False,
+                "flag_control_attitude_enabled": True,
+                "flag_control_rates_enabled": True,
+                "source_id": 0,
+            }
+            for timestamp in timestamps
+        ],
+    )
+    write_rows_csv(
+        telemetry_dir / "actuator_motors.csv",
+        [
+            {
+                "received_time_ns": timestamp * 1000 + base_received_offset,
+                "timestamp": timestamp,
+                "timestamp_sample": timestamp_sample,
+                "motor_1": 0.2,
+                "motor_2": 0.2,
+                "motor_3": 0.2,
+                "motor_4": 0.2,
+            }
+            for timestamp, timestamp_sample in zip(timestamps, timestamp_samples, strict=False)
+        ],
+    )
+    return {
+        "experiment_start_time_ns": timestamps[0] * 1000 + base_received_offset if experiment_started else None,
+        "completion_reason": completion_reason,
+        "anomalies": ["vehicle_status_failsafe"] if failsafe_from_index is not None else [],
+    }
+
+
+def _acceptance_test_config():
+    config = load_study_config(ROOT / "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml")
+    config.sampling_rate_hz = 8.0
+    config.duration_s = 1.0
+    return config
+
+
 def test_px4_ulog_backfill_recovers_missing_topics(tmp_path: Path, monkeypatch) -> None:
     telemetry_dir = tmp_path / "telemetry"
     telemetry_dir.mkdir(parents=True, exist_ok=True)
@@ -464,6 +632,135 @@ def test_px4_data_quality_uses_backfilled_topic_counts(tmp_path: Path, monkeypat
     assert data_quality["topic_presence"]["required_topic_counts"]["actuator_motors"] == 12
     assert data_quality["topic_presence"]["ros_message_counts"]["actuator_motors"] == 0
     assert data_quality["prediction_constructibility"]["actuator_response_ratio_estimate"] == 1.0
+    assert "accepted" in data_quality["acceptance"]
+
+
+def test_px4_acceptance_marks_authoritative_fixture_as_accepted(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "accepted" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=["broad_active"] * 12,
+        experiment_started=True,
+        completion_reason="disarmed_after_land",
+    )
+    config = _acceptance_test_config()
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 12, "vehicle_angular_velocity": 12, "vehicle_local_position": 12, "vehicle_status": 12, "vehicle_control_mode": 12, "actuator_motors": 12}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is True
+    assert acceptance["active_phase_present"] is True
+    assert acceptance["active_nonzero_command_samples"] == 12
+    assert acceptance["rejection_reasons"] == []
+
+
+def test_px4_acceptance_rejects_when_experiment_never_reaches_active_phase(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "rejected_no_active" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=["takeoff_position_hold"] * 12,
+        experiment_started=False,
+        completion_reason="disarmed_before_experiment",
+        nonzero_active_count=0,
+    )
+    config = _acceptance_test_config()
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 12, "vehicle_angular_velocity": 12, "vehicle_local_position": 12, "vehicle_status": 12, "vehicle_control_mode": 12, "actuator_motors": 12}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is False
+    assert "experiment_not_started" in acceptance["rejection_reasons"]
+    assert "active_phase_missing" in acceptance["rejection_reasons"]
+    assert "insufficient_active_nonzero_command_samples" in acceptance["rejection_reasons"]
+
+
+def test_px4_acceptance_rejects_when_no_active_nonzero_commands_exist(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "rejected_zero_active" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=["takeoff_position_hold"] * 12,
+        experiment_started=False,
+        completion_reason="disarmed_before_or_during_mode_switch",
+        nonzero_active_count=0,
+    )
+    config = _acceptance_test_config()
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 12, "vehicle_angular_velocity": 12, "vehicle_local_position": 12, "vehicle_status": 12, "vehicle_control_mode": 12, "actuator_motors": 12}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is False
+    assert acceptance["active_nonzero_command_samples"] == 0
+    assert "active_phase_missing" in acceptance["rejection_reasons"]
+    assert "insufficient_active_nonzero_command_samples" in acceptance["rejection_reasons"]
+
+
+def test_px4_acceptance_rejects_failsafe_truncated_run(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "rejected_failsafe" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=["sweep_active"] * 6 + ["recover"] * 6,
+        experiment_started=True,
+        completion_reason="land_timeout",
+        nonzero_active_count=6,
+        failsafe_from_index=6,
+    )
+    config = _acceptance_test_config()
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 12, "vehicle_angular_velocity": 12, "vehicle_local_position": 12, "vehicle_status": 12, "vehicle_control_mode": 12, "actuator_motors": 12}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is False
+    assert acceptance["failsafe_during_experiment"] is True
+    assert "failsafe_during_experiment" in acceptance["rejection_reasons"]
+    assert "experiment_truncated_before_expected_active_samples" in acceptance["rejection_reasons"]
 
 
 def test_fit_summary_reports_raw_and_effective_conditioning() -> None:

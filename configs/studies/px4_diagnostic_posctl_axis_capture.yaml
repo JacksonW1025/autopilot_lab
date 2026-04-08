@@ -1,10 +1,10 @@
-study_name: px4_visual_demo_offboard_roll_sweep_capture
+study_name: px4_diagnostic_posctl_axis_capture
 backend: px4
-research_tier: demo_only
-flight_mode: OFFBOARD_ATTITUDE
-scenario: visual_demo
-config_profile: px4_visual_demo_offboard_roll_sweep
-seed: 201
+research_tier: diagnostic_research
+flight_mode: POSCTL
+scenario: nominal
+config_profile: px4_diagnostic_posctl_axis
+seed: 111
 repeat_count: 1
 sampling_rate_hz: 20.0
 x_schema: commands_plus_state
@@ -23,7 +23,7 @@ prediction_horizon: 2
 prediction_horizon_unit: steps
 parameter_sweep: {}
 internal_signals_enabled: true
-perturbation_strategy: visual_roll_sweep
+perturbation_strategy: single_axis_diagnostic
 model:
   - ols_affine
   - ridge_affine
@@ -38,24 +38,23 @@ reporting:
   stability_repeats: 2
   max_alignment_error_ms: 150
   real_px4_report: true
-input_type: attitude
+input_type: manual
 axis: roll
 profile_type: sweep
-amplitude: 0.35
+amplitude: 0.18
 bias: 0.0
-start_after_s: 1.5
-duration_s: 12.0
-hold_s: 1.5
+start_after_s: 1.0
+duration_s: 6.0
+hold_s: 1.0
 hover_thrust: -0.69
 timing_required: true
 warmup_cycles: 10
+manual_mode: flight
 ready_timeout_s: 30.0
 takeoff_timeout_s: 12.0
 land_timeout_s: 10.0
-takeoff_altitude_m: 2.0
-takeoff_position_tolerance_m: 0.30
-min_profile_clearance_m: 0.40
 extras:
   auto_clock_bridge: true
-  sweep_start_hz: 0.05
-  sweep_end_hz: 0.25
+  sweep_start_hz: 0.08
+  sweep_end_hz: 0.30
+
