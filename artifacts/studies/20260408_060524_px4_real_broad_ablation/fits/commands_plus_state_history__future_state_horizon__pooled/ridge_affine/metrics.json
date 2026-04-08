@@ -1,0 +1,1837 @@
+{
+  "x_schema": "commands_plus_state_history",
+  "y_schema": "future_state_horizon",
+  "pooling_mode": "pooled",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "command_roll__lag_1",
+    "command_pitch__lag_1",
+    "command_yaw__lag_1",
+    "command_throttle__lag_1",
+    "roll__lag_1",
+    "pitch__lag_1",
+    "yaw__lag_1",
+    "roll_rate__lag_1",
+    "pitch_rate__lag_1",
+    "yaw_rate__lag_1",
+    "position_x__lag_1",
+    "position_y__lag_1",
+    "position_z__lag_1",
+    "velocity_x__lag_1",
+    "velocity_y__lag_1",
+    "velocity_z__lag_1",
+    "altitude__lag_1",
+    "vertical_speed__lag_1",
+    "heading__lag_1",
+    "command_roll__lag_2",
+    "command_pitch__lag_2",
+    "command_yaw__lag_2",
+    "command_throttle__lag_2",
+    "roll__lag_2",
+    "pitch__lag_2",
+    "yaw__lag_2",
+    "roll_rate__lag_2",
+    "pitch_rate__lag_2",
+    "yaw_rate__lag_2",
+    "position_x__lag_2",
+    "position_y__lag_2",
+    "position_z__lag_2",
+    "velocity_x__lag_2",
+    "velocity_y__lag_2",
+    "velocity_z__lag_2",
+    "altitude__lag_2",
+    "vertical_speed__lag_2",
+    "heading__lag_2",
+    "command_roll__lag_3",
+    "command_pitch__lag_3",
+    "command_yaw__lag_3",
+    "command_throttle__lag_3",
+    "roll__lag_3",
+    "pitch__lag_3",
+    "yaw__lag_3",
+    "roll_rate__lag_3",
+    "pitch_rate__lag_3",
+    "yaw_rate__lag_3",
+    "position_x__lag_3",
+    "position_y__lag_3",
+    "position_z__lag_3",
+    "velocity_x__lag_3",
+    "velocity_y__lag_3",
+    "velocity_z__lag_3",
+    "altitude__lag_3",
+    "vertical_speed__lag_3",
+    "heading__lag_3"
+  ],
+  "response_names": [
+    "roll__h1",
+    "pitch__h1",
+    "yaw__h1",
+    "roll_rate__h1",
+    "pitch_rate__h1",
+    "yaw_rate__h1",
+    "roll__h2",
+    "pitch__h2",
+    "yaw__h2",
+    "roll_rate__h2",
+    "pitch_rate__h2",
+    "yaw_rate__h2"
+  ],
+  "schema_metadata": {
+    "x_schema": "commands_plus_state_history",
+    "y_schema": "future_state_horizon",
+    "feature_count": 76,
+    "response_count": 12,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading"
+    ],
+    "requested_response_columns": [
+      "roll__h1",
+      "pitch__h1",
+      "yaw__h1",
+      "roll_rate__h1",
+      "pitch_rate__h1",
+      "yaw_rate__h1",
+      "roll__h2",
+      "pitch__h2",
+      "yaw__h2",
+      "roll_rate__h2",
+      "pitch_rate__h2",
+      "yaw_rate__h2"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "roll__h1": 0.9972652689152234,
+      "pitch__h1": 0.9972652689152234,
+      "yaw__h1": 0.9972652689152234,
+      "roll_rate__h1": 0.9972652689152234,
+      "pitch_rate__h1": 0.9972652689152234,
+      "yaw_rate__h1": 0.9972652689152234,
+      "roll__h2": 0.9945305378304466,
+      "pitch__h2": 0.9945305378304466,
+      "yaw__h2": 0.9945305378304466,
+      "roll_rate__h2": 0.9945305378304466,
+      "pitch_rate__h2": 0.9945305378304466,
+      "yaw_rate__h2": 0.9945305378304466
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": []
+  },
+  "repeat_metrics": [
+    {
+      "repeat_index": 1,
+      "train": {
+        "r2": 0.9988114594773678,
+        "mse": 9.103128731532357e-05,
+        "mae": 0.0029425911913813175,
+        "residual_mean_abs": 0.0029425911913813175,
+        "residual_std": 0.009541031774149144,
+        "residual_max_abs": 0.35398359548715724
+      },
+      "val": {
+        "r2": 0.6616661580529944,
+        "mse": 1.822024668424395e-05,
+        "mae": 0.0021929585812323765,
+        "residual_mean_abs": 0.0021929585812323765,
+        "residual_std": 0.0042165063567455386,
+        "residual_max_abs": 0.09094070064142235
+      },
+      "test": {
+        "r2": 0.9984313526911135,
+        "mse": 0.0001903317166272966,
+        "mae": 0.0040200805868254716,
+        "residual_mean_abs": 0.0040200805868254716,
+        "residual_std": 0.013781131284798277,
+        "residual_max_abs": 0.3641917469168645
+      },
+      "condition_number": 1050025.656234328,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        169.64316206993672,
+        143.84666354811586,
+        111.44283911630266,
+        106.09313966442609,
+        100.85988522669756,
+        88.38827761676698,
+        68.3102053735468,
+        58.333213134764314,
+        53.52148047184716,
+        44.06286651950595
+      ],
+      "effective_condition_number": 1050025.656234328,
+      "singular_values": [
+        168.1462206905113,
+        143.45143120014842,
+        106.38143352187042,
+        90.22275731170079,
+        78.47186069507781,
+        74.65031176168893,
+        67.33594873236692,
+        56.91127501096458,
+        53.393230709182745,
+        44.051103298715454
+      ],
+      "effective_singular_values": [
+        168.1462206905113,
+        143.45143120014842,
+        106.38143352187042,
+        90.22275731170079,
+        78.47186069507781,
+        74.65031176168893,
+        67.33594873236692,
+        56.91127501096458,
+        53.393230709182745,
+        44.051103298715454
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "altitude__lag_1",
+        "vertical_speed__lag_1",
+        "altitude__lag_2",
+        "vertical_speed__lag_2",
+        "altitude__lag_3",
+        "vertical_speed__lag_3"
+      ],
+      "conditioning_baseline_drops": [],
+      "conditioning_extra_pruned_features": [
+        "altitude__lag_1",
+        "vertical_speed__lag_1",
+        "altitude__lag_2",
+        "vertical_speed__lag_2",
+        "altitude__lag_3",
+        "vertical_speed__lag_3"
+      ]
+    },
+    {
+      "repeat_index": 2,
+      "train": {
+        "r2": 0.9987933517877453,
+        "mse": 9.19074842691628e-05,
+        "mae": 0.0028725999088548685,
+        "residual_mean_abs": 0.0028725999088548685,
+        "residual_std": 0.009586839117726072,
+        "residual_max_abs": 0.35878640949979884
+      },
+      "val": {
+        "r2": 0.6733681825319835,
+        "mse": 1.7590059140824517e-05,
+        "mae": 0.0019333860191286607,
+        "residual_mean_abs": 0.0019333860191286607,
+        "residual_std": 0.004151084433861147,
+        "residual_max_abs": 0.0909202923688879
+      },
+      "test": {
+        "r2": 0.9984712121774444,
+        "mse": 0.0001874196857654968,
+        "mae": 0.004626641791399174,
+        "residual_mean_abs": 0.004626641791399174,
+        "residual_std": 0.01366450864073218,
+        "residual_max_abs": 0.35048605057503357
+      },
+      "condition_number": 942495.4708502025,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        169.03256633739235,
+        143.70670379838353,
+        114.10121756548828,
+        105.4293126348886,
+        101.84029714735688,
+        89.04054619480831,
+        67.94484095218478,
+        56.99914706860435,
+        52.33051420197741,
+        45.47119784486979
+      ],
+      "effective_condition_number": 942495.4708502025,
+      "singular_values": [
+        166.43036402765281,
+        143.58433088354573,
+        109.40533567188186,
+        90.78571009435032,
+        82.02821011091072,
+        73.45383407895136,
+        66.95941902638567,
+        54.13811165827693,
+        52.25783224925306,
+        45.448005092199224
+      ],
+      "effective_singular_values": [
+        166.43036402765281,
+        143.58433088354573,
+        109.40533567188186,
+        90.78571009435032,
+        82.02821011091072,
+        73.45383407895136,
+        66.95941902638567,
+        54.13811165827693,
+        52.25783224925306,
+        45.448005092199224
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "altitude__lag_1",
+        "vertical_speed__lag_1",
+        "altitude__lag_2",
+        "vertical_speed__lag_2",
+        "altitude__lag_3",
+        "vertical_speed__lag_3"
+      ],
+      "conditioning_baseline_drops": [],
+      "conditioning_extra_pruned_features": [
+        "altitude__lag_1",
+        "vertical_speed__lag_1",
+        "altitude__lag_2",
+        "vertical_speed__lag_2",
+        "altitude__lag_3",
+        "vertical_speed__lag_3"
+      ]
+    }
+  ],
+  "split_records": [
+    {
+      "repeat_index": 1,
+      "train_count": 1431,
+      "val_count": 368,
+      "test_count": 365
+    },
+    {
+      "repeat_index": 2,
+      "train_count": 1439,
+      "val_count": 368,
+      "test_count": 357
+    }
+  ],
+  "median_test_r2": 0.9984512824342789,
+  "median_test_mse": 0.0001888757011963967,
+  "median_test_mae": 0.0043233611891123225,
+  "coefficient_stability": 0.9736842105263158,
+  "nonzero_count": 19,
+  "sparsity_ratio": 0.9791666666666666,
+  "block_sparsity_summary": {
+    "feature_blocks": {
+      "commands": 16,
+      "state": 6,
+      "history": 57,
+      "controller_params": 0
+    }
+  },
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 996260.5635422652,
+  "condition_number": 996260.5635422652,
+  "raw_singular_values": [
+    169.64316206993672,
+    143.84666354811586,
+    111.44283911630266,
+    106.09313966442609,
+    100.85988522669756,
+    88.38827761676698,
+    68.3102053735468,
+    58.333213134764314,
+    53.52148047184716,
+    44.06286651950595
+  ],
+  "singular_values": [
+    168.1462206905113,
+    143.45143120014842,
+    106.38143352187042,
+    90.22275731170079,
+    78.47186069507781,
+    74.65031176168893,
+    67.33594873236692,
+    56.91127501096458,
+    53.393230709182745,
+    44.051103298715454
+  ],
+  "effective_singular_values": [
+    168.1462206905113,
+    143.45143120014842,
+    106.38143352187042,
+    90.22275731170079,
+    78.47186069507781,
+    74.65031176168893,
+    67.33594873236692,
+    56.91127501096458,
+    53.393230709182745,
+    44.051103298715454
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "altitude__lag_1",
+    "altitude__lag_2",
+    "altitude__lag_3",
+    "vertical_speed",
+    "vertical_speed__lag_1",
+    "vertical_speed__lag_2",
+    "vertical_speed__lag_3"
+  ],
+  "conditioning_baseline_drops": [],
+  "conditioning_extra_pruned_features": [
+    "altitude__lag_1",
+    "altitude__lag_2",
+    "altitude__lag_3",
+    "vertical_speed__lag_1",
+    "vertical_speed__lag_2",
+    "vertical_speed__lag_3"
+  ],
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.8333333333333334,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.8333333333333334,
+      0.0,
+      0.16666666666666666
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.3333333333333333,
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.16666666666666666,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.16666666666666666,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.16666666666666666
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.3333333333333333
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.6666666666666666,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.3333333333333333,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.16666666666666666
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.16666666666666666,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "backend_consistency": {
+    "px4": {
+      "r2": 0.9987776389730751,
+      "mse": 9.37925673288978e-05,
+      "mae": 0.002927849920247799,
+      "residual_mean_abs": 0.002927849920247799,
+      "residual_std": 0.009684214681252629,
+      "residual_max_abs": 0.3579164781928088
+    }
+  },
+  "mode_consistency": {
+    "OFFBOARD_ATTITUDE": {
+      "r2": 0.9987131960530375,
+      "mse": 0.00015300190086751635,
+      "mae": 0.0036609827249813143,
+      "residual_mean_abs": 0.0036609827249813143,
+      "residual_std": 0.012369346860204137,
+      "residual_max_abs": 0.3579164781928088
+    },
+    "POSCTL": {
+      "r2": 0.7789716802204799,
+      "mse": 3.370115805786035e-05,
+      "mae": 0.0021837952115331518,
+      "residual_mean_abs": 0.0021837952115331518,
+      "residual_std": 0.005801065552311345,
+      "residual_max_abs": 0.15966383163927111
+    }
+  },
+  "top_influential": {
+    "roll__h1": [
+      {
+        "feature": "roll",
+        "weight": 1.6245655499902394,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": -0.41937818291102885,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_1",
+        "weight": -0.39439930846416216,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_1",
+        "weight": -0.29280659328298975,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.23790151578884938,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch__h1": [
+      {
+        "feature": "pitch",
+        "weight": 1.7140155957842924,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_1",
+        "weight": -0.5787293260762996,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_2",
+        "weight": -0.3661644188808503,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_3",
+        "weight": 0.18964374383874066,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_1",
+        "weight": -0.1043867740368522,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw__h1": [
+      {
+        "feature": "yaw",
+        "weight": 0.47917949963545214,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "heading",
+        "weight": 0.47014240719366396,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.3267362793463011,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_3",
+        "weight": 0.3237856339853511,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw__lag_1",
+        "weight": 0.22825218209081663,
+        "selection_frequency": 1.0
+      }
+    ],
+    "roll_rate__h1": [
+      {
+        "feature": "roll_rate",
+        "weight": 1.7222403205531256,
+        "selection_frequency": 0.8333333333333334
+      },
+      {
+        "feature": "roll_rate__lag_1",
+        "weight": -1.282679704735047,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": 0.5661704661850078,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll_rate__lag_2",
+        "weight": 0.5576751982550646,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_1",
+        "weight": -0.3942839828169541,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch_rate__h1": [
+      {
+        "feature": "pitch_rate",
+        "weight": 1.6202109064776078,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate__lag_1",
+        "weight": -1.0547796538008751,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_1",
+        "weight": -0.40362686466133313,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate__lag_2",
+        "weight": 0.3241625483410062,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.275317431480234,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw_rate__h1": [
+      {
+        "feature": "yaw_rate",
+        "weight": 1.4754863308480988,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": 0.795722419043744,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll_rate__lag_1",
+        "weight": -0.6129207070320623,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_3",
+        "weight": -0.5815164436102062,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_2",
+        "weight": 0.5054021647674981,
+        "selection_frequency": 0.0
+      }
+    ],
+    "roll__h2": [
+      {
+        "feature": "roll",
+        "weight": 2.2804583131501577,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_1",
+        "weight": -1.080186430321754,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_1",
+        "weight": -0.6482734178744483,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": -0.5941945621027581,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.49586057360587266,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch__h2": [
+      {
+        "feature": "pitch",
+        "weight": 2.3957738205323786,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_1",
+        "weight": -1.3835637675840107,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_2",
+        "weight": -0.49338059215790825,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_3",
+        "weight": 0.37473129035609887,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_1",
+        "weight": -0.20928791759334325,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw__h2": [
+      {
+        "feature": "roll",
+        "weight": 0.7975171445507231,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw",
+        "weight": 0.6280864605600025,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "heading",
+        "weight": 0.6123369468449227,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll__lag_3",
+        "weight": 0.6117741091841429,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": -0.48805418015570434,
+        "selection_frequency": 0.0
+      }
+    ],
+    "roll_rate__h2": [
+      {
+        "feature": "roll_rate",
+        "weight": 1.6925235045318368,
+        "selection_frequency": 0.8333333333333334
+      },
+      {
+        "feature": "roll_rate__lag_1",
+        "weight": -1.6631648327202349,
+        "selection_frequency": 0.3333333333333333
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": 1.0768004808118108,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll_rate__lag_2",
+        "weight": 0.7820630705784032,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_1",
+        "weight": -0.4299637385610606,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch_rate__h2": [
+      {
+        "feature": "pitch_rate",
+        "weight": 1.588203836644365,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate__lag_1",
+        "weight": -1.4278063449918366,
+        "selection_frequency": 0.16666666666666666
+      },
+      {
+        "feature": "roll__lag_1",
+        "weight": -0.5948705624004519,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_3",
+        "weight": 0.5416703446791029,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch__lag_2",
+        "weight": -0.5074974545039969,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw_rate__h2": [
+      {
+        "feature": "yaw_rate",
+        "weight": 2.095273614157301,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll__lag_2",
+        "weight": 1.9538953491721354,
+        "selection_frequency": 0.16666666666666666
+      },
+      {
+        "feature": "roll__lag_3",
+        "weight": -1.5446044440583835,
+        "selection_frequency": 0.16666666666666666
+      },
+      {
+        "feature": "roll_rate__lag_1",
+        "weight": -1.1651003065020955,
+        "selection_frequency": 0.5
+      },
+      {
+        "feature": "pitch__lag_2",
+        "weight": 0.9660366600576037,
+        "selection_frequency": 0.0
+      }
+    ]
+  }
+}

@@ -10,7 +10,8 @@ import numpy as np
 from linearity_core.config import AblationPlan, StudyConfig, load_ablation_plan, load_study_config
 from linearity_core.dataset import PreparedSampleTable, build_prepared_sample_table
 from linearity_core.fit import fit_schema_combo
-from linearity_core.io import ensure_study_directories, read_rows_csv, write_json, write_rows_csv, write_yaml
+from linearity_core.io import ensure_study_directories, read_rows_csv, read_yaml, write_json, write_rows_csv, write_yaml
+from linearity_core.research_contract import manifest_acceptance_state
 from linearity_core.report import render_comparison_markdown, render_summary_markdown, summarize_results
 from linearity_core.schemas import available_x_schemas, available_y_schemas, build_schema_matrices
 
@@ -46,6 +47,33 @@ def _load_run_dirs(args: argparse.Namespace) -> list[Path]:
             deduped.append(path)
             seen.add(path)
     return deduped
+
+
+def _filter_run_dirs(
+    run_dirs: list[Path],
+    *,
+    include_rejected_runs: bool,
+) -> tuple[list[Path], list[dict[str, Any]]]:
+    selected: list[Path] = []
+    excluded: list[dict[str, Any]] = []
+    for path in run_dirs:
+        manifest = read_yaml(path / "manifest.yaml")
+        acceptance_state = manifest_acceptance_state(manifest)
+        if include_rejected_runs or acceptance_state == "accepted":
+            selected.append(path)
+            continue
+        excluded.append(
+            {
+                "run_dir": str(path),
+                "run_id": manifest.get("run_id", path.name),
+                "backend": manifest.get("backend", ""),
+                "research_tier": manifest.get("research_tier", ""),
+                "research_acceptance": manifest.get("research_acceptance", ""),
+                "filter_reason": "legacy_manifest" if acceptance_state == "legacy" else "research_rejected",
+                "research_rejection_reasons": list(manifest.get("research_rejection_reasons", []) or []),
+            }
+        )
+    return selected, excluded
 
 
 def _drop_zero_variance_features(matrices, run_ids: list[str]) -> tuple[np.ndarray, list[str], np.ndarray, np.ndarray]:
@@ -207,14 +235,18 @@ def run_analysis(
     *,
     ablation_plan: AblationPlan | None = None,
     output_root: Path | None = None,
+    include_rejected_runs: bool = False,
 ) -> Path:
     if not run_dirs:
         raise ValueError("没有可分析的 run_dirs")
+    filtered_run_dirs, excluded_runs = _filter_run_dirs(run_dirs, include_rejected_runs=include_rejected_runs)
+    if not filtered_run_dirs:
+        raise ValueError("没有可分析的 accepted run_dirs；如需调试 rejected/legacy runs，请显式开启 include_rejected_runs。")
 
     study_name = ablation_plan.output_study_name if ablation_plan and ablation_plan.output_study_name else config.study_name
     study_id = f"{datetime.now(timezone.utc).astimezone():%Y%m%d_%H%M%S}_{study_name}"
     paths = ensure_study_directories(study_id, root=output_root)
-    table, inventory = build_prepared_sample_table(run_dirs, config)
+    table, inventory = build_prepared_sample_table(filtered_run_dirs, config)
     write_rows_csv(paths["sample_table_path"], table.to_csv_rows(), fieldnames=list(table.rows[0].keys()) if table.rows else [])
 
     plan = ablation_plan
@@ -226,6 +258,11 @@ def run_analysis(
 
     schema_inventory = {
         **inventory,
+        "analysis_filters": {
+            "include_rejected_runs": include_rejected_runs,
+        },
+        "selected_run_dirs": [str(path) for path in filtered_run_dirs],
+        "excluded_runs": excluded_runs,
         "requested_x_schemas": x_schemas,
         "requested_y_schemas": y_schemas,
         "models": models,
@@ -359,12 +396,19 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--runs-manifest", type=Path, help="CSV manifest；至少包含 run_dir 列。")
     parser.add_argument("--ablation-plan", type=Path, help="可选 ablation plan YAML。")
     parser.add_argument("--output-root", type=Path, default=None)
+    parser.add_argument("--include-rejected-runs", action="store_true", help="调试时包含 rejected/legacy raw runs。")
     args = parser.parse_args(argv)
 
     config = load_study_config(args.config)
     plan = load_ablation_plan(args.ablation_plan) if args.ablation_plan else None
     run_dirs = _load_run_dirs(args)
-    study_dir = run_analysis(run_dirs, config, ablation_plan=plan, output_root=args.output_root)
+    study_dir = run_analysis(
+        run_dirs,
+        config,
+        ablation_plan=plan,
+        output_root=args.output_root,
+        include_rejected_runs=args.include_rejected_runs,
+    )
     print(f"study_dir={study_dir}")
 
 

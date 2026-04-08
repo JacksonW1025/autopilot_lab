@@ -1,0 +1,12 @@
+# 20260408_020617_px4_manual_broad_composite_r1
+- px4 raw linearity capture
+- status: completed
+- backend: px4
+- input_type: manual
+- flight_mode: POSCTL
+- x_schema: commands_plus_state
+- y_schema: delta_state
+- ulog_path: /home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/2026-04-08/09_06_29.ulg
+- anomalies: manual_mode_not_held, quality_alignment_p95_exceeded, vehicle_status_failsafe
+- recorder_counts: {'vehicle_attitude': 1808, 'vehicle_attitude_setpoint': 0, 'vehicle_angular_velocity': 0, 'vehicle_rates_setpoint': 0, 'vehicle_local_position': 1793, 'rate_ctrl_status': 0, 'control_allocator_status': 0, 'actuator_motors': 0, 'vehicle_status': 47, 'manual_control_setpoint': 433, 'vehicle_control_mode': 47}
+- injector_completion: disarmed_after_land

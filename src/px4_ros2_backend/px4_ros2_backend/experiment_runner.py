@@ -12,6 +12,7 @@ from typing import Any
 import rclpy
 from linearity_core.io import capture_host_snapshot, read_rows_csv, write_rows_csv, write_yaml
 from linearity_core.mav_params import close_mavlink, connect_mavlink, set_parameters, snapshot_parameters
+from linearity_core.research_contract import apply_manifest_research_contract, build_acceptance_block
 from rclpy.executors import SingleThreadedExecutor
 
 from .artifacts import ensure_run_directories, resolve_ulog_path, snapshot_ulog_files
@@ -44,6 +45,7 @@ INPUT_TRACE_FIELDS = [
     "command_throttle",
     "phase",
 ]
+ACTIVE_PHASE_COMPATIBILITY = {"experiment"}
 
 
 def _preflight_checks() -> tuple[list[str], bool]:
@@ -165,6 +167,101 @@ def _timestamp_monotonic(rows: list[dict[str, Any]], time_key: str) -> bool:
     return True
 
 
+def _phase_is_active(phase: Any) -> bool:
+    normalized = str(phase or "").strip().lower()
+    return normalized.endswith("_active") or normalized in ACTIVE_PHASE_COMPATIBILITY
+
+
+def _command_row_has_nonzero_command(row: dict[str, Any], *, epsilon: float = 1e-9) -> bool:
+    return any(abs(float(row.get(name, 0.0) or 0.0)) > epsilon for name in ("command_roll", "command_pitch", "command_yaw", "command_throttle"))
+
+
+def _expected_active_sample_count(config: RunConfig) -> int:
+    duration_s = max(0.0, float(config.duration_s))
+    sampling_rate_hz = max(0.0, float(config.sampling_rate_hz))
+    return int(math.ceil(duration_s * sampling_rate_hz))
+
+
+def _minimum_active_nonzero_samples(config: RunConfig) -> int:
+    duration_s = max(0.0, float(config.duration_s))
+    sampling_rate_hz = max(0.0, float(config.sampling_rate_hz))
+    return max(10, int(math.ceil(0.25 * duration_s * sampling_rate_hz)))
+
+
+def _failsafe_after_experiment_start(status_rows: list[dict[str, Any]], injector_report: dict[str, Any]) -> bool:
+    experiment_start_time_ns = _int_value(injector_report.get("experiment_start_time_ns"), 0)
+    if experiment_start_time_ns <= 0:
+        return False
+    if "vehicle_status_failsafe" in set(str(item) for item in injector_report.get("anomalies", [])):
+        return True
+    for row in status_rows:
+        if _int_value(row.get("received_time_ns"), 0) < experiment_start_time_ns:
+            continue
+        if _int_value(row.get("failsafe"), 0) != 0:
+            return True
+    return False
+
+
+def _completion_reason_indicates_truncation(completion_reason: str) -> bool:
+    return completion_reason in {
+        "disarmed_before_experiment",
+        "disarmed_before_or_during_mode_switch",
+        "land_timeout_before_experiment",
+        "land_timeout",
+        "run_timeout",
+    }
+
+
+def _px4_acceptance(
+    paths: dict[str, Path],
+    command_trace: list[dict[str, Any]],
+    config: RunConfig,
+    injector_report: dict[str, Any] | None,
+    status: str,
+    missing_topics: list[str],
+) -> dict[str, Any]:
+    injector_report = injector_report or {}
+    input_rows = command_trace or _sorted_csv_rows(paths["input_trace_path"], "publish_time_ns")
+    status_rows = _sorted_csv_rows(paths["telemetry_dir"] / "vehicle_status.csv", "received_time_ns")
+    active_rows = [row for row in input_rows if _phase_is_active(row.get("phase"))]
+    active_nonzero_command_samples = int(sum(1 for row in active_rows if _command_row_has_nonzero_command(row)))
+    experiment_started = _int_value(injector_report.get("experiment_start_time_ns"), 0) > 0
+    expected_active_samples = _expected_active_sample_count(config)
+    failsafe_during_experiment = _failsafe_after_experiment_start(status_rows, injector_report)
+    completion_reason = str(injector_report.get("completion_reason", "") or "").strip()
+    rejection_reasons: list[str] = []
+    if status != "completed":
+        rejection_reasons.append(f"capture_status_{status}")
+    if missing_topics:
+        rejection_reasons.append("missing_topics_blocking")
+    if not experiment_started:
+        rejection_reasons.append("experiment_not_started")
+    if not active_rows:
+        rejection_reasons.append("active_phase_missing")
+    if active_nonzero_command_samples < _minimum_active_nonzero_samples(config):
+        rejection_reasons.append("insufficient_active_nonzero_command_samples")
+    if failsafe_during_experiment:
+        rejection_reasons.append("failsafe_during_experiment")
+    if (
+        experiment_started
+        and len(active_rows) < expected_active_samples
+        and (_completion_reason_indicates_truncation(completion_reason) or failsafe_during_experiment)
+    ):
+        rejection_reasons.append("experiment_truncated_before_expected_active_samples")
+    accepted = not rejection_reasons
+    return build_acceptance_block(
+        experiment_started=experiment_started,
+        active_phase_present=bool(active_rows),
+        expected_active_samples=expected_active_samples,
+        active_sample_count=len(active_rows),
+        active_nonzero_command_samples=active_nonzero_command_samples,
+        failsafe_during_experiment=failsafe_during_experiment,
+        missing_topics_blocking=missing_topics,
+        accepted=accepted,
+        rejection_reasons=rejection_reasons,
+    )
+
+
 def _nearest_gap_metrics(reference_rows: list[dict[str, Any]], target_rows: list[dict[str, Any]], reference_key: str, target_key: str) -> dict[str, float]:
     if not reference_rows or not target_rows:
         return {"count": 0.0, "median_ns": math.nan, "p95_ns": math.nan, "max_ns": math.nan}
@@ -198,7 +295,14 @@ def _prediction_constructibility_metrics(command_trace: list[dict[str, Any]], to
     }
 
 
-def _px4_data_quality(paths: dict[str, Path], recorder_summary: dict[str, Any], command_trace: list[dict[str, Any]], config: RunConfig) -> dict[str, Any]:
+def _px4_data_quality(
+    paths: dict[str, Path],
+    recorder_summary: dict[str, Any],
+    command_trace: list[dict[str, Any]],
+    config: RunConfig,
+    injector_report: dict[str, Any] | None = None,
+    status: str = "completed",
+) -> dict[str, Any]:
     required_topics = (
         "vehicle_attitude",
         "vehicle_angular_velocity",
@@ -232,6 +336,7 @@ def _px4_data_quality(paths: dict[str, Path], recorder_summary: dict[str, Any], 
         for name, metrics in input_alignment_ns.items()
         if not math.isnan(metrics["p95_ns"]) and metrics["p95_ns"] > max_alignment_error_ms * 1_000_000.0
     )
+    acceptance = _px4_acceptance(paths, command_trace, config, injector_report, status, missing_topics)
     return {
         "topic_presence": {
             "required_topic_counts": topic_counts,
@@ -251,6 +356,7 @@ def _px4_data_quality(paths: dict[str, Path], recorder_summary: dict[str, Any], 
             "non_monotonic_streams": sorted(name for name, ok in timestamp_monotonicity.items() if not ok),
             "alignment_p95_exceeded_streams": p95_alignment_failures,
         },
+        "acceptance": acceptance,
     }
 
 
@@ -337,7 +443,7 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
     for topic, payload in telemetry_backfill.get("topics", {}).items():
         if payload.get("source") == "missing" and payload.get("failure_reason"):
             anomalies.append(f"{topic}:{payload['failure_reason']}")
-    data_quality = _px4_data_quality(paths, recorder_summary, command_trace, config)
+    data_quality = _px4_data_quality(paths, recorder_summary, command_trace, config, injector_report, status)
     if data_quality["topic_presence"]["missing_topics"]:
         anomalies.append("quality_missing_topics")
     if data_quality["quality_flags"]["non_monotonic_streams"]:
@@ -349,9 +455,9 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
         status = "failed"
         failure_reason = failure_reason or "timing_invalid"
 
-    manifest = {
+    manifest = apply_manifest_research_contract(
+        {
         "kind": "linearity_raw_run",
-        "raw_schema_version": 1,
         "run_id": run_id,
         "backend": "px4",
         "status": status,
@@ -382,7 +488,10 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
         "data_quality": data_quality,
         "anomaly_summary": sorted(dict.fromkeys(anomalies)),
         "telemetry_files": sorted(path.name for path in paths["telemetry_dir"].glob("*.csv")),
-    }
+        },
+        research_tier=config.research_tier,
+        acceptance=data_quality["acceptance"],
+    )
     write_yaml(paths["manifest_path"], manifest)
     paths["notes_path"].write_text(
         _notes_text(run_id, config, status, sorted(dict.fromkeys(anomalies)), ulog_path, recorder_summary, injector_report),

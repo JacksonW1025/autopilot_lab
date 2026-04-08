@@ -132,6 +132,8 @@ def _px4_rows_from_manifest(run_dir: Path, manifest: dict[str, Any]) -> list[dic
             "mode": str(manifest.get("flight_mode", "")),
             "scenario": str(manifest.get("scenario", "")),
             "config_profile": str(manifest.get("config_profile", "")),
+            "research_tier": str(manifest.get("research_tier", "")),
+            "research_acceptance": str(manifest.get("research_acceptance", "")),
             "seed": int(manifest.get("seed", 0)),
             "timestamp": timestamp_ns,
             "logical_step": index,
@@ -240,6 +242,8 @@ def _ardupilot_rows_from_manifest(run_dir: Path, manifest: dict[str, Any]) -> li
             "mode": str(manifest.get("flight_mode", "")),
             "scenario": str(manifest.get("scenario", "")),
             "config_profile": str(manifest.get("config_profile", "")),
+            "research_tier": str(manifest.get("research_tier", "")),
+            "research_acceptance": str(manifest.get("research_acceptance", "")),
             "seed": int(manifest.get("seed", 0)),
             "timestamp": timestamp_ns,
             "logical_step": index,
@@ -300,6 +304,8 @@ def _synthetic_rows_from_manifest(run_dir: Path, manifest: dict[str, Any]) -> li
         normalized_row["logical_step"] = _int_value(row.get("logical_step"), 0)
         normalized_row["timestamp"] = _int_value(row.get("timestamp"), 0)
         normalized_row["run_status"] = str(manifest.get("status", "completed"))
+        normalized_row["research_tier"] = str(manifest.get("research_tier", ""))
+        normalized_row["research_acceptance"] = str(manifest.get("research_acceptance", ""))
         normalized.append(normalized_row)
     return normalized
 
@@ -386,6 +392,9 @@ def build_prepared_sample_table(run_dirs: list[Path], config: StudyConfig) -> tu
                 "flight_mode": manifest.get("flight_mode", ""),
                 "scenario": manifest.get("scenario", ""),
                 "config_profile": manifest.get("config_profile", ""),
+                "research_tier": manifest.get("research_tier", ""),
+                "research_acceptance": manifest.get("research_acceptance", ""),
+                "research_rejection_reasons": list(manifest.get("research_rejection_reasons", []) or []),
                 "raw_data_quality": manifest.get("data_quality", {}),
             }
         )
@@ -444,6 +453,16 @@ def build_prepared_sample_table(run_dirs: list[Path], config: StudyConfig) -> tu
             "tracking_error_available_ratio": float(np.mean([_float_value(row.get("quality_tracking_error_available"), 0.0) for row in rows])) if rows else 0.0,
             "median_alignment_attitude_ms": _safe_nanmedian_ms([_float_value(row.get("quality_alignment_attitude_ns")) for row in rows]) if rows else math.nan,
             "median_alignment_position_ms": _safe_nanmedian_ms([_float_value(row.get("quality_alignment_position_ns")) for row in rows]) if rows else math.nan,
+            "accepted_row_ratio": float(np.mean([1.0 if str(row.get("research_acceptance", "")).strip().lower() == "accepted" else 0.0 for row in rows]))
+            if rows
+            else 0.0,
+            "accepted_run_count": int(
+                sum(1 for item in inventory_runs if str(item.get("research_acceptance", "")).strip().lower() == "accepted")
+            ),
+            "rejected_run_count": int(
+                sum(1 for item in inventory_runs if str(item.get("research_acceptance", "")).strip().lower() == "rejected")
+            ),
+            "research_tiers": sorted({str(item.get("research_tier", "")) for item in inventory_runs if str(item.get("research_tier", ""))}),
         },
     }
     return PreparedSampleTable(rows=rows, numeric_columns=numeric_columns), inventory

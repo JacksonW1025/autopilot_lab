@@ -8,6 +8,8 @@ from typing import Any
 
 import yaml
 
+from .research_contract import SUPPORTED_RESEARCH_TIERS
+
 
 SUPPORTED_BACKENDS = {"synthetic", "px4", "ardupilot"}
 SUPPORTED_INPUT_TYPES = {"manual", "attitude", "rate"}
@@ -85,6 +87,7 @@ class StudyConfig:
     repeat_count: int
     sampling_rate_hz: float
     x_schema: str
+    research_tier: str = "authoritative_research"
     x_include_groups: list[str] = field(default_factory=list)
     x_exclude_groups: list[str] = field(default_factory=list)
     y_schema: str = "next_raw_state"
@@ -159,6 +162,7 @@ class StudyConfig:
             raise ValueError(f"配置缺少字段: {', '.join(missing)}")
 
         optional_keys = {
+            "research_tier",
             "x_include_groups",
             "x_exclude_groups",
             "y_schema",
@@ -235,6 +239,10 @@ class StudyConfig:
         if pooling_mode not in SUPPORTED_POOLING_MODES:
             raise ValueError(f"不支持的 pooling_mode: {pooling_mode}")
 
+        research_tier = str(data.get("research_tier", "authoritative_research")).strip().lower()
+        if research_tier not in SUPPORTED_RESEARCH_TIERS:
+            raise ValueError(f"不支持的 research_tier: {research_tier}")
+
         prediction_horizon_unit = str(data.get("prediction_horizon_unit", "steps")).strip().lower()
         if prediction_horizon_unit not in SUPPORTED_PREDICTION_UNITS:
             raise ValueError(f"不支持的 prediction_horizon_unit: {prediction_horizon_unit}")
@@ -261,6 +269,7 @@ class StudyConfig:
         return cls(
             study_name=str(data["study_name"]),
             backend=backend,
+            research_tier=research_tier,
             flight_mode=data["flight_mode"],
             scenario=str(data["scenario"]),
             config_profile=str(data["config_profile"]),

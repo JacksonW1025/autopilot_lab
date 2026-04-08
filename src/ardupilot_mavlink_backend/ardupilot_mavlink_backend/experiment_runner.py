@@ -14,6 +14,7 @@ from linearity_core.excitation import ExcitationGenerator
 from linearity_core.io import capture_host_snapshot, ensure_raw_run_directories, write_rows_csv, write_yaml
 from linearity_core.mav_params import fetch_parameter, set_parameter, set_parameters, snapshot_parameters
 from linearity_core.paths import ARDUPILOT_ROOT, ARDUPILOT_RAW_ROOT
+from linearity_core.research_contract import apply_manifest_research_contract, unavailable_acceptance_block
 from pymavlink import mavutil
 
 from .bin_log_extract import extract_bin_log
@@ -556,10 +557,11 @@ def run_capture(
     _write_telemetry_csv(paths["telemetry_dir"] / "heartbeat.csv", heartbeat_rows, HEARTBEAT_FIELDNAMES)
     _write_telemetry_csv(paths["telemetry_dir"] / "sys_status.csv", status_rows, STATUS_FIELDNAMES)
     write_rows_csv(paths["input_trace_path"], input_profile_rows, INPUT_TRACE_FIELDNAMES)
+    acceptance = unavailable_acceptance_block()
 
-    manifest = {
+    manifest = apply_manifest_research_contract(
+        {
         "kind": "linearity_raw_run",
-        "raw_schema_version": 1,
         "run_id": run_id,
         "backend": BACKEND_NAME,
         "status": status,
@@ -588,7 +590,10 @@ def run_capture(
         "bin_extract_summary": extracted_bin_summary,
         "anomaly_summary": sorted(dict.fromkeys(anomalies)),
         "telemetry_files": sorted(path.name for path in paths["telemetry_dir"].glob("*.csv")),
-    }
+        },
+        research_tier=config.research_tier,
+        acceptance=acceptance,
+    )
     write_yaml(paths["manifest_path"], manifest)
     paths["notes_path"].write_text(
         _notes_text(run_id, config, status, sorted(dict.fromkeys(anomalies)), copied_bin_path or bin_log_path, tlog_path),
