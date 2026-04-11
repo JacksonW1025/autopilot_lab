@@ -1,0 +1,30 @@
+plan_name: px4_generalization_diagnostic_matrix
+x_schemas:
+  - commands_only
+  - commands_plus_state
+  - commands_plus_state_history
+  - full_augmented
+  - pooled_backend_mode_augmented
+  - feature_mapped_linear
+y_schemas:
+  - next_raw_state
+  - delta_state
+  - selected_state_subset
+  - future_state_horizon
+  - actuator_response
+  - window_summary_response
+models:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+pooling_modes:
+  - pooled
+  - stratified
+stratify_by:
+  - mode
+output_study_name: px4_generalization_diagnostic_matrix
+reporting:
+  top_k: 12
+  appendix_x_schemas:
+    - pooled_backend_mode_augmented
+    - feature_mapped_linear

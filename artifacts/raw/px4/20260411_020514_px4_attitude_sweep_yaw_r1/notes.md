@@ -1,0 +1,12 @@
+# 20260411_020514_px4_attitude_sweep_yaw_r1
+- px4 raw linearity capture
+- status: completed
+- backend: px4
+- input_type: attitude
+- flight_mode: OFFBOARD_ATTITUDE
+- x_schema: commands_plus_state
+- y_schema: delta_state
+- ulog_path: /home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/2026-04-11/09_05_08.ulg
+- anomalies: quality_alignment_p95_exceeded
+- recorder_counts: {'vehicle_attitude': 2257, 'vehicle_attitude_setpoint': 0, 'vehicle_angular_velocity': 0, 'vehicle_rates_setpoint': 0, 'vehicle_local_position': 2223, 'rate_ctrl_status': 0, 'control_allocator_status': 0, 'actuator_motors': 0, 'vehicle_status': 51, 'manual_control_setpoint': 0, 'vehicle_control_mode': 52}
+- injector_completion: disarmed_after_land

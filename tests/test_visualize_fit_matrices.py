@@ -167,13 +167,16 @@ def test_main_generates_heatmaps_for_study_dir(tmp_path: Path) -> None:
 
     assert exit_code == 0
     for path in (
-        study_dir / "fits/full_augmented__next_raw_state__pooled/ols_affine/matrix_heatmap_abs.png",
-        study_dir / "fits/full_augmented__next_raw_state__pooled/ols_affine/matrix_heatmap_signed.png",
         study_dir / "fits/commands_plus_state_history__next_raw_state__pooled/ols_affine/matrix_heatmap_abs.png",
         study_dir / "fits/commands_plus_state_history__next_raw_state__pooled/ols_affine/matrix_heatmap_signed.png",
+        study_dir / "fits/feature_mapped_linear__next_raw_state__pooled/ridge_affine/matrix_heatmap_abs.png",
+        study_dir / "fits/feature_mapped_linear__next_raw_state__pooled/ridge_affine/matrix_heatmap_signed.png",
     ):
         assert path.exists()
         assert path.stat().st_size > 0
+    assert not (study_dir / "fits/full_augmented__next_raw_state__pooled/ols_affine/matrix_heatmap_abs.png").exists()
+    assert (study_dir / "reports/matrix_gallery.md").exists()
+    assert (study_dir / "summary/matrix_gallery.json").exists()
 
 
 def test_main_generates_heatmaps_for_explicit_paths_only(tmp_path: Path) -> None:

@@ -1,0 +1,11 @@
+# 20260411_103908_ardupilot_attitude_random_roll_r1
+- ardupilot raw linearity capture
+- status: completed
+- backend: ardupilot
+- input_type: attitude
+- flight_mode: GUIDED_NOGPS
+- x_schema: commands_plus_state
+- y_schema: delta_state
+- ardupilot_bin_log_path: /home/car/autopilot_lab/artifacts/raw/ardupilot/20260411_103908_ardupilot_attitude_random_roll_r1/telemetry/ardupilot.BIN
+- ardupilot_tlog_path: /home/car/autopilot_lab/artifacts/raw/ardupilot/20260411_103908_ardupilot_attitude_random_roll_r1/telemetry/ardupilot.tlog
+- anomalies: quality_alignment_p95_exceeded

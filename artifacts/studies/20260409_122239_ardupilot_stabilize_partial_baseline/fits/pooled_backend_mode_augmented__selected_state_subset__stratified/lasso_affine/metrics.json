@@ -1,0 +1,762 @@
+{
+  "x_schema": "pooled_backend_mode_augmented",
+  "y_schema": "selected_state_subset",
+  "pooling_mode": "stratified",
+  "model_name": "lasso_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading"
+  ],
+  "response_names": [
+    "future_state_roll",
+    "future_state_pitch",
+    "future_state_yaw",
+    "future_state_roll_rate",
+    "future_state_pitch_rate",
+    "future_state_yaw_rate"
+  ],
+  "schema_metadata": {
+    "x_schema": "pooled_backend_mode_augmented",
+    "y_schema": "selected_state_subset",
+    "feature_count": 23,
+    "response_count": 6,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_ardupilot",
+      "mode_stabilize",
+      "scenario_nominal",
+      "config_profile_ardupilot_real_stabilize_nominal"
+    ],
+    "requested_response_columns": [
+      "future_state_roll",
+      "future_state_pitch",
+      "future_state_yaw",
+      "future_state_roll_rate",
+      "future_state_pitch_rate",
+      "future_state_yaw_rate"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "future_state_roll": 0.9893955461293743,
+      "future_state_pitch": 0.9893955461293743,
+      "future_state_yaw": 0.9893955461293743,
+      "future_state_roll_rate": 0.9893955461293743,
+      "future_state_pitch_rate": 0.9893955461293743,
+      "future_state_yaw_rate": 0.9893955461293743
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "velocity_x",
+      "velocity_y",
+      "backend_ardupilot",
+      "mode_stabilize",
+      "scenario_nominal",
+      "config_profile_ardupilot_real_stabilize_nominal"
+    ]
+  },
+  "group_results": [
+    {
+      "group_key": [
+        "STABILIZE"
+      ],
+      "summary": {
+        "model_name": "lasso_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.9994150582147067,
+              "mse": 2.7294468679166073e-09,
+              "mae": 3.361403746370453e-05,
+              "residual_mean_abs": 3.361403746370453e-05,
+              "residual_std": 5.224410845173461e-05,
+              "residual_max_abs": 9.998332496038986e-05
+            },
+            "val": {
+              "r2": -3.3176298262775674e+17,
+              "mse": 1.6079760719517677e-09,
+              "mae": 2.8225203386618377e-05,
+              "residual_mean_abs": 2.8225203386618377e-05,
+              "residual_std": 2.8483573612694126e-05,
+              "residual_max_abs": 6.35331389969851e-05
+            },
+            "test": {
+              "r2": -1.866166809530747e+17,
+              "mse": 1.6079760719517677e-09,
+              "mae": 2.8225203386618377e-05,
+              "residual_mean_abs": 2.8225203386618377e-05,
+              "residual_std": 2.8483573612694126e-05,
+              "residual_max_abs": 6.35331389969851e-05
+            },
+            "condition_number": 4935665220026.594,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              58.068924563831914,
+              53.97093203586439,
+              41.06420164810996,
+              37.314460471712664,
+              13.800876010755697,
+              0.19157041575236208,
+              2.4039416577238924e-13,
+              5.416054654107292e-14,
+              5.070408128672668e-14,
+              4.2219023880197576e-14
+            ],
+            "effective_condition_number": 4935665220026.594,
+            "singular_values": [
+              38.16408866277152,
+              33.52576484645669,
+              26.387310400323337,
+              9.758700916092302,
+              0.05508418505127228,
+              7.732309012353534e-12
+            ],
+            "effective_singular_values": [
+              38.16408866277152,
+              33.52576484645669,
+              26.387310400323337,
+              9.758700916092302,
+              0.05508418505127228,
+              7.732309012353534e-12
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.9994364625808293,
+              "mse": 2.638569300493749e-09,
+              "mae": 3.377022943392367e-05,
+              "residual_mean_abs": 3.377022943392367e-05,
+              "residual_std": 5.136700595220387e-05,
+              "residual_max_abs": 0.00010007355039891308
+            },
+            "val": {
+              "r2": -2.3597051460756883e+17,
+              "mse": 2.033231644873835e-09,
+              "mae": 3.140098020797006e-05,
+              "residual_mean_abs": 3.140098020797006e-05,
+              "residual_std": 3.2360625563609284e-05,
+              "residual_max_abs": 7.72802590621735e-05
+            },
+            "test": {
+              "r2": -1.4046343463145334e+18,
+              "mse": 3.025745795741543e-09,
+              "mae": 3.72934553264934e-05,
+              "residual_mean_abs": 3.72934553264934e-05,
+              "residual_std": 4.043444058684291e-05,
+              "residual_max_abs": 0.00010351088742932557
+            },
+            "condition_number": 4546304848056.157,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              57.96550698475778,
+              53.890665623037265,
+              40.988525167451705,
+              37.234805331268376,
+              13.75826892314402,
+              0.12755972785080483,
+              2.3861116248353433e-13,
+              5.443961079093681e-14,
+              3.651637592046852e-14,
+              3.3168561062076e-14
+            ],
+            "effective_condition_number": 4546304848056.157,
+            "singular_values": [
+              38.10711004720344,
+              33.465651721065754,
+              26.329676028046983,
+              9.72857321524203,
+              0.03663588988512871,
+              8.381996219082564e-12
+            ],
+            "effective_singular_values": [
+              38.10711004720344,
+              33.465651721065754,
+              26.329676028046983,
+              9.72857321524203,
+              0.03663588988512871,
+              8.381996219082564e-12
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 562,
+            "val_count": 187,
+            "test_count": 184
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 560,
+            "val_count": 184,
+            "test_count": 189
+          }
+        ],
+        "median_test_r2": -7.95625513633804e+17,
+        "median_test_mse": 2.3168609338466554e-09,
+        "median_test_mae": 3.2759329356555886e-05,
+        "coefficient_stability": 1.0,
+        "nonzero_count": 7,
+        "sparsity_ratio": 0.9313725490196079,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 4740985034041.375,
+        "condition_number": 4740985034041.375,
+        "raw_singular_values": [
+          58.068924563831914,
+          53.97093203586439,
+          41.06420164810996,
+          37.314460471712664,
+          13.800876010755697,
+          0.19157041575236208,
+          2.4039416577238924e-13,
+          5.416054654107292e-14,
+          5.070408128672668e-14,
+          4.2219023880197576e-14
+        ],
+        "singular_values": [
+          38.16408866277152,
+          33.52576484645669,
+          26.387310400323337,
+          9.758700916092302,
+          0.05508418505127228,
+          7.732309012353534e-12
+        ],
+        "effective_singular_values": [
+          38.16408866277152,
+          33.52576484645669,
+          26.387310400323337,
+          9.758700916092302,
+          0.05508418505127228,
+          7.732309012353534e-12
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "command_pitch",
+          "command_yaw",
+          "heading",
+          "pitch",
+          "position_y",
+          "position_z",
+          "roll",
+          "vertical_speed",
+          "yaw",
+          "yaw_rate"
+        ],
+        "conditioning_baseline_drops": [],
+        "conditioning_extra_pruned_features": [
+          "command_pitch",
+          "command_yaw",
+          "heading",
+          "pitch",
+          "position_y",
+          "position_z",
+          "roll",
+          "yaw",
+          "yaw_rate"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "ardupilot": {
+            "r2": 0.9992788653345943,
+            "mse": 2.433346466603572e-09,
+            "mae": 3.274395037996229e-05,
+            "residual_mean_abs": 3.274395037996229e-05,
+            "residual_std": 4.7722748668567e-05,
+            "residual_max_abs": 0.00010002843767965147
+          }
+        },
+        "mode_consistency": {
+          "STABILIZE": {
+            "r2": 0.9992788653345943,
+            "mse": 2.433346466603572e-09,
+            "mae": 3.274395037996229e-05,
+            "residual_mean_abs": 3.274395037996229e-05,
+            "residual_std": 4.7722748668567e-05,
+            "residual_max_abs": 0.00010002843767965147
+          }
+        },
+        "top_influential": {
+          "future_state_roll": [],
+          "future_state_pitch": [],
+          "future_state_yaw": [],
+          "future_state_roll_rate": [
+            {
+              "feature": "roll_rate",
+              "weight": 0.9661181458365045,
+              "selection_frequency": 1.0
+            }
+          ],
+          "future_state_pitch_rate": [
+            {
+              "feature": "roll_rate",
+              "weight": 1.7935226674406781,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "yaw_rate",
+              "weight": 4.6178946340506864e-05,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 1.544711407058286e-05,
+              "selection_frequency": 1.0
+            }
+          ],
+          "future_state_yaw_rate": [
+            {
+              "feature": "roll_rate",
+              "weight": 1.3777259521232628,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "yaw_rate",
+              "weight": 0.00012398522547339924,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 4.064941230032176e-05,
+              "selection_frequency": 1.0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "median_test_r2": -7.95625513633804e+17,
+  "median_test_mse": 2.3168609338466554e-09,
+  "median_test_mae": 3.2759329356555886e-05,
+  "coefficient_stability": 1.0,
+  "nonzero_count": 7,
+  "sparsity_ratio": 0.9313725490196079,
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 4740985034041.375,
+  "condition_number": 4740985034041.375,
+  "raw_singular_values": [
+    58.068924563831914,
+    53.97093203586439,
+    41.06420164810996,
+    37.314460471712664,
+    13.800876010755697,
+    0.19157041575236208,
+    2.4039416577238924e-13,
+    5.416054654107292e-14,
+    5.070408128672668e-14,
+    4.2219023880197576e-14
+  ],
+  "singular_values": [
+    38.16408866277152,
+    33.52576484645669,
+    26.387310400323337,
+    9.758700916092302,
+    0.05508418505127228,
+    7.732309012353534e-12
+  ],
+  "effective_singular_values": [
+    38.16408866277152,
+    33.52576484645669,
+    26.387310400323337,
+    9.758700916092302,
+    0.05508418505127228,
+    7.732309012353534e-12
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "command_pitch",
+    "command_yaw",
+    "heading",
+    "pitch",
+    "position_y",
+    "position_z",
+    "roll",
+    "vertical_speed",
+    "yaw",
+    "yaw_rate"
+  ],
+  "conditioning_baseline_drops": [],
+  "conditioning_extra_pruned_features": [
+    "command_pitch",
+    "command_yaw",
+    "heading",
+    "pitch",
+    "position_y",
+    "position_z",
+    "roll",
+    "yaw",
+    "yaw_rate"
+  ],
+  "backend_consistency": {},
+  "mode_consistency": {},
+  "top_influential": {},
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

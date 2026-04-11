@@ -1,0 +1,796 @@
+{
+  "x_schema": "feature_mapped_linear",
+  "y_schema": "actuator_response",
+  "pooling_mode": "pooled",
+  "model_name": "lasso_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize",
+    "clip__command_roll",
+    "sq__command_roll",
+    "clip__command_pitch",
+    "sq__command_pitch",
+    "clip__command_yaw",
+    "sq__command_yaw",
+    "clip__command_throttle",
+    "sq__command_throttle",
+    "sq__roll",
+    "sq__pitch",
+    "sq__yaw",
+    "sq__roll_rate",
+    "sq__pitch_rate",
+    "sq__yaw_rate",
+    "backend_ardupilot__command_roll",
+    "backend_ardupilot__command_pitch",
+    "backend_ardupilot__command_yaw",
+    "backend_ardupilot__command_throttle"
+  ],
+  "response_names": [
+    "actuator_1",
+    "actuator_2",
+    "actuator_3",
+    "actuator_4"
+  ],
+  "schema_metadata": {
+    "x_schema": "feature_mapped_linear",
+    "y_schema": "actuator_response",
+    "feature_count": 40,
+    "response_count": 4,
+    "strict_raw_linear": false,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_ardupilot",
+      "mode_guided_nogps",
+      "mode_stabilize"
+    ],
+    "requested_response_columns": [
+      "actuator_1",
+      "actuator_2",
+      "actuator_3",
+      "actuator_4"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {},
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "backend_ardupilot"
+    ]
+  },
+  "repeat_metrics": [
+    {
+      "repeat_index": 1,
+      "train": {
+        "r2": 0.9992362796079595,
+        "mse": 6.515668648948434e-05,
+        "mae": 0.004598063612551148,
+        "residual_mean_abs": 0.004598063612551148,
+        "residual_std": 0.00807196918288743,
+        "residual_max_abs": 0.0565565720422434
+      },
+      "val": {
+        "r2": 0.9998614243257087,
+        "mse": 1.0604344474668097e-05,
+        "mae": 0.002937835067266081,
+        "residual_mean_abs": 0.002937835067266081,
+        "residual_std": 0.0030631472587059694,
+        "residual_max_abs": 0.009423436648764216
+      },
+      "test": {
+        "r2": 0.998234034809794,
+        "mse": 0.0001523054986622251,
+        "mae": 0.007969117398076968,
+        "residual_mean_abs": 0.007969117398076968,
+        "residual_std": 0.01207458531968954,
+        "residual_max_abs": 0.062310596647480954
+      },
+      "condition_number": 22304662.668547787,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        318.43229433798837,
+        132.13066577942155,
+        129.1189950274906,
+        129.00634851077461,
+        123.80200992425809,
+        88.77169182434034,
+        79.37900319718993,
+        77.04021978516852,
+        74.45223566809337,
+        72.50341940071344
+      ],
+      "effective_condition_number": 22304662.668547787,
+      "singular_values": [
+        262.44761911896785,
+        113.60642836993213,
+        86.56512633539992,
+        81.60557689618203,
+        78.60828103044939,
+        77.1820527603969,
+        75.22653362287211,
+        74.40551025207046,
+        71.31418825722695,
+        67.82949783412826
+      ],
+      "effective_singular_values": [
+        262.44761911896785,
+        113.60642836993213,
+        86.56512633539992,
+        81.60557689618203,
+        78.60828103044939,
+        77.1820527603969,
+        75.22653362287211,
+        74.40551025207046,
+        71.31418825722695,
+        67.82949783412826
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "backend_ardupilot__command_pitch",
+        "mode_guided_nogps",
+        "heading",
+        "clip__command_roll",
+        "clip__command_pitch",
+        "clip__command_yaw",
+        "clip__command_throttle",
+        "sq__roll",
+        "backend_ardupilot__command_roll",
+        "backend_ardupilot__command_yaw",
+        "backend_ardupilot__command_throttle"
+      ],
+      "conditioning_baseline_drops": [
+        "backend_ardupilot__command_pitch",
+        "mode_guided_nogps"
+      ],
+      "conditioning_extra_pruned_features": [
+        "heading",
+        "clip__command_roll",
+        "clip__command_pitch",
+        "clip__command_yaw",
+        "clip__command_throttle",
+        "sq__roll",
+        "backend_ardupilot__command_roll",
+        "backend_ardupilot__command_yaw",
+        "backend_ardupilot__command_throttle"
+      ]
+    },
+    {
+      "repeat_index": 2,
+      "train": {
+        "r2": 0.9991746394333116,
+        "mse": 7.108750564801954e-05,
+        "mae": 0.00480875188396515,
+        "residual_mean_abs": 0.00480875188396515,
+        "residual_std": 0.008431340679157706,
+        "residual_max_abs": 0.055611842934670364
+      },
+      "val": {
+        "r2": 0.9994543191619887,
+        "mse": 4.651198976169058e-05,
+        "mae": 0.0043460473708273085,
+        "residual_mean_abs": 0.0043460473708273085,
+        "residual_std": 0.006818571858602203,
+        "residual_max_abs": 0.048778645254825004
+      },
+      "test": {
+        "r2": 0.9993376925905341,
+        "mse": 5.7111071188239076e-05,
+        "mae": 0.004766147521348346,
+        "residual_mean_abs": 0.004766147521348346,
+        "residual_std": 0.007550885663884979,
+        "residual_max_abs": 0.03957811094717445
+      },
+      "condition_number": 20428228.78787124,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        319.1069823730579,
+        133.5178776651609,
+        130.5880569755741,
+        129.29609626405585,
+        121.35928772047114,
+        87.91435504740446,
+        82.2415163827998,
+        75.11361580860314,
+        73.28888800899765,
+        70.75959853561123
+      ],
+      "effective_condition_number": 20428228.78787124,
+      "singular_values": [
+        262.2798480314195,
+        112.16452046163265,
+        88.20887329412194,
+        85.74525469246021,
+        81.58501148256947,
+        80.05282065363407,
+        74.80298863656441,
+        73.1105871343927,
+        69.60737069610077,
+        67.12274889452085
+      ],
+      "effective_singular_values": [
+        262.2798480314195,
+        112.16452046163265,
+        88.20887329412194,
+        85.74525469246021,
+        81.58501148256947,
+        80.05282065363407,
+        74.80298863656441,
+        73.1105871343927,
+        69.60737069610077,
+        67.12274889452085
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "backend_ardupilot__command_pitch",
+        "mode_guided_nogps",
+        "heading",
+        "clip__command_roll",
+        "clip__command_pitch",
+        "clip__command_yaw",
+        "clip__command_throttle",
+        "sq__roll",
+        "backend_ardupilot__command_roll",
+        "backend_ardupilot__command_yaw",
+        "backend_ardupilot__command_throttle"
+      ],
+      "conditioning_baseline_drops": [
+        "backend_ardupilot__command_pitch",
+        "mode_guided_nogps"
+      ],
+      "conditioning_extra_pruned_features": [
+        "heading",
+        "clip__command_roll",
+        "clip__command_pitch",
+        "clip__command_yaw",
+        "clip__command_throttle",
+        "sq__roll",
+        "backend_ardupilot__command_roll",
+        "backend_ardupilot__command_yaw",
+        "backend_ardupilot__command_throttle"
+      ]
+    }
+  ],
+  "split_records": [
+    {
+      "repeat_index": 1,
+      "train_count": 5540,
+      "val_count": 1722,
+      "test_count": 1907
+    },
+    {
+      "repeat_index": 2,
+      "train_count": 5541,
+      "val_count": 1717,
+      "test_count": 1911
+    }
+  ],
+  "median_test_r2": 0.9987858637001641,
+  "median_test_mse": 0.00010470828492523209,
+  "median_test_mae": 0.006367632459712657,
+  "coefficient_stability": 0.8717948717948718,
+  "nonzero_count": 116,
+  "sparsity_ratio": 0.2564102564102564,
+  "block_sparsity_summary": {
+    "feature_blocks": {
+      "commands": 4,
+      "state": 6,
+      "history": 0,
+      "controller_params": 0
+    }
+  },
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 21366445.728209514,
+  "condition_number": 21366445.728209514,
+  "raw_singular_values": [
+    318.43229433798837,
+    132.13066577942155,
+    129.1189950274906,
+    129.00634851077461,
+    123.80200992425809,
+    88.77169182434034,
+    79.37900319718993,
+    77.04021978516852,
+    74.45223566809337,
+    72.50341940071344
+  ],
+  "singular_values": [
+    262.44761911896785,
+    113.60642836993213,
+    86.56512633539992,
+    81.60557689618203,
+    78.60828103044939,
+    77.1820527603969,
+    75.22653362287211,
+    74.40551025207046,
+    71.31418825722695,
+    67.82949783412826
+  ],
+  "effective_singular_values": [
+    262.44761911896785,
+    113.60642836993213,
+    86.56512633539992,
+    81.60557689618203,
+    78.60828103044939,
+    77.1820527603969,
+    75.22653362287211,
+    74.40551025207046,
+    71.31418825722695,
+    67.82949783412826
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "backend_ardupilot__command_pitch",
+    "backend_ardupilot__command_roll",
+    "backend_ardupilot__command_throttle",
+    "backend_ardupilot__command_yaw",
+    "clip__command_pitch",
+    "clip__command_roll",
+    "clip__command_throttle",
+    "clip__command_yaw",
+    "heading",
+    "mode_guided_nogps",
+    "sq__roll",
+    "vertical_speed"
+  ],
+  "conditioning_baseline_drops": [
+    "backend_ardupilot__command_pitch",
+    "mode_guided_nogps"
+  ],
+  "conditioning_extra_pruned_features": [
+    "backend_ardupilot__command_roll",
+    "backend_ardupilot__command_throttle",
+    "backend_ardupilot__command_yaw",
+    "clip__command_pitch",
+    "clip__command_roll",
+    "clip__command_throttle",
+    "clip__command_yaw",
+    "heading",
+    "sq__roll"
+  ],
+  "selection_frequency": [
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.8333333333333334,
+      0.8333333333333334,
+      1.0,
+      1.0
+    ],
+    [
+      0.6666666666666666,
+      0.6666666666666666,
+      0.6666666666666666,
+      0.6666666666666666
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      0.3333333333333333,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.8333333333333334,
+      0.8333333333333334,
+      0.8333333333333334,
+      0.8333333333333334
+    ],
+    [
+      1.0,
+      0.8333333333333334,
+      1.0,
+      1.0
+    ],
+    [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.6666666666666666,
+      0.6666666666666666,
+      0.6666666666666666,
+      0.6666666666666666
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    [
+      0.8333333333333334,
+      0.8333333333333334,
+      0.8333333333333334,
+      0.8333333333333334
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  ],
+  "backend_consistency": {
+    "ardupilot": {
+      "r2": 0.9992368139549602,
+      "mse": 6.5814992615897e-05,
+      "mae": 0.004739552226743884,
+      "residual_mean_abs": 0.004739552226743884,
+      "residual_std": 0.00810617032244757,
+      "residual_max_abs": 0.05701746574252209,
+      "sample_count": 9169.0
+    }
+  },
+  "mode_consistency": {
+    "GUIDED_NOGPS": {
+      "r2": -309.598864481818,
+      "mse": 6.457672729919504e-05,
+      "mae": 0.004299041216181085,
+      "residual_mean_abs": 0.004299041216181085,
+      "residual_std": 0.008035219538637442,
+      "residual_max_abs": 0.05701746574252209,
+      "sample_count": 4583.0
+    },
+    "STABILIZE": {
+      "r2": NaN,
+      "mse": 6.705244790295434e-05,
+      "mae": 0.005179775070487737,
+      "residual_mean_abs": 0.005179775070487737,
+      "residual_std": 0.008170830679633576,
+      "residual_max_abs": 0.0560357218823464,
+      "sample_count": 4586.0
+    }
+  },
+  "scenario_consistency": 0.9963242515102195,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": 0.9998940467675077,
+      "mse": 9.136558515771902e-06,
+      "mae": 0.002571974779312161,
+      "residual_mean_abs": 0.002571974779312161,
+      "residual_std": 0.003000117015138237,
+      "residual_max_abs": 0.007024564115563736,
+      "sample_count": 3436.0
+    },
+    "nominal": {
+      "r2": 0.9994992982044286,
+      "mse": 4.318062327474123e-05,
+      "mae": 0.003868201051396601,
+      "residual_mean_abs": 0.003868201051396601,
+      "residual_std": 0.006484472046765276,
+      "residual_max_abs": 0.048008626148625555,
+      "sample_count": 4586.0
+    },
+    "throttle_biased": {
+      "r2": 0.9962186877351615,
+      "mse": 0.00032610123269137233,
+      "mae": 0.014716721014466678,
+      "residual_mean_abs": 0.014716721014466678,
+      "residual_std": 0.01784482115289781,
+      "residual_max_abs": 0.05701746574252209,
+      "sample_count": 1147.0
+    }
+  },
+  "top_influential": {
+    "actuator_1": [
+      {
+        "feature": "sq__pitch",
+        "weight": 16.657235672986076,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "sq__roll",
+        "weight": -2.5423953040126577,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 1.1354043930737943,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.6464663006609779,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.42857578747250635,
+        "selection_frequency": 1.0
+      }
+    ],
+    "actuator_2": [
+      {
+        "feature": "sq__pitch",
+        "weight": 15.371082016786794,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "sq__roll",
+        "weight": -2.6808477833494475,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 1.1141174764176212,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.6059214430911093,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.42867302451356215,
+        "selection_frequency": 1.0
+      }
+    ],
+    "actuator_3": [
+      {
+        "feature": "sq__pitch",
+        "weight": 14.855421038003685,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "sq__roll",
+        "weight": -2.571297190171578,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 1.1267417328978662,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.592881450693622,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.42877633865635734,
+        "selection_frequency": 1.0
+      }
+    ],
+    "actuator_4": [
+      {
+        "feature": "sq__pitch",
+        "weight": 14.110083800476874,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "sq__roll",
+        "weight": -2.566139651895645,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 1.133961795946893,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.5313027216217022,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.42879577449091116,
+        "selection_frequency": 1.0
+      }
+    ]
+  }
+}

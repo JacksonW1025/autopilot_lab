@@ -1,0 +1,1020 @@
+{
+  "x_schema": "pooled_backend_mode_augmented",
+  "y_schema": "window_summary_response",
+  "pooling_mode": "pooled",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "mode_offboard_attitude",
+    "mode_posctl"
+  ],
+  "response_names": [
+    "window_mean_roll",
+    "window_mean_pitch",
+    "window_mean_yaw",
+    "window_mean_roll_rate",
+    "window_mean_pitch_rate",
+    "window_mean_yaw_rate",
+    "window_peak_roll",
+    "window_peak_pitch",
+    "window_peak_yaw",
+    "window_peak_roll_rate",
+    "window_peak_pitch_rate",
+    "window_peak_yaw_rate"
+  ],
+  "schema_metadata": {
+    "x_schema": "pooled_backend_mode_augmented",
+    "y_schema": "window_summary_response",
+    "feature_count": 22,
+    "response_count": 12,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_px4",
+      "mode_offboard_attitude",
+      "mode_posctl"
+    ],
+    "requested_response_columns": [
+      "window_mean_roll",
+      "window_mean_pitch",
+      "window_mean_yaw",
+      "window_mean_roll_rate",
+      "window_mean_pitch_rate",
+      "window_mean_yaw_rate",
+      "window_peak_roll",
+      "window_peak_pitch",
+      "window_peak_yaw",
+      "window_peak_roll_rate",
+      "window_peak_pitch_rate",
+      "window_peak_yaw_rate"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "window_mean_roll": 0.9948029449978346,
+      "window_mean_pitch": 0.9948029449978346,
+      "window_mean_yaw": 0.9948029449978346,
+      "window_mean_roll_rate": 0.9948029449978346,
+      "window_mean_pitch_rate": 0.9948029449978346,
+      "window_mean_yaw_rate": 0.9948029449978346,
+      "window_peak_roll": 0.9948029449978346,
+      "window_peak_pitch": 0.9948029449978346,
+      "window_peak_yaw": 0.9948029449978346,
+      "window_peak_roll_rate": 0.9948029449978346,
+      "window_peak_pitch_rate": 0.9948029449978346,
+      "window_peak_yaw_rate": 0.9948029449978346
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "backend_px4"
+    ]
+  },
+  "repeat_metrics": [
+    {
+      "repeat_index": 1,
+      "train": {
+        "r2": 0.9904872436786815,
+        "mse": 0.0007419817204666311,
+        "mae": 0.009373464200924268,
+        "residual_mean_abs": 0.009373464200924268,
+        "residual_std": 0.027239341410295347,
+        "residual_max_abs": 0.8427134032313075
+      },
+      "val": {
+        "r2": 0.9904039492962124,
+        "mse": 0.0006967417924937884,
+        "mae": 0.009393425279909625,
+        "residual_mean_abs": 0.009393425279909625,
+        "residual_std": 0.026395851465097063,
+        "residual_max_abs": 0.6373742796419709
+      },
+      "test": {
+        "r2": 0.9908416438300968,
+        "mse": 0.0004404322820041613,
+        "mae": 0.008481745109608472,
+        "residual_mean_abs": 0.008481745109608472,
+        "residual_std": 0.02097939388615254,
+        "residual_max_abs": 0.5405676227210896
+      },
+      "condition_number": 1226.3432719243335,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        193.39130356559158,
+        141.60037047880206,
+        119.44943307850397,
+        109.3773038057941,
+        104.3469718629693,
+        99.86392305015896,
+        88.36323705148297,
+        78.63349433346946,
+        72.54886449733283,
+        69.32921577211829
+      ],
+      "effective_condition_number": 1226.3432719243335,
+      "singular_values": [
+        182.9805268005147,
+        121.08412151476178,
+        110.10587585020248,
+        103.77759301699245,
+        97.2582843347647,
+        79.34757971980854,
+        77.66038493252216,
+        74.66278942626931,
+        70.9351563155365,
+        67.15603195001971
+      ],
+      "effective_singular_values": [
+        182.9805268005147,
+        121.08412151476178,
+        110.10587585020248,
+        103.77759301699245,
+        97.2582843347647,
+        79.34757971980854,
+        77.66038493252216,
+        74.66278942626931,
+        70.9351563155365,
+        67.15603195001971
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "mode_offboard_attitude"
+      ],
+      "conditioning_baseline_drops": [
+        "mode_offboard_attitude"
+      ],
+      "conditioning_extra_pruned_features": []
+    },
+    {
+      "repeat_index": 2,
+      "train": {
+        "r2": 0.9907261787243545,
+        "mse": 0.000826134648856989,
+        "mae": 0.010354216033334383,
+        "residual_mean_abs": 0.010354216033334383,
+        "residual_std": 0.02874255814740554,
+        "residual_max_abs": 0.836828145892799
+      },
+      "val": {
+        "r2": 0.9872112351723904,
+        "mse": 0.00034646376224573586,
+        "mae": 0.007700158596560889,
+        "residual_mean_abs": 0.007700158596560889,
+        "residual_std": 0.018612402086706437,
+        "residual_max_abs": 0.5251639860704345
+      },
+      "test": {
+        "r2": 0.9885646735291095,
+        "mse": 0.0005748332617732422,
+        "mae": 0.009306317299759965,
+        "residual_mean_abs": 0.009306317299759965,
+        "residual_std": 0.023971909989654826,
+        "residual_max_abs": 0.6809006592933593
+      },
+      "condition_number": 1113.4175033690256,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        192.95444901296267,
+        133.11882845245418,
+        121.04044148002507,
+        111.09537245358754,
+        104.82672695895903,
+        103.35641992990776,
+        92.25768457844444,
+        78.54735983136013,
+        71.08434281273145,
+        67.4584421291697
+      ],
+      "effective_condition_number": 1113.4175033690256,
+      "singular_values": [
+        181.13686873127426,
+        123.16767862622929,
+        106.39562910277202,
+        103.20198829878078,
+        98.9410680624242,
+        79.24727801328659,
+        78.10568636034934,
+        76.18962626734653,
+        70.9729321893601,
+        67.17357191744149
+      ],
+      "effective_singular_values": [
+        181.13686873127426,
+        123.16767862622929,
+        106.39562910277202,
+        103.20198829878078,
+        98.9410680624242,
+        79.24727801328659,
+        78.10568636034934,
+        76.18962626734653,
+        70.9729321893601,
+        67.17357191744149
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "mode_offboard_attitude"
+      ],
+      "conditioning_baseline_drops": [
+        "mode_offboard_attitude"
+      ],
+      "conditioning_extra_pruned_features": []
+    }
+  ],
+  "split_records": [
+    {
+      "repeat_index": 1,
+      "train_count": 6930,
+      "val_count": 2277,
+      "test_count": 2278
+    },
+    {
+      "repeat_index": 2,
+      "train_count": 6888,
+      "val_count": 2286,
+      "test_count": 2311
+    }
+  ],
+  "median_test_r2": 0.9897031586796031,
+  "median_test_mse": 0.0005076327718887017,
+  "median_test_mae": 0.008894031204684218,
+  "coefficient_stability": 1.0,
+  "nonzero_count": 12,
+  "sparsity_ratio": 0.9523809523809523,
+  "block_sparsity_summary": {
+    "feature_blocks": {
+      "commands": 4,
+      "state": 6,
+      "history": 0,
+      "controller_params": 0
+    }
+  },
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 1169.8803876466795,
+  "condition_number": 1169.8803876466795,
+  "raw_singular_values": [
+    193.39130356559158,
+    141.60037047880206,
+    119.44943307850397,
+    109.3773038057941,
+    104.3469718629693,
+    99.86392305015896,
+    88.36323705148297,
+    78.63349433346946,
+    72.54886449733283,
+    69.32921577211829
+  ],
+  "singular_values": [
+    182.9805268005147,
+    121.08412151476178,
+    110.10587585020248,
+    103.77759301699245,
+    97.2582843347647,
+    79.34757971980854,
+    77.66038493252216,
+    74.66278942626931,
+    70.9351563155365,
+    67.15603195001971
+  ],
+  "effective_singular_values": [
+    182.9805268005147,
+    121.08412151476178,
+    110.10587585020248,
+    103.77759301699245,
+    97.2582843347647,
+    79.34757971980854,
+    77.66038493252216,
+    74.66278942626931,
+    70.9351563155365,
+    67.15603195001971
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "mode_offboard_attitude",
+    "vertical_speed"
+  ],
+  "conditioning_baseline_drops": [
+    "mode_offboard_attitude"
+  ],
+  "conditioning_extra_pruned_features": [],
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "backend_consistency": {
+    "px4": {
+      "r2": 0.9905700080290158,
+      "mse": 0.0006736689103603152,
+      "mae": 0.009345173298823183,
+      "residual_mean_abs": 0.009345173298823183,
+      "residual_std": 0.025954854561107233,
+      "residual_max_abs": 0.8397707745620533,
+      "sample_count": 11485.0
+    }
+  },
+  "mode_consistency": {
+    "OFFBOARD_ATTITUDE": {
+      "r2": 0.9898506215125169,
+      "mse": 0.0011643654214303321,
+      "mae": 0.011901247868165186,
+      "residual_mean_abs": 0.011901247868165186,
+      "residual_std": 0.03412276962145086,
+      "residual_max_abs": 0.8397707745620533,
+      "sample_count": 5716.0
+    },
+    "POSCTL": {
+      "r2": -0.2329658012100222,
+      "mse": 0.00018748044489381904,
+      "mae": 0.006812581473834643,
+      "residual_mean_abs": 0.006812581473834643,
+      "residual_std": 0.013689411256813907,
+      "residual_max_abs": 0.32813332670666434,
+      "sample_count": 5769.0
+    }
+  },
+  "scenario_consistency": 0.9996238844382813,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": 0.990626067911612,
+      "mse": 0.0006655687495246249,
+      "mae": 0.009541623696732183,
+      "residual_mean_abs": 0.009541623696732183,
+      "residual_std": 0.025786330048588126,
+      "residual_max_abs": 0.5402435082501302,
+      "sample_count": 3839.0
+    },
+    "nominal": {
+      "r2": 0.9907252896976433,
+      "mse": 0.0006657419477428989,
+      "mae": 0.009257632196486353,
+      "residual_mean_abs": 0.009257632196486353,
+      "residual_std": 0.025800636107102173,
+      "residual_max_abs": 0.6352766799866536,
+      "sample_count": 3863.0
+    },
+    "throttle_biased": {
+      "r2": 0.9903526624987997,
+      "mse": 0.0006899835743939644,
+      "mae": 0.00923520718747096,
+      "residual_mean_abs": 0.00923520718747096,
+      "residual_std": 0.026257895089709323,
+      "residual_max_abs": 0.8397707745620533,
+      "sample_count": 3783.0
+    }
+  },
+  "top_influential": {
+    "window_mean_roll": [
+      {
+        "feature": "roll",
+        "weight": 0.9061468373260937,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": 0.08097043026238747,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -0.07809708362975301,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.061868615086683565,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.015749513775117838,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_mean_pitch": [
+      {
+        "feature": "pitch",
+        "weight": 0.9112523704197942,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": 0.07282721005180634,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": 0.021757965701151325,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": -0.0210803343009759,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 0.018019639731721795,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_mean_yaw": [
+      {
+        "feature": "yaw",
+        "weight": 0.6995966948233103,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": 0.43949516987141724,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "heading",
+        "weight": 0.3131129647904106,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_posctl",
+        "weight": -0.1504352061463615,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_offboard_attitude",
+        "weight": 0.1504352061457761,
+        "selection_frequency": 1.0
+      }
+    ],
+    "window_mean_roll_rate": [
+      {
+        "feature": "roll_rate",
+        "weight": 0.6623192573294572,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate",
+        "weight": 0.2627329066138103,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.05944416380299397,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": -0.03366574910415851,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": -0.03270267447339181,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_mean_pitch_rate": [
+      {
+        "feature": "pitch_rate",
+        "weight": 0.8157929114119409,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll_rate",
+        "weight": -0.13585784734125517,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -0.015935120536259298,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -0.009921744045739131,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": -0.009375488620897019,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_mean_yaw_rate": [
+      {
+        "feature": "yaw_rate",
+        "weight": 1.025922179687439,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch_rate",
+        "weight": -0.6183031863060651,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll_rate",
+        "weight": 0.5743372513265885,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 0.2589433123712753,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.14281143625707166,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_peak_roll": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.11778215195426694,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 0.11641235425684497,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.10764236202788616,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.08611495570641292,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_posctl",
+        "weight": 0.04113780662267036,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_peak_pitch": [
+      {
+        "feature": "roll",
+        "weight": -0.05083824390375953,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.037094299216202886,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.025711628484079707,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "velocity_x",
+        "weight": -0.02106462754914707,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "heading",
+        "weight": -0.015282804367192794,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_peak_yaw": [
+      {
+        "feature": "command_throttle",
+        "weight": 0.9943629925107932,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "yaw",
+        "weight": 0.6850156875362243,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_posctl",
+        "weight": -0.3429863544851842,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_offboard_attitude",
+        "weight": 0.34298635448497816,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.2793093362417881,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_peak_roll_rate": [
+      {
+        "feature": "roll_rate",
+        "weight": 0.14151859106000864,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.13331473197496818,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate",
+        "weight": -0.11865234359784453,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": 0.10387488546318113,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 0.09836478275213276,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_peak_pitch_rate": [
+      {
+        "feature": "roll_rate",
+        "weight": -0.06043104701602396,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 0.05759902649007265,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": 0.047412593291587035,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw",
+        "weight": -0.04437909567099176,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": -0.04030528855384088,
+        "selection_frequency": 0.0
+      }
+    ],
+    "window_peak_yaw_rate": [
+      {
+        "feature": "yaw_rate",
+        "weight": -1.0505601781007916,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll_rate",
+        "weight": -0.7417733506740565,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate",
+        "weight": 0.7283932893841947,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.1999582304090657,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.16941452092066311,
+        "selection_frequency": 0.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,153 @@
+study_name: px4_vs_ardupilot_compare
+study_id: 20260411_124108_px4_vs_ardupilot_compare
+px4_baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation
+ardupilot_baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation
+px4_diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+ardupilot_diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_105433_ardupilot_generalization_diagnostic_matrix
+summary:
+  status: compare_available
+  px4:
+    baseline:
+      study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation
+      study_name: px4_real_generalization_ablation
+      source_modes:
+      - OFFBOARD_ATTITUDE
+      - POSCTL
+      accepted_run_count: 30
+      accepted_runs_per_mode: 15
+      expected_accepted_run_count: 30
+      baseline_stability_state: stable
+      baseline_stability_status: comparison_available
+      best_combo: full_augmented | next_raw_state | ols_affine | stratified
+      best_median_test_r2: 0.9995277520082995
+      supported_anchor: full_augmented | next_raw_state | ols_affine | stratified
+      supported_anchor_support: supported
+      scenario_generalization:
+        study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation
+        status: scenario_available
+        expected_scenarios:
+        - dynamic
+        - nominal
+        - throttle_biased
+        counts:
+          generalized_supported: 80
+          supported_but_local: 40
+          not_generalized: 96
+        representative_generalized_supported: full_augmented | next_raw_state | ols_affine
+          | stratified
+        representative_supported_but_local: feature_mapped_linear | next_raw_state
+          | ols_affine | stratified
+        conclusion: 当前 study 里已经出现跨 scenario 仍然保持 supported 的组合，f 更像常见映射而不是单一 operating-point
+          拟合。
+    diagnostic:
+      study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+      study_name: px4_generalization_diagnostic_matrix
+      diagnostic_status: diagnostic_available
+      attitude_all_accepted: true
+      accepted_attitude_axes:
+      - OFFBOARD_ATTITUDE pitch
+      - OFFBOARD_ATTITUDE roll
+      - OFFBOARD_ATTITUDE yaw
+      - POSCTL pitch
+      - POSCTL roll
+      - POSCTL yaw
+      rejected_attitude_axes: []
+      throttle_boundary: mixed
+      throttle_blocked_by_nonzero_gate: true
+      throttle_rejection_reasons:
+      - active_phase_missing
+      - experiment_not_started
+      - experiment_truncated_before_expected_active_samples
+      - failsafe_during_experiment
+      - insufficient_active_nonzero_command_samples
+      conclusion: 姿态轴在当前诊断矩阵内保持 accepted；throttle 是最早系统性出问题的通道。
+      scenario_generalization:
+        study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+        status: scenario_available
+        expected_scenarios:
+        - dynamic
+        - nominal
+        - throttle_biased
+        counts:
+          generalized_supported: 111
+          supported_but_local: 15
+          not_generalized: 90
+        representative_generalized_supported: full_augmented | next_raw_state | ols_affine
+          | stratified
+        representative_supported_but_local: feature_mapped_linear | future_state_horizon
+          | ridge_affine | stratified
+        conclusion: 当前 study 里已经出现跨 scenario 仍然保持 supported 的组合，f 更像常见映射而不是单一 operating-point
+          拟合。
+  ardupilot:
+    baseline:
+      study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation
+      study_name: ardupilot_real_generalization_ablation
+      source_modes:
+      - GUIDED_NOGPS
+      - STABILIZE
+      accepted_run_count: 30
+      accepted_runs_per_mode: 15
+      expected_accepted_run_count: 30
+      baseline_stability_state: changed
+      baseline_stability_status: comparison_available
+      best_combo: commands_plus_state_history | selected_state_subset | ols_affine
+        | pooled
+      best_median_test_r2: 1.0
+      supported_anchor: commands_only | actuator_response | ridge_affine | pooled
+      supported_anchor_support: supported
+      scenario_generalization:
+        study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation
+        status: scenario_available
+        expected_scenarios:
+        - dynamic
+        - nominal
+        - throttle_biased
+        counts:
+          generalized_supported: 12
+          supported_but_local: 0
+          not_generalized: 204
+        representative_generalized_supported: commands_only | actuator_response |
+          ridge_affine | pooled
+        representative_supported_but_local: ' |  |  | '
+        conclusion: 当前 study 里已经出现跨 scenario 仍然保持 supported 的组合，f 更像常见映射而不是单一 operating-point
+          拟合。
+    diagnostic:
+      study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_105433_ardupilot_generalization_diagnostic_matrix
+      study_name: ardupilot_generalization_diagnostic_matrix
+      diagnostic_status: diagnostic_available
+      attitude_all_accepted: true
+      accepted_attitude_axes:
+      - GUIDED_NOGPS pitch
+      - GUIDED_NOGPS roll
+      - GUIDED_NOGPS yaw
+      - STABILIZE pitch
+      - STABILIZE roll
+      - STABILIZE yaw
+      rejected_attitude_axes: []
+      throttle_boundary: none
+      throttle_blocked_by_nonzero_gate: false
+      throttle_rejection_reasons: []
+      conclusion: 姿态轴在当前诊断矩阵内保持 accepted，throttle 暂未出现系统性拒收。
+      scenario_generalization:
+        study_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_105433_ardupilot_generalization_diagnostic_matrix
+        status: scenario_available
+        expected_scenarios:
+        - dynamic
+        - nominal
+        - throttle_biased
+        counts:
+          generalized_supported: 12
+          supported_but_local: 0
+          not_generalized: 204
+        representative_generalized_supported: commands_only | actuator_response |
+          ridge_affine | pooled
+        representative_supported_but_local: ' |  |  | '
+        conclusion: 当前 study 里已经出现跨 scenario 仍然保持 supported 的组合，f 更像常见映射而不是单一 operating-point
+          拟合。
+  comparison:
+    both_baselines_stable: false
+    throttle_boundary_consistent: false
+    difference_driver: baseline_stability_unresolved
+    generalization_difference_driver: both_support_cross_scenario_linearity_but_px4_is_broader
+  conclusion: 当前差异更像 baseline 还不够稳，暂时不适合把 backend 差异当作主解释。 两边都已给出跨 scenario 的正面线性证据，但
+    PX4 的 generalized-supported 组合明显更多。

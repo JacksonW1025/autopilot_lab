@@ -1,0 +1,1355 @@
+{
+  "x_schema": "pooled_backend_mode_augmented",
+  "y_schema": "actuator_response",
+  "pooling_mode": "stratified",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize"
+  ],
+  "response_names": [
+    "actuator_1",
+    "actuator_2",
+    "actuator_3",
+    "actuator_4"
+  ],
+  "schema_metadata": {
+    "x_schema": "pooled_backend_mode_augmented",
+    "y_schema": "actuator_response",
+    "feature_count": 22,
+    "response_count": 4,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_ardupilot",
+      "mode_guided_nogps",
+      "mode_stabilize"
+    ],
+    "requested_response_columns": [
+      "actuator_1",
+      "actuator_2",
+      "actuator_3",
+      "actuator_4"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {},
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "backend_ardupilot"
+    ]
+  },
+  "group_results": [
+    {
+      "group_key": [
+        "GUIDED_NOGPS"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.8033039621613036,
+              "mse": 4.164358895875047e-08,
+              "mae": 0.00017251100807521555,
+              "residual_mean_abs": 0.00017251100807521555,
+              "residual_std": 0.0002040676087936311,
+              "residual_max_abs": 0.0005864317569813648
+            },
+            "val": {
+              "r2": -0.376171376278454,
+              "mse": 2.2030146672426484e-07,
+              "mae": 0.0003939705850274282,
+              "residual_mean_abs": 0.0003939705850274282,
+              "residual_std": 0.00046674373649807557,
+              "residual_max_abs": 0.00105423277501282
+            },
+            "test": {
+              "r2": -0.2633906190067674,
+              "mse": 2.527438551260132e-07,
+              "mae": 0.0004123365510937543,
+              "residual_mean_abs": 0.0004123365510937543,
+              "residual_std": 0.0004761006061550489,
+              "residual_max_abs": 0.001317708190519573
+            },
+            "condition_number": 5576612.430641342,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              109.92989122214651,
+              91.88936932319805,
+              65.36347297971679,
+              60.63239727112829,
+              55.78659507102104,
+              53.895345580940976,
+              52.308636848639864,
+              51.94827952753517,
+              50.111905591177134,
+              45.999806735367606
+            ],
+            "effective_condition_number": 5576612.430641342,
+            "singular_values": [
+              91.03352043261745,
+              83.9166738375611,
+              58.994452609494566,
+              55.93512912427013,
+              54.591058689999635,
+              53.74102247462248,
+              51.66066201597166,
+              51.08250953028411,
+              50.031848938117314,
+              45.21169036361962
+            ],
+            "effective_singular_values": [
+              91.03352043261745,
+              83.9166738375611,
+              58.994452609494566,
+              55.93512912427013,
+              54.591058689999635,
+              53.74102247462248,
+              51.66066201597166,
+              51.08250953028411,
+              50.031848938117314,
+              45.21169036361962
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "mode_guided_nogps",
+              "heading",
+              "mode_stabilize"
+            ],
+            "conditioning_baseline_drops": [
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "heading",
+              "mode_stabilize"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.836965392455481,
+              "mse": 3.5347519819073656e-08,
+              "mae": 0.00012898182241430407,
+              "residual_mean_abs": 0.00012898182241430407,
+              "residual_std": 0.00018800936098788712,
+              "residual_max_abs": 0.0006082935002699186
+            },
+            "val": {
+              "r2": -0.20500043094805087,
+              "mse": 1.9295026436511572e-07,
+              "mae": 0.00033219454931384437,
+              "residual_mean_abs": 0.00033219454931384437,
+              "residual_std": 0.0004304326807788716,
+              "residual_max_abs": 0.000999780202881384
+            },
+            "test": {
+              "r2": -0.2203655806324496,
+              "mse": 2.4413667509151876e-07,
+              "mae": 0.00032480873396811594,
+              "residual_mean_abs": 0.00032480873396811594,
+              "residual_std": 0.0004934197176076846,
+              "residual_max_abs": 0.0011826167787949426
+            },
+            "condition_number": 6262739.505675105,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              108.8830698683707,
+              86.64459189961869,
+              67.3320186151817,
+              62.25105040343614,
+              60.179510917298245,
+              53.02159839041714,
+              52.51795447236144,
+              51.839815991411825,
+              50.33148299550373,
+              46.872218001302045
+            ],
+            "effective_condition_number": 6262739.505675105,
+            "singular_values": [
+              89.95936621369499,
+              78.30712052584423,
+              67.03753713954667,
+              57.88597718610031,
+              53.72311629930745,
+              52.476266484512266,
+              52.13047708319956,
+              51.71851458823262,
+              46.852644742547334,
+              45.74929303890417
+            ],
+            "effective_singular_values": [
+              89.95936621369499,
+              78.30712052584423,
+              67.03753713954667,
+              57.88597718610031,
+              53.72311629930745,
+              52.476266484512266,
+              52.13047708319956,
+              51.71851458823262,
+              46.852644742547334,
+              45.74929303890417
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "mode_guided_nogps",
+              "heading",
+              "mode_stabilize"
+            ],
+            "conditioning_baseline_drops": [
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "heading",
+              "mode_stabilize"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 2671,
+            "val_count": 956,
+            "test_count": 956
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 2674,
+            "val_count": 954,
+            "test_count": 955
+          }
+        ],
+        "median_test_r2": -0.2418780998196085,
+        "median_test_mse": 2.48440265108766e-07,
+        "median_test_mae": 0.0003685726425309351,
+        "coefficient_stability": 1.0,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 5919675.968158224,
+        "condition_number": 5919675.968158224,
+        "raw_singular_values": [
+          109.92989122214651,
+          91.88936932319805,
+          65.36347297971679,
+          60.63239727112829,
+          55.78659507102104,
+          53.895345580940976,
+          52.308636848639864,
+          51.94827952753517,
+          50.111905591177134,
+          45.999806735367606
+        ],
+        "singular_values": [
+          91.03352043261745,
+          83.9166738375611,
+          58.994452609494566,
+          55.93512912427013,
+          54.591058689999635,
+          53.74102247462248,
+          51.66066201597166,
+          51.08250953028411,
+          50.031848938117314,
+          45.21169036361962
+        ],
+        "effective_singular_values": [
+          91.03352043261745,
+          83.9166738375611,
+          58.994452609494566,
+          55.93512912427013,
+          54.591058689999635,
+          53.74102247462248,
+          51.66066201597166,
+          51.08250953028411,
+          50.031848938117314,
+          45.21169036361962
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "heading",
+          "mode_guided_nogps",
+          "mode_stabilize",
+          "vertical_speed"
+        ],
+        "conditioning_baseline_drops": [
+          "mode_guided_nogps"
+        ],
+        "conditioning_extra_pruned_features": [
+          "heading",
+          "mode_stabilize"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "ardupilot": {
+            "r2": 0.5851558663369674,
+            "mse": 8.625040061212676e-08,
+            "mae": 0.00022423172977878883,
+            "residual_mean_abs": 0.00022423172977878883,
+            "residual_std": 0.0002917292747927541,
+            "residual_max_abs": 0.0009047747700352549,
+            "sample_count": 4583.0
+          }
+        },
+        "mode_consistency": {
+          "GUIDED_NOGPS": {
+            "r2": 0.5851558663369674,
+            "mse": 8.625040061212676e-08,
+            "mae": 0.00022423172977878883,
+            "residual_mean_abs": 0.00022423172977878883,
+            "residual_std": 0.0002917292747927541,
+            "residual_max_abs": 0.0009047747700352549,
+            "sample_count": 4583.0
+          }
+        },
+        "scenario_consistency": 0.8007258110486882,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": 0.5203884604676903,
+            "mse": 7.702185628594561e-08,
+            "mae": 0.0002196879153271657,
+            "residual_mean_abs": 0.0002196879153271657,
+            "residual_std": 0.0002739061618451439,
+            "residual_max_abs": 0.0007540303109128121,
+            "sample_count": 1717.0
+          },
+          "nominal": {
+            "r2": 0.5064414293332243,
+            "mse": 9.939721214817028e-08,
+            "mae": 0.00023609043726158303,
+            "residual_mean_abs": 0.00023609043726158303,
+            "residual_std": 0.0003107448845551076,
+            "residual_max_abs": 0.0009047747700352549,
+            "sample_count": 2292.0
+          },
+          "throttle_biased": {
+            "r2": 0.6324779623001688,
+            "mse": 6.136001484111847e-08,
+            "mae": 0.00019047140201375836,
+            "residual_mean_abs": 0.00019047140201375836,
+            "residual_std": 0.00023570466818322744,
+            "residual_max_abs": 0.0007028112307407852,
+            "sample_count": 574.0
+          }
+        },
+        "top_influential": {
+          "actuator_1": [
+            {
+              "feature": "roll",
+              "weight": -0.031109429775878127,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.03059025090136977,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.007505919967320775,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": -0.003954231120237196,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": -0.0039542311202339095,
+              "selection_frequency": 0.0
+            }
+          ],
+          "actuator_2": [
+            {
+              "feature": "roll",
+              "weight": -0.07553369911509446,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": -0.0025163674398550407,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate",
+              "weight": 0.0013121264288172912,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": -0.0012282573299390502,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": -0.0012282573299381252,
+              "selection_frequency": 0.0
+            }
+          ],
+          "actuator_3": [
+            {
+              "feature": "pitch",
+              "weight": -0.006292210575761392,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": -0.00480652289583698,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll",
+              "weight": -0.003933420630464523,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.0026009579731379926,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": -0.001076336541168753,
+              "selection_frequency": 0.0
+            }
+          ],
+          "actuator_4": [
+            {
+              "feature": "roll",
+              "weight": -0.03130495343857368,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.013862422714529171,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 0.005647382118391074,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.0031997604902899313,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": 0.003199760490285262,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group_key": [
+        "STABILIZE"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "val": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "test": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "condition_number": 1399036.786217118,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              126.73594596640761,
+              98.81420811523066,
+              90.77235634111368,
+              52.536165817320224,
+              51.97756158194656,
+              50.92479923096627,
+              49.675198380555784,
+              30.334807314286955,
+              0.5049023576047488,
+              6.488265786651644e-05
+            ],
+            "effective_condition_number": 1399036.786217118,
+            "singular_values": [
+              90.77322504318113,
+              69.95606926272325,
+              52.42349863241167,
+              51.890378782476056,
+              51.739733281105686,
+              50.87186978928052,
+              49.665664569208225,
+              21.53265125733403,
+              0.5049023519911935,
+              6.4882657795314e-05
+            ],
+            "effective_singular_values": [
+              90.77322504318113,
+              69.95606926272325,
+              52.42349863241167,
+              51.890378782476056,
+              51.739733281105686,
+              50.87186978928052,
+              49.665664569208225,
+              21.53265125733403,
+              0.5049023519911935,
+              6.4882657795314e-05
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "mode_guided_nogps",
+              "pitch",
+              "yaw",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize"
+            ],
+            "conditioning_baseline_drops": [
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "pitch",
+              "yaw",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "val": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "test": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "condition_number": 2214760.991518038,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              109.87481752212449,
+              103.46013725102054,
+              98.99708754582466,
+              52.77047979095548,
+              52.066980355935854,
+              51.753321615460244,
+              50.037679873340025,
+              36.76878535371561,
+              29.752935385984124,
+              0.22517850465467246
+            ],
+            "effective_condition_number": 2214760.991518038,
+            "singular_values": [
+              99.76992269325626,
+              70.33174813334264,
+              52.45807952274046,
+              51.88738925474255,
+              51.73006862551052,
+              51.59297946637042,
+              49.731347985681076,
+              28.832918883607398,
+              21.185514863962226,
+              0.22517839754791732
+            ],
+            "effective_singular_values": [
+              99.76992269325626,
+              70.33174813334264,
+              52.45807952274046,
+              51.88738925474255,
+              51.73006862551052,
+              51.59297946637042,
+              49.731347985681076,
+              28.832918883607398,
+              21.185514863962226,
+              0.22517839754791732
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "mode_guided_nogps",
+              "pitch",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize"
+            ],
+            "conditioning_baseline_drops": [
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "pitch",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 2677,
+            "val_count": 955,
+            "test_count": 954
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 2676,
+            "val_count": 956,
+            "test_count": 954
+          }
+        ],
+        "median_test_r2": NaN,
+        "median_test_mse": 0.0,
+        "median_test_mae": 0.0,
+        "coefficient_stability": 1.0,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 1806898.888867578,
+        "condition_number": 1806898.888867578,
+        "raw_singular_values": [
+          126.73594596640761,
+          98.81420811523066,
+          90.77235634111368,
+          52.536165817320224,
+          51.97756158194656,
+          50.92479923096627,
+          49.675198380555784,
+          30.334807314286955,
+          0.5049023576047488,
+          6.488265786651644e-05
+        ],
+        "singular_values": [
+          90.77322504318113,
+          69.95606926272325,
+          52.42349863241167,
+          51.890378782476056,
+          51.739733281105686,
+          50.87186978928052,
+          49.665664569208225,
+          21.53265125733403,
+          0.5049023519911935,
+          6.4882657795314e-05
+        ],
+        "effective_singular_values": [
+          90.77322504318113,
+          69.95606926272325,
+          52.42349863241167,
+          51.890378782476056,
+          51.739733281105686,
+          50.87186978928052,
+          49.665664569208225,
+          21.53265125733403,
+          0.5049023519911935,
+          6.4882657795314e-05
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "heading",
+          "mode_guided_nogps",
+          "mode_stabilize",
+          "pitch",
+          "position_y",
+          "position_z",
+          "velocity_x",
+          "velocity_y",
+          "vertical_speed",
+          "yaw"
+        ],
+        "conditioning_baseline_drops": [
+          "mode_guided_nogps"
+        ],
+        "conditioning_extra_pruned_features": [
+          "heading",
+          "mode_stabilize",
+          "pitch",
+          "position_y",
+          "position_z",
+          "velocity_x",
+          "velocity_y",
+          "yaw"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "ardupilot": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 4586.0
+          }
+        },
+        "mode_consistency": {
+          "STABILIZE": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 4586.0
+          }
+        },
+        "scenario_consistency": NaN,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 1719.0
+          },
+          "nominal": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 2294.0
+          },
+          "throttle_biased": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 573.0
+          }
+        },
+        "top_influential": {
+          "actuator_1": [],
+          "actuator_2": [],
+          "actuator_3": [],
+          "actuator_4": []
+        }
+      }
+    }
+  ],
+  "median_test_r2": NaN,
+  "median_test_mse": 1.24220132554383e-07,
+  "median_test_mae": 0.00018428632126546755,
+  "coefficient_stability": 1.0,
+  "nonzero_count": 0,
+  "sparsity_ratio": 1.0,
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 3863287.428512901,
+  "condition_number": 3863287.428512901,
+  "raw_singular_values": [
+    109.92989122214651,
+    91.88936932319805,
+    65.36347297971679,
+    60.63239727112829,
+    55.78659507102104,
+    53.895345580940976,
+    52.308636848639864,
+    51.94827952753517,
+    50.111905591177134,
+    45.999806735367606
+  ],
+  "singular_values": [
+    91.03352043261745,
+    83.9166738375611,
+    58.994452609494566,
+    55.93512912427013,
+    54.591058689999635,
+    53.74102247462248,
+    51.66066201597166,
+    51.08250953028411,
+    50.031848938117314,
+    45.21169036361962
+  ],
+  "effective_singular_values": [
+    91.03352043261745,
+    83.9166738375611,
+    58.994452609494566,
+    55.93512912427013,
+    54.591058689999635,
+    53.74102247462248,
+    51.66066201597166,
+    51.08250953028411,
+    50.031848938117314,
+    45.21169036361962
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize",
+    "pitch",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "vertical_speed",
+    "yaw"
+  ],
+  "conditioning_baseline_drops": [
+    "mode_guided_nogps"
+  ],
+  "conditioning_extra_pruned_features": [
+    "heading",
+    "mode_stabilize",
+    "pitch",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "yaw"
+  ],
+  "backend_consistency": {
+    "ardupilot": {
+      "r2": -0.02072001054968431,
+      "mse": 0.08802398890000968,
+      "mae": 0.2965605699550926,
+      "residual_mean_abs": 0.2965605699550926,
+      "residual_std": 0.2966730796331315,
+      "residual_max_abs": 0.31576268407766084,
+      "sample_count": 9169.0
+    }
+  },
+  "mode_consistency": {
+    "GUIDED_NOGPS": {
+      "r2": -414731.6902988116,
+      "mse": 0.08622723038015373,
+      "mae": 0.29364455156971137,
+      "residual_mean_abs": 0.29364455156971137,
+      "residual_std": 0.0003281974662542737,
+      "residual_max_abs": 0.2943770151554564,
+      "sample_count": 4583.0
+    },
+    "STABILIZE": {
+      "r2": NaN,
+      "mse": 0.0898195720435988,
+      "mae": 0.29947468078374545,
+      "residual_mean_abs": 0.29947468078374545,
+      "residual_std": 0.011596879454084524,
+      "residual_max_abs": 0.31576268407766084,
+      "sample_count": 4586.0
+    }
+  },
+  "scenario_consistency": 0.0,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": -0.02073763334425416,
+      "mse": 0.08802024154363514,
+      "mae": 0.2965541867897469,
+      "residual_mean_abs": 0.2965541867897469,
+      "residual_std": 0.2966659136471699,
+      "residual_max_abs": 0.315736351800908,
+      "sample_count": 3436.0
+    },
+    "nominal": {
+      "r2": -0.02066816702363905,
+      "mse": 0.08802262743729582,
+      "mae": 0.2965582458529169,
+      "residual_mean_abs": 0.2965582458529169,
+      "residual_std": 0.2966704362366888,
+      "residual_max_abs": 0.31574070162031864,
+      "sample_count": 4586.0
+    },
+    "throttle_biased": {
+      "r2": -0.020876914724847984,
+      "mse": 0.08804065811056644,
+      "mae": 0.2965889839818628,
+      "residual_mean_abs": 0.2965889839818628,
+      "residual_std": 0.29670482238708473,
+      "residual_max_abs": 0.31576268407766084,
+      "sample_count": 1147.0
+    }
+  },
+  "top_influential": {},
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

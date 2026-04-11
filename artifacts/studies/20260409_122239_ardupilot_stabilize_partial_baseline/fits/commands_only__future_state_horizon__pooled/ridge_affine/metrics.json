@@ -1,0 +1,578 @@
+{
+  "x_schema": "commands_only",
+  "y_schema": "future_state_horizon",
+  "pooling_mode": "pooled",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle"
+  ],
+  "response_names": [
+    "roll__h1",
+    "pitch__h1",
+    "yaw__h1",
+    "roll_rate__h1",
+    "pitch_rate__h1",
+    "yaw_rate__h1",
+    "roll__h2",
+    "pitch__h2",
+    "yaw__h2",
+    "roll_rate__h2",
+    "pitch_rate__h2",
+    "yaw_rate__h2"
+  ],
+  "schema_metadata": {
+    "x_schema": "commands_only",
+    "y_schema": "future_state_horizon",
+    "feature_count": 4,
+    "response_count": 12,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle"
+    ],
+    "requested_response_columns": [
+      "roll__h1",
+      "pitch__h1",
+      "yaw__h1",
+      "roll_rate__h1",
+      "pitch_rate__h1",
+      "yaw_rate__h1",
+      "roll__h2",
+      "pitch__h2",
+      "yaw__h2",
+      "roll_rate__h2",
+      "pitch_rate__h2",
+      "yaw_rate__h2"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "roll__h1": 0.9946977730646872,
+      "pitch__h1": 0.9946977730646872,
+      "yaw__h1": 0.9946977730646872,
+      "roll_rate__h1": 0.9946977730646872,
+      "pitch_rate__h1": 0.9946977730646872,
+      "yaw_rate__h1": 0.9946977730646872,
+      "roll__h2": 0.9893955461293743,
+      "pitch__h2": 0.9893955461293743,
+      "yaw__h2": 0.9893955461293743,
+      "roll_rate__h2": 0.9893955461293743,
+      "pitch_rate__h2": 0.9893955461293743,
+      "yaw_rate__h2": 0.9893955461293743
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": []
+  },
+  "repeat_metrics": [
+    {
+      "repeat_index": 1,
+      "train": {
+        "r2": 1.4470546039202503e-07,
+        "mse": 4.666184809454443e-06,
+        "mae": 0.001403666067853525,
+        "residual_mean_abs": 0.001403666067853525,
+        "residual_std": 0.002160135368317098,
+        "residual_max_abs": 0.005400070825633527
+      },
+      "val": {
+        "r2": -4.854936981417573e+20,
+        "mse": 2.3530721948302334e-06,
+        "mae": 0.0010548723131394004,
+        "residual_mean_abs": 0.0010548723131394004,
+        "residual_std": 0.0011136950201032086,
+        "residual_max_abs": 0.0027289258062181618
+      },
+      "test": {
+        "r2": -2.730912579010933e+20,
+        "mse": 2.3530812246874448e-06,
+        "mae": 0.0010548743375881962,
+        "residual_mean_abs": 0.0010548743375881962,
+        "residual_std": 0.0011136971565851425,
+        "residual_max_abs": 0.0027289337955428645
+      },
+      "condition_number": 4335554022166.14,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        47.41307836451875,
+        9.46707658054696e-12,
+        5.1822954526521897e-14,
+        1.7632980851873636e-28
+      ],
+      "effective_condition_number": 4335554022166.14,
+      "singular_values": [
+        33.52610922848043,
+        7.732831618998033e-12
+      ],
+      "effective_singular_values": [
+        33.52610922848043,
+        7.732831618998033e-12
+      ],
+      "conditioning_pruned_features": [
+        "command_pitch",
+        "command_yaw"
+      ],
+      "conditioning_baseline_drops": [],
+      "conditioning_extra_pruned_features": [
+        "command_pitch",
+        "command_yaw"
+      ]
+    },
+    {
+      "repeat_index": 2,
+      "train": {
+        "r2": 1.6545114694954677e-06,
+        "mse": 4.682146819697671e-06,
+        "mae": 0.0014073421991516275,
+        "residual_mean_abs": 0.0014073421991516275,
+        "residual_std": 0.0021638268922669554,
+        "residual_max_abs": 0.005404566512968316
+      },
+      "val": {
+        "r2": -2.7414565992558792e+20,
+        "mse": 2.3621664426698134e-06,
+        "mae": 0.0010568553091776572,
+        "residual_mean_abs": 0.0010568553091776572,
+        "residual_std": 0.0011158957380209577,
+        "residual_max_abs": 0.0027411794269195803
+      },
+      "test": {
+        "r2": -1.0859570595219955e+21,
+        "mse": 2.3392778453879167e-06,
+        "mae": 0.0010515523974963597,
+        "residual_mean_abs": 0.0010515523974963597,
+        "residual_std": 0.0011106373848867586,
+        "residual_max_abs": 0.00272171523555512
+      },
+      "condition_number": 3992987115841.3965,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        47.328638264796915,
+        1.0263777327420216e-11,
+        6.524679666755634e-15,
+        4.39850566143246e-29
+      ],
+      "effective_condition_number": 3992987115841.3965,
+      "singular_values": [
+        33.46640106136304,
+        8.381294527245436e-12
+      ],
+      "effective_singular_values": [
+        33.46640106136304,
+        8.381294527245436e-12
+      ],
+      "conditioning_pruned_features": [
+        "command_pitch",
+        "command_yaw"
+      ],
+      "conditioning_baseline_drops": [],
+      "conditioning_extra_pruned_features": [
+        "command_pitch",
+        "command_yaw"
+      ]
+    }
+  ],
+  "split_records": [
+    {
+      "repeat_index": 1,
+      "train_count": 562,
+      "val_count": 187,
+      "test_count": 184
+    },
+    {
+      "repeat_index": 2,
+      "train_count": 560,
+      "val_count": 184,
+      "test_count": 189
+    }
+  ],
+  "median_test_r2": -6.795241587115444e+20,
+  "median_test_mse": 2.3461795350376808e-06,
+  "median_test_mae": 0.001053213367542278,
+  "coefficient_stability": 1.0,
+  "nonzero_count": 0,
+  "sparsity_ratio": 1.0,
+  "block_sparsity_summary": {
+    "feature_blocks": {
+      "commands": 4,
+      "state": 0,
+      "history": 0,
+      "controller_params": 0
+    }
+  },
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 4164270569003.7686,
+  "condition_number": 4164270569003.7686,
+  "raw_singular_values": [
+    47.41307836451875,
+    9.46707658054696e-12,
+    5.1822954526521897e-14,
+    1.7632980851873636e-28
+  ],
+  "singular_values": [
+    33.52610922848043,
+    7.732831618998033e-12
+  ],
+  "effective_singular_values": [
+    33.52610922848043,
+    7.732831618998033e-12
+  ],
+  "conditioning_pruned_features": [
+    "command_pitch",
+    "command_yaw"
+  ],
+  "conditioning_baseline_drops": [],
+  "conditioning_extra_pruned_features": [
+    "command_pitch",
+    "command_yaw"
+  ],
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "backend_consistency": {
+    "ardupilot": {
+      "r2": -0.11079851262262341,
+      "mse": 3.7482009470147834e-06,
+      "mae": 0.0012655598833587302,
+      "residual_mean_abs": 0.0012655598833587302,
+      "residual_std": 0.0018898204559780493,
+      "residual_max_abs": 0.005402318669300921
+    }
+  },
+  "mode_consistency": {
+    "STABILIZE": {
+      "r2": -0.11079851262262341,
+      "mse": 3.7482009470147834e-06,
+      "mae": 0.0012655598833587302,
+      "residual_mean_abs": 0.0012655598833587302,
+      "residual_std": 0.0018898204559780493,
+      "residual_max_abs": 0.005402318669300921
+    }
+  },
+  "top_influential": {
+    "roll__h1": [
+      {
+        "feature": "command_throttle",
+        "weight": 8.139137663714591e-23,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -2.440299481322273e-24,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -1.2201497406611165e-24,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -9.768038644929848e-25,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch__h1": [
+      {
+        "feature": "command_throttle",
+        "weight": 3.1981837638069084e-23,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -9.589787573524357e-25,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -4.7948937867620975e-25,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -3.8375178031030193e-25,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw__h1": [
+      {
+        "feature": "command_throttle",
+        "weight": -7.010114699379657e-19,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 2.1017866135398422e-20,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": 1.0508933067699038e-20,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": 8.413103028470996e-21,
+        "selection_frequency": 0.0
+      }
+    ],
+    "roll_rate__h1": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.00019862774807983876,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -1.7876497378491698e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -8.93824868924549e-06,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -7.150598944977702e-06,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch_rate__h1": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.00036245684370183137,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -3.2621115959573464e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -1.631055797978607e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -1.3048446386791698e-05,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw_rate__h1": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.0002790332250487701,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -2.5112990278911494e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -1.2556495139455234e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -1.0045196113407326e-05,
+        "selection_frequency": 0.0
+      }
+    ],
+    "roll__h2": [
+      {
+        "feature": "command_throttle",
+        "weight": 8.139137663714591e-23,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -2.440299481322273e-24,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -1.2201497406611165e-24,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -9.768038644929848e-25,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch__h2": [
+      {
+        "feature": "command_throttle",
+        "weight": 3.1981837638069084e-23,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -9.589787573524357e-25,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -4.7948937867620975e-25,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -3.8375178031030193e-25,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw__h2": [
+      {
+        "feature": "command_throttle",
+        "weight": -7.010114699379657e-19,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": 2.1017866135398422e-20,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": 1.0508933067699038e-20,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": 8.413103028470996e-21,
+        "selection_frequency": 0.0
+      }
+    ],
+    "roll_rate__h2": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.00019862774807983876,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -1.7876497378491698e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -8.93824868924549e-06,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -7.150598944977702e-06,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch_rate__h2": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.00036245684370183137,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -3.2621115959573464e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -1.631055797978607e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -1.3048446386791698e-05,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw_rate__h2": [
+      {
+        "feature": "command_throttle",
+        "weight": -0.0002790332250487701,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_yaw",
+        "weight": -2.5112990278911494e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_pitch",
+        "weight": -1.2556495139455234e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_roll",
+        "weight": -1.0045196113407326e-05,
+        "selection_frequency": 0.0
+      }
+    ]
+  }
+}

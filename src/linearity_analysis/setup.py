@@ -12,7 +12,7 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         (f"share/{package_name}", ["package.xml"]),
     ],
-    install_requires=["setuptools", "numpy", "PyYAML"],
+    install_requires=["setuptools", "numpy", "PyYAML", "matplotlib"],
     zip_safe=True,
     maintainer="car",
     maintainer_email="1245080419@qq.com",
@@ -23,6 +23,11 @@ setup(
         "console_scripts": [
             "linearity_analyze = linearity_analysis.linearity_analyze:main",
             "linearity_compare_schemas = linearity_analysis.linearity_compare_schemas:main",
+            "linearity_contract_audit = linearity_analysis.contract_audit:main",
+            "linearity_matrix_gallery = linearity_analysis.matrix_gallery:main",
+            "linearity_milestone_report = linearity_analysis.milestone_report:main",
+            "linearity_prune_artifacts = linearity_analysis.prune_artifacts:main",
+            "linearity_stage_checks = linearity_analysis.stage_checks:main",
         ],
     },
 )

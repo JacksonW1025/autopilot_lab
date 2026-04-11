@@ -1,0 +1,320 @@
+kind: linearity_raw_run
+run_id: 20260410_224232_px4_attitude_multi_broad_composite_r5
+backend: px4
+status: completed
+failure_reason: ''
+study_name: px4_real_generalization_offboard_attitude_dynamic_capture
+study_config:
+  study_name: px4_real_generalization_offboard_attitude_dynamic_capture
+  backend: px4
+  flight_mode: OFFBOARD_ATTITUDE
+  scenario: dynamic
+  config_profile: px4_real_offboard_attitude_generalization_dynamic
+  seed: 1203
+  repeat_count: 1
+  sampling_rate_hz: 20.0
+  x_schema: commands_plus_state
+  research_tier: authoritative_research
+  x_include_groups: []
+  x_exclude_groups: []
+  y_schema: delta_state
+  y_include_groups: []
+  y_exclude_groups: []
+  feature_map: identity
+  run_level_covariates_as_inputs: false
+  backend_mode_covariates:
+  - backend
+  - mode
+  - scenario
+  - config_profile
+  stratify_by:
+  - mode
+  pooling_mode: pooled
+  output_semantics: future_state
+  history_length: 3
+  prediction_horizon: 2
+  prediction_horizon_unit: steps
+  parameter_sweep: {}
+  internal_signals_enabled: true
+  perturbation_strategy: generalization_multi_broad
+  ablation_plan: null
+  model:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+  sparsity:
+    threshold: 0.05
+    ridge_alpha: 0.6
+    lasso_alpha: 0.04
+    bootstrap_repeats: 6
+    stability_selection_threshold: 0.6
+  reporting:
+    stability_repeats: 2
+    max_alignment_error_ms: 150
+    real_px4_report: true
+  input_type: attitude
+  axis: composite
+  profile_type: multi_broad
+  amplitude: 0.135
+  bias: 0.0
+  start_after_s: 1.0
+  duration_s: 6.0
+  hold_s: 1.0
+  hover_thrust: -0.69
+  timing_required: true
+  operator: Codex
+  warmup_cycles: 10
+  manual_mode: flight
+  takeoff_thrust: -0.8
+  takeoff_thrust_max: -0.92
+  takeoff_ramp_s: 2.0
+  takeoff_altitude_m: 2.0
+  takeoff_position_tolerance_m: 0.2
+  takeoff_velocity_tolerance_m: 0.3
+  takeoff_settle_s: 1.5
+  takeoff_timeout_s: 12.0
+  min_takeoff_clearance_m: 0.35
+  min_profile_clearance_m: 0.4
+  altitude_hold_kp: 0.12
+  altitude_hold_kd: 0.08
+  thrust_z_min: -0.95
+  thrust_z_max: -0.35
+  land_timeout_s: 10.0
+  ready_timeout_s: 30.0
+  parameter_overrides: {}
+  controlled_parameters: []
+  synthetic: {}
+  extras:
+    auto_clock_bridge: true
+    roll_amplitude: 1.0
+    pitch_amplitude: 0.8
+    yaw_amplitude: 0.4
+    thrust_delta: 0.1
+    multi_broad_frequencies_hz:
+      roll:
+      - 0.23
+      - 0.61
+      - 1.07
+      pitch:
+      - 0.27
+      - 0.67
+      - 1.19
+      yaw:
+      - 0.19
+      - 0.49
+      - 0.91
+      throttle:
+      - 0.31
+      - 0.79
+      - 1.33
+    multi_broad_phases_rad:
+      roll:
+      - 0.0
+      - 0.9
+      - 1.8
+      pitch:
+      - 0.4
+      - 1.3
+      - 2.2
+      yaw:
+      - 0.7
+      - 1.6
+      - 2.5
+      throttle:
+      - 1.1
+      - 2.0
+      - 2.9
+    source_path: /tmp/tmp.2WPbViJexn/px4_real_generalization_offboard_attitude_dynamic_capture.yaml
+    repeat_index: 1
+  source_path: /tmp/tmp.2WPbViJexn/px4_real_generalization_offboard_attitude_dynamic_capture.yaml
+  repeat_index: 5
+flight_mode: OFFBOARD_ATTITUDE
+scenario: dynamic
+config_profile: px4_real_offboard_attitude_generalization_dynamic
+seed: 1203
+repeat_index: 5
+input_type: attitude
+profile_type: multi_broad
+axis: composite
+sim_world: default
+start_time: '2026-04-10T22:42:32.467178-07:00'
+end_time: '2026-04-10T22:43:09.644126-07:00'
+px4_log_path: /home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/2026-04-11/05_42_25.ulg
+clock_bridge:
+  started: true
+  timing_ready_after_bridge: true
+  gz_topic: /clock
+  log_path: /home/car/autopilot_lab/artifacts/raw/px4/20260410_224232_px4_attitude_multi_broad_composite_r5/logs/gz_clock_bridge.log
+ros_topics_recorded:
+- /fmu/out/vehicle_attitude
+- /fmu/out/vehicle_attitude_setpoint
+- /fmu/out/vehicle_angular_velocity
+- /fmu/out/vehicle_rates_setpoint
+- /fmu/out/vehicle_local_position
+- /fmu/out/rate_ctrl_status
+- /fmu/out/control_allocator_status
+- /fmu/out/actuator_motors
+- /fmu/out/vehicle_status
+- /fmu/out/manual_control_setpoint
+- /fmu/out/vehicle_control_mode
+parameter_snapshot_before: {}
+parameter_snapshot_after: {}
+host_snapshot_start:
+  uptime: '22:42:32 up 15:25,  1 user,  load average: 9.58, 9.33, 7.45'
+  loadavg: 9.58 9.33 7.45 28/1344 851306
+host_snapshot_end:
+  uptime: '22:43:09 up 15:26,  1 user,  load average: 9.57, 9.34, 7.53'
+  loadavg: 9.57 9.34 7.53 14/1347 853901
+recorder_summary:
+  message_counts:
+    vehicle_attitude: 2456
+    vehicle_attitude_setpoint: 0
+    vehicle_angular_velocity: 0
+    vehicle_rates_setpoint: 0
+    vehicle_local_position: 2440
+    rate_ctrl_status: 0
+    control_allocator_status: 0
+    actuator_motors: 0
+    vehicle_status: 54
+    manual_control_setpoint: 0
+    vehicle_control_mode: 54
+  event_counts:
+    vehicle_status_events: 6
+    vehicle_control_mode_events: 8
+telemetry_backfill:
+  ulog_path: /home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/2026-04-11/05_42_25.ulg
+  timebase_reference_topic: vehicle_attitude
+  offset_ns: 1775886152668989440
+  topics:
+    vehicle_angular_velocity:
+      source: ulog_backfill
+      row_count: 3866
+    vehicle_rates_setpoint:
+      source: ulog_backfill
+      row_count: 1860
+    rate_ctrl_status:
+      source: ulog_backfill
+      row_count: 195
+    control_allocator_status:
+      source: ulog_backfill
+      row_count: 195
+    actuator_motors:
+      source: ulog_backfill
+      row_count: 388
+    vehicle_attitude_setpoint:
+      source: ulog_backfill
+      row_count: 756
+  failure_reasons: []
+injector_report:
+  offboard_command_time_ns: 1775886162161869261
+  arm_command_time_ns: 1775886162161869261
+  takeoff_start_time_ns: 1775886162161869261
+  takeoff_reference_z: -1.3805888891220093
+  takeoff_target_z: -3.3805888891220093
+  experiment_start_time_ns: 1775886172413697282
+  landing_command_time_ns: 1775886180460895901
+  disarm_command_time_ns: null
+  completion_time_ns: 1775886188512266207
+  completion_reason: disarmed_after_land
+  anomalies: []
+data_quality:
+  topic_presence:
+    required_topic_counts:
+      vehicle_attitude: 2456
+      vehicle_angular_velocity: 3866
+      vehicle_local_position: 2440
+      vehicle_status: 54
+      vehicle_control_mode: 54
+      actuator_motors: 388
+    missing_topics: []
+    ros_message_counts:
+      vehicle_attitude: 2456
+      vehicle_angular_velocity: 0
+      vehicle_local_position: 2440
+      vehicle_status: 54
+      vehicle_control_mode: 54
+      actuator_motors: 0
+  timestamp_monotonicity:
+    input_trace: true
+    vehicle_attitude: true
+    vehicle_angular_velocity: true
+    vehicle_local_position: true
+    vehicle_status: true
+    vehicle_control_mode: true
+    actuator_motors: true
+  input_alignment_ns:
+    vehicle_attitude:
+      count: 376.0
+      median_ns: 3138560.0
+      p95_ns: 8567808.0
+      max_ns: 16223488.0
+    vehicle_angular_velocity:
+      count: 376.0
+      median_ns: 2416384.0
+      p95_ns: 5977856.0
+      max_ns: 9963776.0
+    vehicle_local_position:
+      count: 376.0
+      median_ns: 2917632.0
+      p95_ns: 8086528.0
+      max_ns: 14422528.0
+    vehicle_status:
+      count: 376.0
+      median_ns: 141229568.0
+      p95_ns: 270023168.0
+      max_ns: 294456064.0
+    vehicle_control_mode:
+      count: 376.0
+      median_ns: 141383424.0
+      p95_ns: 269684992.0
+      max_ns: 294232832.0
+    actuator_motors:
+      count: 376.0
+      median_ns: 28033024.0
+      p95_ns: 39681024.0
+      max_ns: 43829760.0
+  prediction_constructibility:
+    total_input_samples: 376.0
+    prediction_horizon: 2.0
+    future_state_ratio_estimate: 0.9946808510638298
+    delta_state_ratio_estimate: 0.9946808510638298
+    window_summary_ratio_estimate: 0.9946808510638298
+    actuator_response_ratio_estimate: 1.0
+  thresholds:
+    max_alignment_error_ms: 150.0
+  quality_flags:
+    non_monotonic_streams: []
+    alignment_p95_exceeded_streams:
+    - vehicle_control_mode
+    - vehicle_status
+  acceptance:
+    experiment_started: true
+    active_phase_present: true
+    expected_active_samples: 120
+    active_sample_count: 121
+    active_nonzero_command_samples: 121
+    failsafe_during_experiment: false
+    missing_topics_blocking: []
+    accepted: true
+    rejection_reasons: []
+anomaly_summary:
+- quality_alignment_p95_exceeded
+telemetry_files:
+- actuator_motors.csv
+- control_allocator_status.csv
+- input_trace.csv
+- manual_control_setpoint.csv
+- rate_ctrl_status.csv
+- vehicle_angular_velocity.csv
+- vehicle_attitude.csv
+- vehicle_attitude_setpoint.csv
+- vehicle_control_mode.csv
+- vehicle_control_mode_events.csv
+- vehicle_local_position.csv
+- vehicle_rates_setpoint.csv
+- vehicle_status.csv
+- vehicle_status_events.csv
+raw_schema_version: 2
+research_acceptance: accepted
+research_rejection_reasons: []
+research_tier: authoritative_research

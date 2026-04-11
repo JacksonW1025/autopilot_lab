@@ -1,0 +1,2252 @@
+{
+  "x_schema": "full_augmented",
+  "y_schema": "selected_state_subset",
+  "pooling_mode": "stratified",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "integrator_yaw",
+    "control_output_roll",
+    "control_output_pitch",
+    "control_output_yaw",
+    "command_roll__lag_1",
+    "command_pitch__lag_1",
+    "command_yaw__lag_1",
+    "command_throttle__lag_1",
+    "roll__lag_1",
+    "pitch__lag_1",
+    "yaw__lag_1",
+    "roll_rate__lag_1",
+    "pitch_rate__lag_1",
+    "yaw_rate__lag_1",
+    "position_x__lag_1",
+    "position_y__lag_1",
+    "position_z__lag_1",
+    "velocity_z__lag_1",
+    "altitude__lag_1",
+    "vertical_speed__lag_1",
+    "heading__lag_1",
+    "command_roll__lag_2",
+    "command_pitch__lag_2",
+    "command_yaw__lag_2",
+    "command_throttle__lag_2",
+    "roll__lag_2",
+    "pitch__lag_2",
+    "yaw__lag_2",
+    "roll_rate__lag_2",
+    "pitch_rate__lag_2",
+    "yaw_rate__lag_2",
+    "position_x__lag_2",
+    "position_y__lag_2",
+    "position_z__lag_2",
+    "velocity_z__lag_2",
+    "altitude__lag_2",
+    "vertical_speed__lag_2",
+    "heading__lag_2",
+    "command_roll__lag_3",
+    "command_pitch__lag_3",
+    "command_yaw__lag_3",
+    "command_throttle__lag_3",
+    "roll__lag_3",
+    "pitch__lag_3",
+    "yaw__lag_3",
+    "roll_rate__lag_3",
+    "pitch_rate__lag_3",
+    "yaw_rate__lag_3",
+    "position_x__lag_3",
+    "position_y__lag_3",
+    "position_z__lag_3",
+    "velocity_z__lag_3",
+    "altitude__lag_3",
+    "vertical_speed__lag_3",
+    "heading__lag_3"
+  ],
+  "response_names": [
+    "future_state_roll",
+    "future_state_pitch",
+    "future_state_yaw",
+    "future_state_roll_rate",
+    "future_state_pitch_rate",
+    "future_state_yaw_rate"
+  ],
+  "schema_metadata": {
+    "x_schema": "full_augmented",
+    "y_schema": "selected_state_subset",
+    "feature_count": 92,
+    "response_count": 6,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "param_ARMING_CHECK",
+      "backend_ardupilot",
+      "mode_stabilize",
+      "scenario_nominal",
+      "config_profile_ardupilot_real_stabilize_nominal",
+      "integrator_roll",
+      "integrator_pitch",
+      "integrator_yaw",
+      "control_output_roll",
+      "control_output_pitch",
+      "control_output_yaw",
+      "torque_achieved",
+      "thrust_achieved",
+      "saturation_ratio",
+      "actuator_1",
+      "actuator_2",
+      "actuator_3",
+      "actuator_4"
+    ],
+    "requested_response_columns": [
+      "future_state_roll",
+      "future_state_pitch",
+      "future_state_yaw",
+      "future_state_roll_rate",
+      "future_state_pitch_rate",
+      "future_state_yaw_rate"
+    ],
+    "dropped_unavailable_features": [
+      "torque_achieved",
+      "thrust_achieved"
+    ],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "future_state_roll": 0.9893955461293743,
+      "future_state_pitch": 0.9893955461293743,
+      "future_state_yaw": 0.9893955461293743,
+      "future_state_roll_rate": 0.9893955461293743,
+      "future_state_pitch_rate": 0.9893955461293743,
+      "future_state_yaw_rate": 0.9893955461293743
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "velocity_x",
+      "velocity_y",
+      "param_ARMING_CHECK",
+      "backend_ardupilot",
+      "mode_stabilize",
+      "scenario_nominal",
+      "config_profile_ardupilot_real_stabilize_nominal",
+      "integrator_roll",
+      "integrator_pitch",
+      "saturation_ratio",
+      "actuator_1",
+      "actuator_2",
+      "actuator_3",
+      "actuator_4",
+      "velocity_x__lag_1",
+      "velocity_y__lag_1",
+      "velocity_x__lag_2",
+      "velocity_y__lag_2",
+      "velocity_x__lag_3",
+      "velocity_y__lag_3"
+    ]
+  },
+  "group_results": [
+    {
+      "group_key": [
+        "STABILIZE"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.9999999898245021,
+              "mse": 4.7484069630147155e-14,
+              "mae": 1.300405115898368e-07,
+              "residual_mean_abs": 1.300405115898368e-07,
+              "residual_std": 2.179083973373836e-07,
+              "residual_max_abs": 4.991475018034652e-07
+            },
+            "val": {
+              "r2": -1.0337587246702992e+17,
+              "mse": 8.907345715033892e-10,
+              "mae": 1.7954969350283494e-05,
+              "residual_mean_abs": 1.7954969350283494e-05,
+              "residual_std": 2.9580636946974833e-05,
+              "residual_max_abs": 6.576736997010446e-05
+            },
+            "test": {
+              "r2": -1.0337584079277922e+17,
+              "mse": 8.907342979611506e-10,
+              "mae": 1.7954973530508444e-05,
+              "residual_mean_abs": 1.7954973530508444e-05,
+              "residual_std": 2.9580634097871698e-05,
+              "residual_max_abs": 6.576717765749418e-05
+            },
+            "condition_number": 7803606054991.687,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              117.57976016304852,
+              106.23750466381274,
+              88.13915792604512,
+              72.24464024237315,
+              26.804338226636744,
+              22.9473506943458,
+              17.262277588711534,
+              8.51158683684605,
+              4.966827545007733,
+              4.793370405911071
+            ],
+            "effective_condition_number": 7803606054991.687,
+            "singular_values": [
+              65.18455842801558,
+              43.688263422481974,
+              33.2547465889169,
+              17.428357805434473,
+              10.126862696216453,
+              5.986899095333799,
+              3.3898061189343167,
+              2.6672900832988065,
+              2.614047548067417,
+              2.3085139749757313
+            ],
+            "effective_singular_values": [
+              65.18455842801558,
+              43.688263422481974,
+              33.2547465889169,
+              17.428357805434473,
+              10.126862696216453,
+              5.986899095333799,
+              3.3898061189343167,
+              2.6672900832988065,
+              2.614047548067417,
+              2.3085139749757313
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading",
+              "integrator_yaw",
+              "control_output_roll",
+              "control_output_pitch",
+              "control_output_yaw",
+              "command_pitch__lag_1",
+              "command_yaw__lag_1",
+              "command_throttle__lag_1",
+              "roll__lag_1",
+              "pitch__lag_1",
+              "yaw__lag_1",
+              "roll_rate__lag_1",
+              "pitch_rate__lag_1",
+              "yaw_rate__lag_1",
+              "position_y__lag_1",
+              "position_z__lag_1",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "heading__lag_1",
+              "command_pitch__lag_2",
+              "command_yaw__lag_2",
+              "command_throttle__lag_2",
+              "roll__lag_2",
+              "pitch__lag_2",
+              "yaw__lag_2",
+              "roll_rate__lag_2",
+              "pitch_rate__lag_2",
+              "yaw_rate__lag_2",
+              "position_y__lag_2",
+              "position_z__lag_2",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "heading__lag_2",
+              "command_pitch__lag_3",
+              "command_yaw__lag_3",
+              "command_throttle__lag_3",
+              "roll__lag_3",
+              "pitch__lag_3",
+              "yaw__lag_3",
+              "roll_rate__lag_3",
+              "pitch_rate__lag_3",
+              "yaw_rate__lag_3",
+              "position_y__lag_3",
+              "position_z__lag_3",
+              "velocity_z__lag_3",
+              "altitude__lag_3",
+              "vertical_speed__lag_3",
+              "heading__lag_3"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading",
+              "integrator_yaw",
+              "control_output_roll",
+              "control_output_pitch",
+              "control_output_yaw",
+              "command_pitch__lag_1",
+              "command_yaw__lag_1",
+              "command_throttle__lag_1",
+              "roll__lag_1",
+              "pitch__lag_1",
+              "yaw__lag_1",
+              "roll_rate__lag_1",
+              "pitch_rate__lag_1",
+              "yaw_rate__lag_1",
+              "position_y__lag_1",
+              "position_z__lag_1",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "heading__lag_1",
+              "command_pitch__lag_2",
+              "command_yaw__lag_2",
+              "command_throttle__lag_2",
+              "roll__lag_2",
+              "pitch__lag_2",
+              "yaw__lag_2",
+              "roll_rate__lag_2",
+              "pitch_rate__lag_2",
+              "yaw_rate__lag_2",
+              "position_y__lag_2",
+              "position_z__lag_2",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "heading__lag_2",
+              "command_pitch__lag_3",
+              "command_yaw__lag_3",
+              "command_throttle__lag_3",
+              "roll__lag_3",
+              "pitch__lag_3",
+              "yaw__lag_3",
+              "roll_rate__lag_3",
+              "pitch_rate__lag_3",
+              "yaw_rate__lag_3",
+              "position_y__lag_3",
+              "position_z__lag_3",
+              "velocity_z__lag_3",
+              "altitude__lag_3",
+              "vertical_speed__lag_3",
+              "heading__lag_3"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.9999999465596945,
+              "mse": 2.5024040689946844e-13,
+              "mae": 3.1867096217691535e-07,
+              "residual_mean_abs": 3.1867096217691535e-07,
+              "residual_std": 5.002403491317631e-07,
+              "residual_max_abs": 1.2979393691214813e-06
+            },
+            "val": {
+              "r2": -23037908211000.812,
+              "mse": 1.9850532619081238e-13,
+              "mae": 3.058885559351125e-07,
+              "residual_mean_abs": 3.058885559351125e-07,
+              "residual_std": 3.239406080421902e-07,
+              "residual_max_abs": 8.377138607240653e-07
+            },
+            "test": {
+              "r2": -2.3430239503310387e+17,
+              "mse": 2.018858353544264e-09,
+              "mae": 2.753820162133781e-05,
+              "residual_mean_abs": 2.753820162133781e-05,
+              "residual_std": 4.465048505812926e-05,
+              "residual_max_abs": 9.767943570226922e-05
+            },
+            "condition_number": 7946863002281.303,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              117.36694594305536,
+              106.07612692384949,
+              90.32868072510712,
+              72.07118417744924,
+              26.71144331819418,
+              17.28552623636306,
+              10.269135544462408,
+              8.53679296907282,
+              4.907629025921194,
+              4.808945213852896
+            ],
+            "effective_condition_number": 7946863002281.303,
+            "singular_values": [
+              68.46381084993281,
+              44.04401831360027,
+              33.19584560836751,
+              18.836082733100106,
+              10.142636916705857,
+              6.016100512111757,
+              3.4015842093957636,
+              2.917661815126146,
+              2.6376240651564755,
+              2.6160591187178612
+            ],
+            "effective_singular_values": [
+              68.46381084993281,
+              44.04401831360027,
+              33.19584560836751,
+              18.836082733100106,
+              10.142636916705857,
+              6.016100512111757,
+              3.4015842093957636,
+              2.917661815126146,
+              2.6376240651564755,
+              2.6160591187178612
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading",
+              "integrator_yaw",
+              "control_output_roll",
+              "control_output_pitch",
+              "control_output_yaw",
+              "command_pitch__lag_1",
+              "command_yaw__lag_1",
+              "command_throttle__lag_1",
+              "roll__lag_1",
+              "pitch__lag_1",
+              "yaw__lag_1",
+              "roll_rate__lag_1",
+              "pitch_rate__lag_1",
+              "yaw_rate__lag_1",
+              "position_y__lag_1",
+              "position_z__lag_1",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "heading__lag_1",
+              "command_pitch__lag_2",
+              "command_yaw__lag_2",
+              "command_throttle__lag_2",
+              "roll__lag_2",
+              "pitch__lag_2",
+              "yaw__lag_2",
+              "roll_rate__lag_2",
+              "pitch_rate__lag_2",
+              "yaw_rate__lag_2",
+              "position_y__lag_2",
+              "position_z__lag_2",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "heading__lag_2",
+              "command_pitch__lag_3",
+              "command_yaw__lag_3",
+              "command_throttle__lag_3",
+              "roll__lag_3",
+              "pitch__lag_3",
+              "yaw__lag_3",
+              "roll_rate__lag_3",
+              "pitch_rate__lag_3",
+              "yaw_rate__lag_3",
+              "position_y__lag_3",
+              "position_z__lag_3",
+              "altitude__lag_3",
+              "vertical_speed__lag_3",
+              "heading__lag_3"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "command_pitch",
+              "command_yaw",
+              "roll",
+              "pitch",
+              "yaw",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "heading",
+              "integrator_yaw",
+              "control_output_roll",
+              "control_output_pitch",
+              "control_output_yaw",
+              "command_pitch__lag_1",
+              "command_yaw__lag_1",
+              "command_throttle__lag_1",
+              "roll__lag_1",
+              "pitch__lag_1",
+              "yaw__lag_1",
+              "roll_rate__lag_1",
+              "pitch_rate__lag_1",
+              "yaw_rate__lag_1",
+              "position_y__lag_1",
+              "position_z__lag_1",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "heading__lag_1",
+              "command_pitch__lag_2",
+              "command_yaw__lag_2",
+              "command_throttle__lag_2",
+              "roll__lag_2",
+              "pitch__lag_2",
+              "yaw__lag_2",
+              "roll_rate__lag_2",
+              "pitch_rate__lag_2",
+              "yaw_rate__lag_2",
+              "position_y__lag_2",
+              "position_z__lag_2",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "heading__lag_2",
+              "command_pitch__lag_3",
+              "command_yaw__lag_3",
+              "command_throttle__lag_3",
+              "roll__lag_3",
+              "pitch__lag_3",
+              "yaw__lag_3",
+              "roll_rate__lag_3",
+              "pitch_rate__lag_3",
+              "yaw_rate__lag_3",
+              "position_y__lag_3",
+              "position_z__lag_3",
+              "altitude__lag_3",
+              "vertical_speed__lag_3",
+              "heading__lag_3"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 553,
+            "val_count": 184,
+            "test_count": 181
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 551,
+            "val_count": 181,
+            "test_count": 186
+          }
+        ],
+        "median_test_r2": -1.6883911791294154e+17,
+        "median_test_mse": 1.4547963257527071e-09,
+        "median_test_mae": 2.2746587575923127e-05,
+        "coefficient_stability": 0.9722222222222222,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 16,
+            "state": 6,
+            "history": 51,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 7875234528636.494,
+        "condition_number": 7875234528636.494,
+        "raw_singular_values": [
+          117.57976016304852,
+          106.23750466381274,
+          88.13915792604512,
+          72.24464024237315,
+          26.804338226636744,
+          22.9473506943458,
+          17.262277588711534,
+          8.51158683684605,
+          4.966827545007733,
+          4.793370405911071
+        ],
+        "singular_values": [
+          65.18455842801558,
+          43.688263422481974,
+          33.2547465889169,
+          17.428357805434473,
+          10.126862696216453,
+          5.986899095333799,
+          3.3898061189343167,
+          2.6672900832988065,
+          2.614047548067417,
+          2.3085139749757313
+        ],
+        "effective_singular_values": [
+          65.18455842801558,
+          43.688263422481974,
+          33.2547465889169,
+          17.428357805434473,
+          10.126862696216453,
+          5.986899095333799,
+          3.3898061189343167,
+          2.6672900832988065,
+          2.614047548067417,
+          2.3085139749757313
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "altitude__lag_1",
+          "altitude__lag_2",
+          "altitude__lag_3",
+          "command_pitch",
+          "command_pitch__lag_1",
+          "command_pitch__lag_2",
+          "command_pitch__lag_3",
+          "command_throttle__lag_1",
+          "command_throttle__lag_2",
+          "command_throttle__lag_3",
+          "command_yaw",
+          "command_yaw__lag_1",
+          "command_yaw__lag_2",
+          "command_yaw__lag_3",
+          "control_output_pitch",
+          "control_output_roll",
+          "control_output_yaw",
+          "heading",
+          "heading__lag_1",
+          "heading__lag_2",
+          "heading__lag_3",
+          "integrator_yaw",
+          "pitch",
+          "pitch__lag_1",
+          "pitch__lag_2",
+          "pitch__lag_3",
+          "pitch_rate__lag_1",
+          "pitch_rate__lag_2",
+          "pitch_rate__lag_3",
+          "position_y",
+          "position_y__lag_1",
+          "position_y__lag_2",
+          "position_y__lag_3",
+          "position_z",
+          "position_z__lag_1",
+          "position_z__lag_2",
+          "position_z__lag_3",
+          "roll",
+          "roll__lag_1",
+          "roll__lag_2",
+          "roll__lag_3",
+          "roll_rate__lag_1",
+          "roll_rate__lag_2",
+          "roll_rate__lag_3",
+          "velocity_z__lag_3",
+          "vertical_speed",
+          "vertical_speed__lag_1",
+          "vertical_speed__lag_2",
+          "vertical_speed__lag_3",
+          "yaw",
+          "yaw__lag_1",
+          "yaw__lag_2",
+          "yaw__lag_3",
+          "yaw_rate",
+          "yaw_rate__lag_1",
+          "yaw_rate__lag_2",
+          "yaw_rate__lag_3"
+        ],
+        "conditioning_baseline_drops": [],
+        "conditioning_extra_pruned_features": [
+          "altitude__lag_1",
+          "altitude__lag_2",
+          "altitude__lag_3",
+          "command_pitch",
+          "command_pitch__lag_1",
+          "command_pitch__lag_2",
+          "command_pitch__lag_3",
+          "command_throttle__lag_1",
+          "command_throttle__lag_2",
+          "command_throttle__lag_3",
+          "command_yaw",
+          "command_yaw__lag_1",
+          "command_yaw__lag_2",
+          "command_yaw__lag_3",
+          "control_output_pitch",
+          "control_output_roll",
+          "control_output_yaw",
+          "heading",
+          "heading__lag_1",
+          "heading__lag_2",
+          "heading__lag_3",
+          "integrator_yaw",
+          "pitch",
+          "pitch__lag_1",
+          "pitch__lag_2",
+          "pitch__lag_3",
+          "pitch_rate__lag_1",
+          "pitch_rate__lag_2",
+          "pitch_rate__lag_3",
+          "position_y",
+          "position_y__lag_1",
+          "position_y__lag_2",
+          "position_y__lag_3",
+          "position_z",
+          "position_z__lag_1",
+          "position_z__lag_2",
+          "position_z__lag_3",
+          "roll",
+          "roll__lag_1",
+          "roll__lag_2",
+          "roll__lag_3",
+          "roll_rate__lag_1",
+          "roll_rate__lag_2",
+          "roll_rate__lag_3",
+          "velocity_z__lag_3",
+          "vertical_speed__lag_1",
+          "vertical_speed__lag_2",
+          "vertical_speed__lag_3",
+          "yaw",
+          "yaw__lag_1",
+          "yaw__lag_2",
+          "yaw__lag_3",
+          "yaw_rate",
+          "yaw_rate__lag_1",
+          "yaw_rate__lag_2",
+          "yaw_rate__lag_3"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "ardupilot": {
+            "r2": 0.999943459232648,
+            "mse": 1.908166474866626e-10,
+            "mae": 6.45888246730853e-06,
+            "residual_mean_abs": 6.45888246730853e-06,
+            "residual_std": 1.3755452837745288e-05,
+            "residual_max_abs": 4.904562771229637e-05
+          }
+        },
+        "mode_consistency": {
+          "STABILIZE": {
+            "r2": 0.999943459232648,
+            "mse": 1.908166474866626e-10,
+            "mae": 6.45888246730853e-06,
+            "residual_mean_abs": 6.45888246730853e-06,
+            "residual_std": 1.3755452837745288e-05,
+            "residual_max_abs": 4.904562771229637e-05
+          }
+        },
+        "top_influential": {
+          "future_state_roll": [
+            {
+              "feature": "integrator_yaw",
+              "weight": 0.15999304375808032,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.09195678628799442,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": 0.09195678628761245,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": 0.0919567862874526,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_3",
+              "weight": 0.09195678628743556,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_pitch": [
+            {
+              "feature": "integrator_yaw",
+              "weight": 0.0696073631115772,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.03999826093973485,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_3",
+              "weight": 0.03999826093949253,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": 0.039998260939438465,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": 0.0399982609393487,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_yaw": [
+            {
+              "feature": "integrator_yaw",
+              "weight": -1361.7278072393715,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": -782.6597332699034,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": -782.6597332651565,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_3",
+              "weight": -782.6597332635661,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": -782.6597332629109,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_roll_rate": [
+            {
+              "feature": "control_output_yaw",
+              "weight": -86.07086651516906,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "control_output_pitch",
+              "weight": -3.595388797990444,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "control_output_roll",
+              "weight": 2.3353144881371106,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_1",
+              "weight": 0.07521245431842952,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.07521245431834825,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_pitch_rate": [
+            {
+              "feature": "control_output_yaw",
+              "weight": -157.12842393292988,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "control_output_pitch",
+              "weight": -6.571659856166559,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "control_output_roll",
+              "weight": 4.2622651892177466,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_3",
+              "weight": 0.13716650713985323,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_2",
+              "weight": 0.1371665071398318,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_yaw_rate": [
+            {
+              "feature": "control_output_yaw",
+              "weight": -121.0858629638145,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "control_output_pitch",
+              "weight": -5.078905146573055,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "control_output_roll",
+              "weight": 3.2831755351607783,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_1",
+              "weight": 0.10544613601518413,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.1054461360151838,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "median_test_r2": -1.6883911791294154e+17,
+  "median_test_mse": 1.4547963257527071e-09,
+  "median_test_mae": 2.2746587575923127e-05,
+  "coefficient_stability": 0.9722222222222222,
+  "nonzero_count": 0,
+  "sparsity_ratio": 1.0,
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 7875234528636.494,
+  "condition_number": 7875234528636.494,
+  "raw_singular_values": [
+    117.57976016304852,
+    106.23750466381274,
+    88.13915792604512,
+    72.24464024237315,
+    26.804338226636744,
+    22.9473506943458,
+    17.262277588711534,
+    8.51158683684605,
+    4.966827545007733,
+    4.793370405911071
+  ],
+  "singular_values": [
+    65.18455842801558,
+    43.688263422481974,
+    33.2547465889169,
+    17.428357805434473,
+    10.126862696216453,
+    5.986899095333799,
+    3.3898061189343167,
+    2.6672900832988065,
+    2.614047548067417,
+    2.3085139749757313
+  ],
+  "effective_singular_values": [
+    65.18455842801558,
+    43.688263422481974,
+    33.2547465889169,
+    17.428357805434473,
+    10.126862696216453,
+    5.986899095333799,
+    3.3898061189343167,
+    2.6672900832988065,
+    2.614047548067417,
+    2.3085139749757313
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "altitude__lag_1",
+    "altitude__lag_2",
+    "altitude__lag_3",
+    "command_pitch",
+    "command_pitch__lag_1",
+    "command_pitch__lag_2",
+    "command_pitch__lag_3",
+    "command_throttle__lag_1",
+    "command_throttle__lag_2",
+    "command_throttle__lag_3",
+    "command_yaw",
+    "command_yaw__lag_1",
+    "command_yaw__lag_2",
+    "command_yaw__lag_3",
+    "control_output_pitch",
+    "control_output_roll",
+    "control_output_yaw",
+    "heading",
+    "heading__lag_1",
+    "heading__lag_2",
+    "heading__lag_3",
+    "integrator_yaw",
+    "pitch",
+    "pitch__lag_1",
+    "pitch__lag_2",
+    "pitch__lag_3",
+    "pitch_rate__lag_1",
+    "pitch_rate__lag_2",
+    "pitch_rate__lag_3",
+    "position_y",
+    "position_y__lag_1",
+    "position_y__lag_2",
+    "position_y__lag_3",
+    "position_z",
+    "position_z__lag_1",
+    "position_z__lag_2",
+    "position_z__lag_3",
+    "roll",
+    "roll__lag_1",
+    "roll__lag_2",
+    "roll__lag_3",
+    "roll_rate__lag_1",
+    "roll_rate__lag_2",
+    "roll_rate__lag_3",
+    "velocity_z__lag_3",
+    "vertical_speed",
+    "vertical_speed__lag_1",
+    "vertical_speed__lag_2",
+    "vertical_speed__lag_3",
+    "yaw",
+    "yaw__lag_1",
+    "yaw__lag_2",
+    "yaw__lag_3",
+    "yaw_rate",
+    "yaw_rate__lag_1",
+    "yaw_rate__lag_2",
+    "yaw_rate__lag_3"
+  ],
+  "conditioning_baseline_drops": [],
+  "conditioning_extra_pruned_features": [
+    "altitude__lag_1",
+    "altitude__lag_2",
+    "altitude__lag_3",
+    "command_pitch",
+    "command_pitch__lag_1",
+    "command_pitch__lag_2",
+    "command_pitch__lag_3",
+    "command_throttle__lag_1",
+    "command_throttle__lag_2",
+    "command_throttle__lag_3",
+    "command_yaw",
+    "command_yaw__lag_1",
+    "command_yaw__lag_2",
+    "command_yaw__lag_3",
+    "control_output_pitch",
+    "control_output_roll",
+    "control_output_yaw",
+    "heading",
+    "heading__lag_1",
+    "heading__lag_2",
+    "heading__lag_3",
+    "integrator_yaw",
+    "pitch",
+    "pitch__lag_1",
+    "pitch__lag_2",
+    "pitch__lag_3",
+    "pitch_rate__lag_1",
+    "pitch_rate__lag_2",
+    "pitch_rate__lag_3",
+    "position_y",
+    "position_y__lag_1",
+    "position_y__lag_2",
+    "position_y__lag_3",
+    "position_z",
+    "position_z__lag_1",
+    "position_z__lag_2",
+    "position_z__lag_3",
+    "roll",
+    "roll__lag_1",
+    "roll__lag_2",
+    "roll__lag_3",
+    "roll_rate__lag_1",
+    "roll_rate__lag_2",
+    "roll_rate__lag_3",
+    "velocity_z__lag_3",
+    "vertical_speed__lag_1",
+    "vertical_speed__lag_2",
+    "vertical_speed__lag_3",
+    "yaw",
+    "yaw__lag_1",
+    "yaw__lag_2",
+    "yaw__lag_3",
+    "yaw_rate",
+    "yaw_rate__lag_1",
+    "yaw_rate__lag_2",
+    "yaw_rate__lag_3"
+  ],
+  "backend_consistency": {},
+  "mode_consistency": {},
+  "top_influential": {},
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

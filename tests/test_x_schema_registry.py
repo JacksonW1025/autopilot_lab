@@ -4,13 +4,10 @@ from pathlib import Path
 
 import numpy as np
 
-from linearity_core.config import load_study_config
 from linearity_core.dataset import build_prepared_sample_table
 from linearity_core.schemas import available_x_schemas, build_schema_matrices
 from linearity_core.synthetic import generate_synthetic_raw_runs
-
-
-ROOT = Path(__file__).resolve().parents[1]
+from tests.support import load_synthetic_config
 
 
 def test_x_schema_registry_contains_required_entries() -> None:
@@ -28,7 +25,12 @@ def test_x_schema_registry_contains_required_entries() -> None:
 
 
 def test_history_schema_adds_lagged_features(tmp_path: Path) -> None:
-    config = load_study_config(ROOT / "configs/studies/global_linear_history_augmented__future_state_horizon.yaml")
+    config = load_synthetic_config(
+        tmp_path,
+        filename="history_config.json",
+        x_schema="commands_plus_state_history",
+        y_schema="future_state_horizon",
+    )
     run_dirs = generate_synthetic_raw_runs(config, output_root=tmp_path)
     table, _ = build_prepared_sample_table(run_dirs, config)
     matrices = build_schema_matrices(table, config, "commands_plus_state_history", "future_state_horizon")
@@ -38,7 +40,12 @@ def test_history_schema_adds_lagged_features(tmp_path: Path) -> None:
 
 
 def test_feature_mapped_linear_is_marked_non_strict(tmp_path: Path) -> None:
-    config = load_study_config(ROOT / "configs/studies/global_linear_pooled_backend_augmented__selected_state_subset.yaml")
+    config = load_synthetic_config(
+        tmp_path,
+        filename="feature_map_config.json",
+        x_schema="pooled_backend_mode_augmented",
+        y_schema="selected_state_subset",
+    )
     run_dirs = generate_synthetic_raw_runs(config, output_root=tmp_path)
     table, _ = build_prepared_sample_table(run_dirs, config)
     matrices = build_schema_matrices(table, config, "feature_mapped_linear", "selected_state_subset")
@@ -47,7 +54,7 @@ def test_feature_mapped_linear_is_marked_non_strict(tmp_path: Path) -> None:
 
 
 def test_missing_state_columns_are_pruned_instead_of_invalidating_schema(tmp_path: Path) -> None:
-    config = load_study_config(ROOT / "configs/studies/global_linear_commands_plus_state__delta_state.yaml")
+    config = load_synthetic_config(tmp_path, filename="state_delta_config.json")
     run_dirs = generate_synthetic_raw_runs(config, output_root=tmp_path)
     table, _ = build_prepared_sample_table(run_dirs, config)
     for row in table.rows:
@@ -66,3 +73,25 @@ def test_missing_state_columns_are_pruned_instead_of_invalidating_schema(tmp_pat
     assert "delta_state_roll_rate" not in matrices.response_names
     assert "roll_rate" in matrices.schema_metadata["dropped_unavailable_features"]
     assert "delta_state_roll_rate" in matrices.schema_metadata["dropped_unavailable_responses"]
+
+
+def test_backend_mode_covariates_can_exclude_scenario_and_config_profile(tmp_path: Path) -> None:
+    config = load_synthetic_config(
+        tmp_path,
+        filename="generalization_covariates_config.json",
+        x_schema="pooled_backend_mode_augmented",
+        y_schema="delta_state",
+        backend_mode_covariates=["backend", "mode"],
+    )
+    run_dirs = generate_synthetic_raw_runs(config, output_root=tmp_path)
+    table, _ = build_prepared_sample_table(run_dirs, config)
+    for row in table.rows:
+        row["scenario_dynamic"] = 1.0 if row["logical_step"] % 2 == 0 else 0.0
+        row["scenario_nominal"] = 1.0 - row["scenario_dynamic"]
+        row["config_profile_dynamic"] = row["scenario_dynamic"]
+        row["config_profile_nominal"] = row["scenario_nominal"]
+    matrices = build_schema_matrices(table, config, "pooled_backend_mode_augmented", "delta_state")
+    assert not any(name.startswith("scenario_") for name in matrices.feature_names)
+    assert not any(name.startswith("config_profile_") for name in matrices.feature_names)
+    assert any(name.startswith("backend_") for name in matrices.feature_names)
+    assert any(name.startswith("mode_") for name in matrices.feature_names)

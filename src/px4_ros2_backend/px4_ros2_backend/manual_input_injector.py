@@ -17,6 +17,7 @@ from px4_msgs.msg import (
     VehicleLocalPosition,
     VehicleStatus,
 )
+from rclpy.clock import Clock, ClockType
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 
@@ -55,6 +56,7 @@ class ManualInputInjector(Node):
         self._vehicle_status = VehicleStatus()
         self._vehicle_control_mode = VehicleControlMode()
         self._vehicle_local_position = VehicleLocalPosition()
+        self._timer_clock = Clock(clock_type=ClockType.SYSTEM_TIME)
 
         qos = px4_qos_profile()
         self._manual_input_publisher = self.create_publisher(ManualControlSetpoint, "/fmu/in/manual_control_input", qos)
@@ -79,7 +81,8 @@ class ManualInputInjector(Node):
             qos,
         )
 
-        self._timer = self.create_timer(self._config.period_s, self._timer_callback)
+        # Drive setpoint publication from wall-clock time so simulator /clock stalls do not interrupt OFFBOARD streaming.
+        self._timer = self.create_timer(self._config.period_s, self._timer_callback, clock=self._timer_clock)
 
     def _vehicle_status_callback(self, msg: VehicleStatus) -> None:
         with self._lock:

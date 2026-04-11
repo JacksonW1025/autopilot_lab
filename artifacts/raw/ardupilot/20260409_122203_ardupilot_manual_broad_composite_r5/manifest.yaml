@@ -1,0 +1,272 @@
+kind: linearity_raw_run
+run_id: 20260409_122203_ardupilot_manual_broad_composite_r5
+backend: ardupilot
+status: completed
+failure_reason: ''
+study_name: ardupilot_real_nominal_stabilize_capture
+study_config:
+  study_name: ardupilot_real_nominal_stabilize_capture
+  backend: ardupilot
+  flight_mode: STABILIZE
+  scenario: nominal
+  config_profile: ardupilot_real_stabilize_nominal
+  seed: 201
+  repeat_count: 1
+  sampling_rate_hz: 20.0
+  x_schema: commands_plus_state
+  research_tier: authoritative_research
+  x_include_groups: []
+  x_exclude_groups: []
+  y_schema: delta_state
+  y_include_groups: []
+  y_exclude_groups: []
+  feature_map: identity
+  run_level_covariates_as_inputs: false
+  stratify_by:
+  - mode
+  pooling_mode: pooled
+  output_semantics: future_state
+  history_length: 3
+  prediction_horizon: 2
+  prediction_horizon_unit: steps
+  parameter_sweep: {}
+  internal_signals_enabled: true
+  perturbation_strategy: broad_exploration
+  ablation_plan: null
+  model:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+  sparsity:
+    threshold: 0.05
+    ridge_alpha: 0.6
+    lasso_alpha: 0.04
+    bootstrap_repeats: 6
+    stability_selection_threshold: 0.6
+  reporting:
+    stability_repeats: 2
+    max_alignment_error_ms: 150
+  input_type: manual
+  axis: composite
+  profile_type: broad
+  amplitude: 0.18
+  bias: 0.0
+  start_after_s: 1.0
+  duration_s: 6.0
+  hold_s: 1.0
+  hover_thrust: -0.69
+  timing_required: false
+  operator: Codex
+  warmup_cycles: 10
+  manual_mode: flight
+  takeoff_thrust: -0.8
+  takeoff_thrust_max: -0.92
+  takeoff_ramp_s: 2.0
+  takeoff_altitude_m: 1.5
+  takeoff_position_tolerance_m: 0.2
+  takeoff_velocity_tolerance_m: 0.3
+  takeoff_settle_s: 1.5
+  takeoff_timeout_s: 10.0
+  min_takeoff_clearance_m: 0.35
+  min_profile_clearance_m: 0.25
+  altitude_hold_kp: 0.12
+  altitude_hold_kd: 0.08
+  thrust_z_min: -0.95
+  thrust_z_max: -0.35
+  land_timeout_s: 10.0
+  ready_timeout_s: 30.0
+  parameter_overrides: {}
+  controlled_parameters: []
+  synthetic: {}
+  extras:
+    ardupilot_ready_timeout_s: 30.0
+    ardupilot_tail_s: 2.0
+    ardupilot_land_settle_s: 2.0
+    ardupilot_manual_throttle_bias: 0.65
+    ardupilot_manual_throttle_scale: 0.3
+    broad_frequencies_hz:
+    - 0.15
+    - 0.35
+    - 0.7
+    roll_amplitude: 1.0
+    pitch_amplitude: 0.8
+    yaw_amplitude: 0.4
+    throttle_amplitude: 0.12
+    source_path: /mnt/nvme/autopilot_lab/configs/studies/ardupilot_real_nominal_stabilize_capture.yaml
+    repeat_index: 1
+  source_path: /mnt/nvme/autopilot_lab/configs/studies/ardupilot_real_nominal_stabilize_capture.yaml
+  repeat_index: 5
+flight_mode: STABILIZE
+scenario: nominal
+config_profile: ardupilot_real_stabilize_nominal
+seed: 201
+repeat_index: 5
+input_type: manual
+profile_type: broad
+axis: composite
+vehicle: ArduCopter
+frame: quad
+master_uri: tcp:127.0.0.1:5760
+start_time: '2026-04-09T12:22:03.444589-07:00'
+end_time: '2026-04-09T12:22:36.228716-07:00'
+ardupilot_bin_log_path: /home/car/autopilot_lab/artifacts/raw/ardupilot/20260409_122203_ardupilot_manual_broad_composite_r5/telemetry/ardupilot.BIN
+ardupilot_tlog_path: /home/car/autopilot_lab/artifacts/raw/ardupilot/20260409_122203_ardupilot_manual_broad_composite_r5/telemetry/ardupilot.tlog
+host_snapshot_start:
+  uptime: '12:22:04 up 11:04,  1 user,  load average: 2.60, 3.20, 4.82'
+  loadavg: 2.60 3.20 4.82 2/1456 94900
+host_snapshot_end:
+  uptime: '12:22:36 up 11:04,  1 user,  load average: 3.00, 3.23, 4.78'
+  loadavg: 3.00 3.23 4.78 4/1459 95021
+parameter_snapshot_before:
+  ARMING_CHECK: 1.0
+parameter_snapshot_after:
+  ARMING_CHECK: 0.0
+bin_extract_summary:
+  message_counts:
+    ATT: 249
+    RATE: 248
+    MOTB: 248
+    RCOU: 248
+    POS: 206
+    AHR2: 248
+    BAT: 249
+    MODE: 3
+    ORGN: 2
+runtime_report:
+  experiment_start_time_ns: 1775762532044383016
+  completion_time_ns: 1775762542047268196
+  completion_reason: profile_completed
+  anomalies:
+  - quality_alignment_p95_exceeded
+  visualization:
+    requested: true
+    headless: false
+    mavproxy_started: true
+    map_requested: true
+    map_loaded: true
+    failure_reason: ''
+  telemetry_sources:
+    attitude.csv: live_mavlink
+    local_position.csv: live_mavlink
+    heartbeat.csv: live_mavlink
+    sys_status.csv: live_mavlink
+data_quality:
+  topic_presence:
+    required_topic_counts:
+      attitude: 241
+      local_position: 241
+      heartbeat: 13
+      sys_status: 241
+      bin_att: 249
+      bin_rate: 248
+      bin_motb: 248
+      bin_rcou: 248
+    missing_topics: []
+    ros_message_counts:
+      attitude: 241
+      local_position: 241
+      heartbeat: 13
+      sys_status: 241
+      bin_att: 249
+      bin_rate: 248
+      bin_motb: 248
+      bin_rcou: 248
+  timestamp_monotonicity:
+    input_trace: true
+    attitude: true
+    local_position: true
+    heartbeat: true
+    sys_status: true
+    bin_att: true
+    bin_rate: true
+    bin_motb: true
+    bin_rcou: true
+  input_alignment_ns:
+    attitude:
+      count: 191.0
+      median_ns: 173824.0
+      p95_ns: 285696.0
+      max_ns: 50956032.0
+    local_position:
+      count: 191.0
+      median_ns: 249344.0
+      p95_ns: 463616.0
+      max_ns: 51139584.0
+    heartbeat:
+      count: 191.0
+      median_ns: 267628544.0
+      p95_ns: 725923840.0
+      max_ns: 1021975552.0
+    sys_status:
+      count: 191.0
+      median_ns: 337664.0
+      p95_ns: 658688.0
+      max_ns: 51322112.0
+    bin_att:
+      count: 191.0
+      median_ns: 1.7757625078866035e+18
+      p95_ns: 1.7757625123004465e+18
+      max_ns: 1.7757625128190162e+18
+    bin_rate:
+      count: 191.0
+      median_ns: 1.7757625079865633e+18
+      p95_ns: 1.7757625124004063e+18
+      max_ns: 1.775762512918976e+18
+    bin_motb:
+      count: 191.0
+      median_ns: 1.7757625079865633e+18
+      p95_ns: 1.7757625124004063e+18
+      max_ns: 1.775762512918976e+18
+    bin_rcou:
+      count: 191.0
+      median_ns: 1.7757625079865633e+18
+      p95_ns: 1.7757625124004063e+18
+      max_ns: 1.775762512918976e+18
+  prediction_constructibility:
+    total_input_samples: 191.0
+    prediction_horizon: 2.0
+    future_state_ratio_estimate: 0.9895287958115183
+    delta_state_ratio_estimate: 0.9895287958115183
+    window_summary_ratio_estimate: 0.9895287958115183
+    actuator_response_ratio_estimate: 1.0
+  thresholds:
+    max_alignment_error_ms: 150.0
+  quality_flags:
+    non_monotonic_streams: []
+    alignment_p95_exceeded_streams:
+    - bin_att
+    - bin_motb
+    - bin_rate
+    - bin_rcou
+    - heartbeat
+  acceptance:
+    experiment_started: true
+    active_phase_present: true
+    expected_active_samples: 120
+    active_sample_count: 115
+    active_nonzero_command_samples: 115
+    failsafe_during_experiment: false
+    missing_topics_blocking: []
+    accepted: true
+    rejection_reasons: []
+anomaly_summary:
+- quality_alignment_p95_exceeded
+telemetry_files:
+- attitude.csv
+- bin_ahr2.csv
+- bin_att.csv
+- bin_bat.csv
+- bin_mode.csv
+- bin_motb.csv
+- bin_orgn.csv
+- bin_pos.csv
+- bin_rate.csv
+- bin_rcou.csv
+- heartbeat.csv
+- input_trace.csv
+- local_position.csv
+- sys_status.csv
+raw_schema_version: 2
+research_acceptance: accepted
+research_rejection_reasons: []
+research_tier: authoritative_research

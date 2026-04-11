@@ -1,0 +1,24 @@
+plan_name: ardupilot_diagnostic_stabilize_throttle
+x_schemas:
+  - commands_only
+  - commands_plus_state
+  - commands_plus_state_history
+  - full_augmented
+y_schemas:
+  - next_raw_state
+  - delta_state
+  - selected_state_subset
+  - future_state_horizon
+  - actuator_response
+models:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+pooling_modes:
+  - pooled
+stratify_by:
+  - mode
+output_study_name: ardupilot_diagnostic_stabilize_throttle
+reporting:
+  top_k: 10
+  appendix_x_schemas: []

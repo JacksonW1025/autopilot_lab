@@ -13,6 +13,7 @@ import rclpy
 from linearity_core.io import capture_host_snapshot, read_rows_csv, write_rows_csv, write_yaml
 from linearity_core.mav_params import close_mavlink, connect_mavlink, set_parameters, snapshot_parameters
 from linearity_core.research_contract import apply_manifest_research_contract, build_acceptance_block
+from rclpy._rclpy_pybind11 import RCLError
 from rclpy.executors import SingleThreadedExecutor
 
 from .artifacts import ensure_run_directories, resolve_ulog_path, snapshot_ulog_files
@@ -169,7 +170,11 @@ def _timestamp_monotonic(rows: list[dict[str, Any]], time_key: str) -> bool:
 
 def _phase_is_active(phase: Any) -> bool:
     normalized = str(phase or "").strip().lower()
-    return normalized.endswith("_active") or normalized in ACTIVE_PHASE_COMPATIBILITY
+    return (
+        normalized.endswith("_active")
+        or "_active_" in normalized
+        or normalized in ACTIVE_PHASE_COMPATIBILITY
+    )
 
 
 def _command_row_has_nonzero_command(row: dict[str, Any], *, epsilon: float = 1e-9) -> bool:
@@ -389,11 +394,15 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
     rclpy.init()
     recorder = TelemetryRecorder()
     injector = _select_injector(config)
-    executor = SingleThreadedExecutor()
-    executor.add_node(recorder)
-    executor.add_node(injector)
-    spin_thread = threading.Thread(target=executor.spin, daemon=True)
-    spin_thread.start()
+    recorder_executor = SingleThreadedExecutor()
+    injector_executor = SingleThreadedExecutor()
+    recorder_executor.add_node(recorder)
+    injector_executor.add_node(injector)
+    # Keep the control timer isolated from recorder callback backlog so OFFBOARD setpoints do not stall.
+    recorder_spin_thread = threading.Thread(target=recorder_executor.spin, daemon=True)
+    injector_spin_thread = threading.Thread(target=injector_executor.spin, daemon=True)
+    recorder_spin_thread.start()
+    injector_spin_thread.start()
 
     status = "completed"
     failure_reason = ""
@@ -416,11 +425,17 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
                 anomalies.append(failure_reason)
             time.sleep(1.0)
     finally:
-        executor.shutdown()
-        spin_thread.join(timeout=5.0)
+        injector_executor.shutdown()
+        recorder_executor.shutdown()
+        injector_spin_thread.join(timeout=5.0)
+        recorder_spin_thread.join(timeout=5.0)
         injector.destroy_node()
         recorder.destroy_node()
-        rclpy.shutdown()
+        try:
+            if rclpy.ok():
+                rclpy.shutdown()
+        except RCLError:
+            pass
         stop_clock_bridge(clock_bridge_handle)
         if parameter_snapshot_after != parameter_snapshot_before:
             anomalies.extend(_restore_px4_parameters(parameter_master, parameter_snapshot_before))

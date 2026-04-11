@@ -1,0 +1,266 @@
+# Global Linearity Study Summary: px4_real_generalization_ablation
+
+## 研究目标
+- 主线固定为：数据采集 -> X/Y 构造 -> 全局拟合 -> 稀疏性分析 -> 结论。
+- 研究问题是：在当前 study scope 下，是否存在固定的全局线性/仿射映射 `Y ≈ fX (+ b)`。
+
+## 结论摘要
+- best_linear_schema: `full_augmented x next_raw_state | ols_affine | stratified`
+- best_sparse_and_stable_schema: `commands_plus_state_history x window_summary_response | ols_affine | stratified`
+- best_y_definition: `next_raw_state`
+- commands_only_to_commands_plus_state_r2_gain: 0.4862
+- commands_plus_state_to_history_r2_gain: 0.0013
+
+## 最优组合
+- best_combo: `full_augmented x next_raw_state | ols_affine | stratified`
+- support: `supported`
+- median_test_r2: 0.9995
+- median_test_mse: 0.000092
+- median_test_mae: 0.003705
+- sparsity_ratio: 0.9644
+- coefficient_stability: 0.8958
+
+## Conditioning
+- raw_condition_number: inf
+- effective_condition_number: 3435.5927
+- conditioning_pruned_features: altitude, altitude__lag_1, altitude__lag_2, altitude__lag_3, mode_offboard_attitude, mode_posctl, vertical_speed, vertical_speed__lag_1, vertical_speed__lag_2, vertical_speed__lag_3
+- conditioning_baseline_drops: mode_offboard_attitude
+- conditioning_extra_pruned_features: altitude__lag_1, altitude__lag_2, altitude__lag_3, mode_posctl, vertical_speed__lag_1, vertical_speed__lag_2, vertical_speed__lag_3
+
+## Data Quality
+- alignment_failure_ratio: 0.0000
+- missing_attitude_ratio: 0.0000
+- missing_local_position_ratio: 0.0000
+- missing_actuator_ratio: 0.0000
+- future_horizon_available_ratio: 0.9948
+- window_summary_available_ratio: 0.9948
+- median_alignment_attitude_ms: 2.8931
+- median_alignment_position_ms: 2.8833
+
+## Schema Ranking
+- `full_augmented x next_raw_state | ols_affine | stratified`: test R2=0.9995, sparsity=0.9644, support=supported
+- `full_augmented x next_raw_state | ridge_affine | stratified`: test R2=0.9995, sparsity=0.9780, support=supported
+- `commands_plus_state_history x next_raw_state | ols_affine | stratified`: test R2=0.9994, sparsity=0.9658, support=supported
+- `commands_plus_state_history x next_raw_state | ridge_affine | stratified`: test R2=0.9994, sparsity=0.9746, support=supported
+- `full_augmented x next_raw_state | lasso_affine | stratified`: test R2=0.9993, sparsity=0.6159, support=supported
+- `full_augmented x next_raw_state | ols_affine | pooled`: test R2=0.9992, sparsity=0.8917, support=supported
+- `full_augmented x next_raw_state | ridge_affine | pooled`: test R2=0.9992, sparsity=0.9523, support=supported
+- `commands_plus_state_history x next_raw_state | lasso_affine | stratified`: test R2=0.9992, sparsity=0.6035, support=supported
+- `commands_plus_state_history x next_raw_state | ols_affine | pooled`: test R2=0.9991, sparsity=0.8754, support=supported
+- `commands_plus_state_history x next_raw_state | ridge_affine | pooled`: test R2=0.9991, sparsity=0.9500, support=supported
+- `full_augmented x next_raw_state | lasso_affine | pooled`: test R2=0.9990, sparsity=0.2000, support=supported
+- `commands_plus_state_history x next_raw_state | lasso_affine | pooled`: test R2=0.9990, sparsity=0.1974, support=supported
+- `commands_plus_state x next_raw_state | ols_affine | stratified`: test R2=0.9982, sparsity=0.9509, support=supported
+- `commands_plus_state x next_raw_state | lasso_affine | stratified`: test R2=0.9982, sparsity=0.2561, support=supported
+- `commands_plus_state x next_raw_state | ridge_affine | stratified`: test R2=0.9982, sparsity=0.9649, support=supported
+- `commands_plus_state x next_raw_state | ols_affine | pooled`: test R2=0.9977, sparsity=0.8912, support=supported
+- `commands_plus_state x next_raw_state | lasso_affine | pooled`: test R2=0.9977, sparsity=0.0246, support=supported
+- `commands_plus_state x next_raw_state | ridge_affine | pooled`: test R2=0.9977, sparsity=0.9404, support=supported
+- `full_augmented x future_state_horizon | ridge_affine | pooled`: test R2=0.9975, sparsity=0.9744, support=supported
+- `full_augmented x future_state_horizon | ols_affine | pooled`: test R2=0.9974, sparsity=0.9280, support=supported
+- `full_augmented x future_state_horizon | lasso_affine | pooled`: test R2=0.9972, sparsity=0.3759, support=supported
+- `commands_plus_state_history x future_state_horizon | ridge_affine | pooled`: test R2=0.9970, sparsity=0.9748, support=supported
+- `commands_plus_state_history x future_state_horizon | ols_affine | pooled`: test R2=0.9969, sparsity=0.9145, support=supported
+- `commands_plus_state_history x future_state_horizon | lasso_affine | pooled`: test R2=0.9968, sparsity=0.3651, support=supported
+- `full_augmented x selected_state_subset | ridge_affine | pooled`: test R2=0.9962, sparsity=0.9678, support=supported
+- `full_augmented x selected_state_subset | ols_affine | pooled`: test R2=0.9960, sparsity=0.9034, support=supported
+- `full_augmented x selected_state_subset | lasso_affine | pooled`: test R2=0.9958, sparsity=0.3220, support=supported
+- `commands_plus_state_history x selected_state_subset | ridge_affine | pooled`: test R2=0.9954, sparsity=0.9693, support=supported
+- `commands_plus_state_history x selected_state_subset | ols_affine | pooled`: test R2=0.9953, sparsity=0.8882, support=supported
+- `commands_plus_state_history x selected_state_subset | lasso_affine | pooled`: test R2=0.9950, sparsity=0.3268, support=supported
+- `full_augmented x window_summary_response | ridge_affine | pooled`: test R2=0.9947, sparsity=0.9650, support=supported
+- `full_augmented x window_summary_response | ols_affine | pooled`: test R2=0.9946, sparsity=0.9025, support=supported
+- `full_augmented x window_summary_response | lasso_affine | pooled`: test R2=0.9945, sparsity=0.2670, support=supported
+- `commands_plus_state_history x window_summary_response | ridge_affine | pooled`: test R2=0.9943, sparsity=0.9616, support=supported
+- `commands_plus_state_history x window_summary_response | ols_affine | pooled`: test R2=0.9941, sparsity=0.8783, support=supported
+- `commands_plus_state_history x window_summary_response | lasso_affine | pooled`: test R2=0.9939, sparsity=0.2873, support=supported
+- `commands_plus_state x future_state_horizon | ols_affine | pooled`: test R2=0.9924, sparsity=0.9342, support=supported
+- `commands_plus_state x future_state_horizon | lasso_affine | pooled`: test R2=0.9923, sparsity=0.0614, support=supported
+- `commands_plus_state x future_state_horizon | ridge_affine | pooled`: test R2=0.9923, sparsity=0.9737, support=supported
+- `commands_plus_state x window_summary_response | ols_affine | pooled`: test R2=0.9900, sparsity=0.9123, support=supported
+- `commands_plus_state x window_summary_response | lasso_affine | pooled`: test R2=0.9899, sparsity=0.0351, support=supported
+- `commands_plus_state x window_summary_response | ridge_affine | pooled`: test R2=0.9899, sparsity=0.9737, support=supported
+- `commands_plus_state x selected_state_subset | ols_affine | pooled`: test R2=0.9883, sparsity=0.9386, support=supported
+- `commands_plus_state x selected_state_subset | lasso_affine | pooled`: test R2=0.9882, sparsity=0.0351, support=supported
+- `commands_plus_state x selected_state_subset | ridge_affine | pooled`: test R2=0.9882, sparsity=0.9737, support=supported
+- `full_augmented x future_state_horizon | lasso_affine | stratified`: test R2=0.8837, sparsity=0.8125, support=supported
+- `full_augmented x future_state_horizon | ridge_affine | stratified`: test R2=0.8811, sparsity=1.0000, support=supported
+- `full_augmented x future_state_horizon | ols_affine | stratified`: test R2=0.8780, sparsity=0.9905, support=supported
+- `commands_plus_state_history x future_state_horizon | lasso_affine | stratified`: test R2=0.8689, sparsity=0.8191, support=supported
+- `commands_plus_state_history x future_state_horizon | ridge_affine | stratified`: test R2=0.8652, sparsity=1.0000, support=supported
+- `commands_plus_state_history x future_state_horizon | ols_affine | stratified`: test R2=0.8644, sparsity=1.0000, support=supported
+- `full_augmented x selected_state_subset | lasso_affine | stratified`: test R2=0.8209, sparsity=0.7652, support=supported
+- `full_augmented x selected_state_subset | ridge_affine | stratified`: test R2=0.8175, sparsity=1.0000, support=supported
+- `full_augmented x selected_state_subset | ols_affine | stratified`: test R2=0.8111, sparsity=0.9886, support=supported
+- `full_augmented x delta_state | ols_affine | stratified`: test R2=0.8105, sparsity=0.9659, support=supported
+- `commands_plus_state x future_state_horizon | lasso_affine | stratified`: test R2=0.8070, sparsity=0.4167, support=supported
+- `commands_plus_state x future_state_horizon | ols_affine | stratified`: test R2=0.8069, sparsity=0.9912, support=supported
+- `commands_plus_state x future_state_horizon | ridge_affine | stratified`: test R2=0.8068, sparsity=1.0000, support=supported
+- `full_augmented x delta_state | ridge_affine | stratified`: test R2=0.8054, sparsity=0.9833, support=supported
+- `commands_plus_state_history x selected_state_subset | lasso_affine | stratified`: test R2=0.7959, sparsity=0.7873, support=supported
+- `commands_plus_state_history x selected_state_subset | ridge_affine | stratified`: test R2=0.7915, sparsity=1.0000, support=supported
+- `commands_plus_state_history x selected_state_subset | ols_affine | stratified`: test R2=0.7904, sparsity=1.0000, support=supported
+- `commands_plus_state_history x delta_state | ols_affine | stratified`: test R2=0.7847, sparsity=0.9675, support=supported
+- `commands_plus_state_history x delta_state | ridge_affine | stratified`: test R2=0.7745, sparsity=0.9807, support=supported
+- `full_augmented x delta_state | lasso_affine | stratified`: test R2=0.7706, sparsity=0.7379, support=supported
+- `full_augmented x delta_state | ridge_affine | pooled`: test R2=0.7570, sparsity=0.9598, support=supported
+- `full_augmented x delta_state | ols_affine | pooled`: test R2=0.7458, sparsity=0.8924, support=supported
+- `commands_plus_state_history x delta_state | lasso_affine | stratified`: test R2=0.7332, sparsity=0.7456, support=supported
+- `commands_plus_state_history x delta_state | ridge_affine | pooled`: test R2=0.7291, sparsity=0.9588, support=supported
+- `full_augmented x delta_state | lasso_affine | pooled`: test R2=0.7257, sparsity=0.2924, support=supported
+- `commands_plus_state_history x delta_state | ols_affine | pooled`: test R2=0.7205, sparsity=0.8772, support=supported
+- `commands_plus_state x selected_state_subset | lasso_affine | stratified`: test R2=0.7175, sparsity=0.3246, support=supported
+- `commands_plus_state x selected_state_subset | ols_affine | stratified`: test R2=0.7174, sparsity=0.9825, support=supported
+- `commands_plus_state x selected_state_subset | ridge_affine | stratified`: test R2=0.7173, sparsity=1.0000, support=supported
+- `commands_plus_state_history x window_summary_response | lasso_affine | stratified`: test R2=0.7017, sparsity=0.7456, support=supported
+- `commands_plus_state_history x window_summary_response | ridge_affine | stratified`: test R2=0.6963, sparsity=1.0000, support=partial
+- `commands_plus_state_history x window_summary_response | ols_affine | stratified`: test R2=0.6918, sparsity=0.9989, support=partial
+- `full_augmented x window_summary_response | lasso_affine | stratified`: test R2=0.6906, sparsity=0.7528, support=partial
+- `commands_plus_state_history x delta_state | lasso_affine | pooled`: test R2=0.6906, sparsity=0.2912, support=partial
+- `full_augmented x window_summary_response | ridge_affine | stratified`: test R2=0.6870, sparsity=1.0000, support=partial
+- `full_augmented x window_summary_response | ols_affine | stratified`: test R2=0.6823, sparsity=0.9915, support=partial
+- `commands_plus_state x window_summary_response | lasso_affine | stratified`: test R2=0.6756, sparsity=0.3070, support=partial
+- `commands_plus_state x window_summary_response | ridge_affine | stratified`: test R2=0.6754, sparsity=1.0000, support=partial
+- `commands_plus_state x window_summary_response | ols_affine | stratified`: test R2=0.6753, sparsity=0.9825, support=partial
+- `commands_plus_state x actuator_response | lasso_affine | stratified`: test R2=0.6085, sparsity=0.0000, support=partial
+- `commands_plus_state x actuator_response | ridge_affine | stratified`: test R2=0.6085, sparsity=0.9342, support=partial
+- `commands_plus_state x actuator_response | ols_affine | stratified`: test R2=0.6084, sparsity=0.8421, support=partial
+- `commands_plus_state_history x actuator_response | lasso_affine | stratified`: test R2=0.6024, sparsity=0.0559, support=partial
+- `commands_plus_state_history x actuator_response | ridge_affine | stratified`: test R2=0.5866, sparsity=0.7500, support=partial
+- `commands_plus_state_history x actuator_response | ols_affine | stratified`: test R2=0.5751, sparsity=0.5987, support=partial
+- `full_augmented x actuator_response | lasso_affine | stratified`: test R2=0.5342, sparsity=0.0506, support=partial
+- `full_augmented x actuator_response | ridge_affine | stratified`: test R2=0.5216, sparsity=0.7768, support=partial
+- `commands_only x actuator_response | ols_affine | stratified`: test R2=0.5120, sparsity=0.7500, support=partial
+- `commands_only x actuator_response | lasso_affine | stratified`: test R2=0.5120, sparsity=0.0000, support=partial
+- `commands_only x actuator_response | ridge_affine | stratified`: test R2=0.5120, sparsity=0.7500, support=partial
+- `full_augmented x actuator_response | ols_affine | stratified`: test R2=0.5072, sparsity=0.6190, support=partial
+- `full_augmented x actuator_response | ridge_affine | pooled`: test R2=0.4481, sparsity=0.3869, support=partial
+- `commands_plus_state_history x actuator_response | ridge_affine | pooled`: test R2=0.4477, sparsity=0.3980, support=partial
+- `full_augmented x actuator_response | ols_affine | pooled`: test R2=0.4450, sparsity=0.3661, support=partial
+- `commands_plus_state_history x actuator_response | ols_affine | pooled`: test R2=0.4449, sparsity=0.3520, support=partial
+- `commands_plus_state_history x actuator_response | lasso_affine | pooled`: test R2=0.4414, sparsity=0.0164, support=partial
+- `commands_plus_state x actuator_response | ols_affine | pooled`: test R2=0.4231, sparsity=0.8421, support=partial
+- `full_augmented x actuator_response | lasso_affine | pooled`: test R2=0.4229, sparsity=0.0357, support=partial
+- `commands_plus_state x actuator_response | ridge_affine | pooled`: test R2=0.4229, sparsity=0.8421, support=partial
+- `commands_plus_state x actuator_response | lasso_affine | pooled`: test R2=0.4229, sparsity=0.0000, support=partial
+- `commands_plus_state x delta_state | ols_affine | stratified`: test R2=0.3236, sparsity=0.9860, support=unsupported
+- `commands_only x window_summary_response | lasso_affine | stratified`: test R2=0.3169, sparsity=0.0208, support=unsupported
+- `commands_only x window_summary_response | ols_affine | stratified`: test R2=0.3168, sparsity=1.0000, support=unsupported
+- `commands_only x window_summary_response | ridge_affine | stratified`: test R2=0.3168, sparsity=1.0000, support=unsupported
+- `commands_plus_state x delta_state | lasso_affine | stratified`: test R2=0.3167, sparsity=0.2877, support=unsupported
+- `commands_plus_state x delta_state | ridge_affine | stratified`: test R2=0.3167, sparsity=1.0000, support=unsupported
+- `commands_only x selected_state_subset | lasso_affine | stratified`: test R2=0.2990, sparsity=0.0000, support=unsupported
+- `commands_only x selected_state_subset | ridge_affine | stratified`: test R2=0.2989, sparsity=1.0000, support=unsupported
+- `commands_only x selected_state_subset | ols_affine | stratified`: test R2=0.2989, sparsity=1.0000, support=unsupported
+- `commands_only x future_state_horizon | lasso_affine | stratified`: test R2=0.2976, sparsity=0.0208, support=unsupported
+- `commands_only x future_state_horizon | ridge_affine | stratified`: test R2=0.2975, sparsity=1.0000, support=unsupported
+- `commands_only x future_state_horizon | ols_affine | stratified`: test R2=0.2975, sparsity=1.0000, support=unsupported
+- `commands_only x selected_state_subset | lasso_affine | pooled`: test R2=0.2622, sparsity=0.0000, support=unsupported
+- `commands_only x selected_state_subset | ridge_affine | pooled`: test R2=0.2622, sparsity=0.9167, support=unsupported
+- `commands_only x selected_state_subset | ols_affine | pooled`: test R2=0.2622, sparsity=0.9167, support=unsupported
+- `commands_only x future_state_horizon | lasso_affine | pooled`: test R2=0.2617, sparsity=0.0000, support=unsupported
+- `commands_only x future_state_horizon | ridge_affine | pooled`: test R2=0.2617, sparsity=0.9167, support=unsupported
+- `commands_only x future_state_horizon | ols_affine | pooled`: test R2=0.2617, sparsity=0.9167, support=unsupported
+- `commands_only x window_summary_response | lasso_affine | pooled`: test R2=0.2594, sparsity=0.0000, support=unsupported
+- `commands_only x window_summary_response | ridge_affine | pooled`: test R2=0.2594, sparsity=0.9167, support=unsupported
+- `commands_only x window_summary_response | ols_affine | pooled`: test R2=0.2594, sparsity=0.9167, support=unsupported
+- `commands_plus_state x delta_state | ols_affine | pooled`: test R2=0.2417, sparsity=0.9368, support=unsupported
+- `commands_plus_state x delta_state | ridge_affine | pooled`: test R2=0.2365, sparsity=0.9860, support=unsupported
+- `commands_plus_state x delta_state | lasso_affine | pooled`: test R2=0.2354, sparsity=0.0526, support=unsupported
+- `commands_only x delta_state | lasso_affine | stratified`: test R2=0.0492, sparsity=0.2333, support=unsupported
+- `commands_only x delta_state | ridge_affine | stratified`: test R2=0.0491, sparsity=1.0000, support=unsupported
+- `commands_only x delta_state | ols_affine | stratified`: test R2=0.0491, sparsity=1.0000, support=unsupported
+- `commands_only x next_raw_state | lasso_affine | stratified`: test R2=0.0401, sparsity=0.0000, support=unsupported
+- `commands_only x next_raw_state | ridge_affine | stratified`: test R2=0.0401, sparsity=0.9667, support=unsupported
+- `commands_only x next_raw_state | ols_affine | stratified`: test R2=0.0401, sparsity=0.9667, support=unsupported
+- `commands_only x actuator_response | lasso_affine | pooled`: test R2=0.0147, sparsity=0.0000, support=unsupported
+- `commands_only x actuator_response | ridge_affine | pooled`: test R2=0.0147, sparsity=0.8125, support=unsupported
+- `commands_only x actuator_response | ols_affine | pooled`: test R2=0.0147, sparsity=0.8125, support=unsupported
+- `commands_only x delta_state | lasso_affine | pooled`: test R2=-0.0059, sparsity=0.0167, support=unsupported
+- `commands_only x delta_state | ridge_affine | pooled`: test R2=-0.0060, sparsity=1.0000, support=unsupported
+- `commands_only x delta_state | ols_affine | pooled`: test R2=-0.0060, sparsity=1.0000, support=unsupported
+- `commands_only x next_raw_state | ridge_affine | pooled`: test R2=-0.1065, sparsity=0.8000, support=unsupported
+- `commands_only x next_raw_state | lasso_affine | pooled`: test R2=-0.1065, sparsity=0.0000, support=unsupported
+- `commands_only x next_raw_state | ols_affine | pooled`: test R2=-0.1065, sparsity=0.8000, support=unsupported
+- `feature_mapped_linear x next_raw_state | ols_affine | stratified` (appendix): test R2=0.9983, sparsity=0.9675, support=supported
+- `feature_mapped_linear x next_raw_state | ridge_affine | stratified` (appendix): test R2=0.9983, sparsity=0.9829, support=supported
+- `feature_mapped_linear x next_raw_state | lasso_affine | stratified` (appendix): test R2=0.9983, sparsity=0.3880, support=supported
+- `pooled_backend_mode_augmented x next_raw_state | ols_affine | stratified` (appendix): test R2=0.9982, sparsity=0.9556, support=supported
+- `pooled_backend_mode_augmented x next_raw_state | lasso_affine | stratified` (appendix): test R2=0.9982, sparsity=0.3270, support=supported
+- `pooled_backend_mode_augmented x next_raw_state | ridge_affine | stratified` (appendix): test R2=0.9982, sparsity=0.9683, support=supported
+- `feature_mapped_linear x next_raw_state | ridge_affine | pooled` (appendix): test R2=0.9981, sparsity=0.9590, support=supported
+- `feature_mapped_linear x next_raw_state | ols_affine | pooled` (appendix): test R2=0.9981, sparsity=0.8137, support=supported
+- `feature_mapped_linear x next_raw_state | lasso_affine | pooled` (appendix): test R2=0.9980, sparsity=0.1214, support=supported
+- `pooled_backend_mode_augmented x next_raw_state | ols_affine | pooled` (appendix): test R2=0.9977, sparsity=0.8762, support=supported
+- `pooled_backend_mode_augmented x next_raw_state | ridge_affine | pooled` (appendix): test R2=0.9977, sparsity=0.9270, support=supported
+- `pooled_backend_mode_augmented x next_raw_state | lasso_affine | pooled` (appendix): test R2=0.9977, sparsity=0.0952, support=supported
+- `feature_mapped_linear x future_state_horizon | ols_affine | pooled` (appendix): test R2=0.9937, sparsity=0.8312, support=supported
+- `feature_mapped_linear x future_state_horizon | ridge_affine | pooled` (appendix): test R2=0.9937, sparsity=0.9786, support=supported
+- `feature_mapped_linear x future_state_horizon | lasso_affine | pooled` (appendix): test R2=0.9936, sparsity=0.2030, support=supported
+- `feature_mapped_linear x window_summary_response | ols_affine | pooled` (appendix): test R2=0.9928, sparsity=0.8291, support=supported
+- `feature_mapped_linear x window_summary_response | ridge_affine | pooled` (appendix): test R2=0.9927, sparsity=0.9829, support=supported
+- `feature_mapped_linear x window_summary_response | lasso_affine | pooled` (appendix): test R2=0.9926, sparsity=0.1731, support=supported
+- `pooled_backend_mode_augmented x future_state_horizon | ols_affine | pooled` (appendix): test R2=0.9924, sparsity=0.9286, support=supported
+- `pooled_backend_mode_augmented x future_state_horizon | ridge_affine | pooled` (appendix): test R2=0.9923, sparsity=0.9603, support=supported
+- `pooled_backend_mode_augmented x future_state_horizon | lasso_affine | pooled` (appendix): test R2=0.9922, sparsity=0.1508, support=supported
+- `feature_mapped_linear x selected_state_subset | ols_affine | pooled` (appendix): test R2=0.9905, sparsity=0.8248, support=supported
+- `feature_mapped_linear x selected_state_subset | ridge_affine | pooled` (appendix): test R2=0.9905, sparsity=0.9744, support=supported
+- `feature_mapped_linear x selected_state_subset | lasso_affine | pooled` (appendix): test R2=0.9904, sparsity=0.1709, support=supported
+- `pooled_backend_mode_augmented x window_summary_response | ols_affine | pooled` (appendix): test R2=0.9897, sparsity=0.8968, support=supported
+- `pooled_backend_mode_augmented x window_summary_response | ridge_affine | pooled` (appendix): test R2=0.9897, sparsity=0.9524, support=supported
+- `pooled_backend_mode_augmented x window_summary_response | lasso_affine | pooled` (appendix): test R2=0.9897, sparsity=0.1230, support=supported
+- `pooled_backend_mode_augmented x selected_state_subset | ols_affine | pooled` (appendix): test R2=0.9883, sparsity=0.9206, support=supported
+- `pooled_backend_mode_augmented x selected_state_subset | ridge_affine | pooled` (appendix): test R2=0.9882, sparsity=0.9524, support=supported
+- `pooled_backend_mode_augmented x selected_state_subset | lasso_affine | pooled` (appendix): test R2=0.9881, sparsity=0.1270, support=supported
+- `pooled_backend_mode_augmented x future_state_horizon | lasso_affine | stratified` (appendix): test R2=0.8070, sparsity=0.4722, support=supported
+- `pooled_backend_mode_augmented x future_state_horizon | ols_affine | stratified` (appendix): test R2=0.8069, sparsity=0.9921, support=supported
+- `pooled_backend_mode_augmented x future_state_horizon | ridge_affine | stratified` (appendix): test R2=0.8068, sparsity=1.0000, support=supported
+- `feature_mapped_linear x future_state_horizon | lasso_affine | stratified` (appendix): test R2=0.7963, sparsity=0.5705, support=supported
+- `feature_mapped_linear x future_state_horizon | ols_affine | stratified` (appendix): test R2=0.7960, sparsity=0.9936, support=supported
+- `feature_mapped_linear x future_state_horizon | ridge_affine | stratified` (appendix): test R2=0.7959, sparsity=1.0000, support=supported
+- `feature_mapped_linear x window_summary_response | lasso_affine | stratified` (appendix): test R2=0.7422, sparsity=0.5064, support=supported
+- `feature_mapped_linear x window_summary_response | ridge_affine | stratified` (appendix): test R2=0.7417, sparsity=1.0000, support=supported
+- `feature_mapped_linear x window_summary_response | ols_affine | stratified` (appendix): test R2=0.7417, sparsity=0.9915, support=supported
+- `pooled_backend_mode_augmented x selected_state_subset | lasso_affine | stratified` (appendix): test R2=0.7175, sparsity=0.3889, support=supported
+- `pooled_backend_mode_augmented x selected_state_subset | ols_affine | stratified` (appendix): test R2=0.7174, sparsity=0.9841, support=supported
+- `pooled_backend_mode_augmented x selected_state_subset | ridge_affine | stratified` (appendix): test R2=0.7173, sparsity=1.0000, support=supported
+- `feature_mapped_linear x selected_state_subset | lasso_affine | stratified` (appendix): test R2=0.7034, sparsity=0.5171, support=supported
+- `feature_mapped_linear x selected_state_subset | ols_affine | stratified` (appendix): test R2=0.7031, sparsity=0.9915, support=supported
+- `feature_mapped_linear x selected_state_subset | ridge_affine | stratified` (appendix): test R2=0.7030, sparsity=1.0000, support=supported
+- `feature_mapped_linear x actuator_response | ols_affine | stratified` (appendix): test R2=0.6815, sparsity=0.9231, support=partial
+- `pooled_backend_mode_augmented x window_summary_response | lasso_affine | stratified` (appendix): test R2=0.6756, sparsity=0.3730, support=partial
+- `pooled_backend_mode_augmented x window_summary_response | ridge_affine | stratified` (appendix): test R2=0.6754, sparsity=1.0000, support=partial
+- `pooled_backend_mode_augmented x window_summary_response | ols_affine | stratified` (appendix): test R2=0.6753, sparsity=0.9841, support=partial
+- `feature_mapped_linear x actuator_response | ridge_affine | stratified` (appendix): test R2=0.6713, sparsity=0.9615, support=partial
+- `feature_mapped_linear x actuator_response | lasso_affine | stratified` (appendix): test R2=0.6705, sparsity=0.1603, support=partial
+- `feature_mapped_linear x actuator_response | ridge_affine | pooled` (appendix): test R2=0.6457, sparsity=0.7692, support=partial
+- `feature_mapped_linear x actuator_response | ols_affine | pooled` (appendix): test R2=0.6401, sparsity=0.7436, support=partial
+- `feature_mapped_linear x actuator_response | lasso_affine | pooled` (appendix): test R2=0.6247, sparsity=0.0256, support=partial
+- `pooled_backend_mode_augmented x actuator_response | lasso_affine | stratified` (appendix): test R2=0.6085, sparsity=0.0952, support=partial
+- `pooled_backend_mode_augmented x actuator_response | ridge_affine | stratified` (appendix): test R2=0.6085, sparsity=0.9405, support=partial
+- `pooled_backend_mode_augmented x actuator_response | ols_affine | stratified` (appendix): test R2=0.6084, sparsity=0.8571, support=partial
+- `pooled_backend_mode_augmented x actuator_response | ols_affine | pooled` (appendix): test R2=0.4462, sparsity=0.7619, support=partial
+- `pooled_backend_mode_augmented x actuator_response | ridge_affine | pooled` (appendix): test R2=0.4452, sparsity=0.7619, support=partial
+- `pooled_backend_mode_augmented x actuator_response | lasso_affine | pooled` (appendix): test R2=0.4304, sparsity=0.0476, support=partial
+- `feature_mapped_linear x delta_state | ridge_affine | pooled` (appendix): test R2=0.3642, sparsity=0.9812, support=unsupported
+- `feature_mapped_linear x delta_state | ols_affine | pooled` (appendix): test R2=0.3635, sparsity=0.8342, support=unsupported
+- `feature_mapped_linear x delta_state | ols_affine | stratified` (appendix): test R2=0.3610, sparsity=0.9846, support=unsupported
+- `feature_mapped_linear x delta_state | ridge_affine | stratified` (appendix): test R2=0.3591, sparsity=1.0000, support=unsupported
+- `feature_mapped_linear x delta_state | lasso_affine | stratified` (appendix): test R2=0.3514, sparsity=0.4752, support=unsupported
+- `feature_mapped_linear x delta_state | lasso_affine | pooled` (appendix): test R2=0.3510, sparsity=0.2034, support=unsupported
+- `pooled_backend_mode_augmented x delta_state | ols_affine | stratified` (appendix): test R2=0.3236, sparsity=0.9873, support=unsupported
+- `pooled_backend_mode_augmented x delta_state | lasso_affine | stratified` (appendix): test R2=0.3167, sparsity=0.3556, support=unsupported
+- `pooled_backend_mode_augmented x delta_state | ridge_affine | stratified` (appendix): test R2=0.3167, sparsity=1.0000, support=unsupported
+- `pooled_backend_mode_augmented x delta_state | ols_affine | pooled` (appendix): test R2=0.2416, sparsity=0.9175, support=unsupported
+- `pooled_backend_mode_augmented x delta_state | lasso_affine | pooled` (appendix): test R2=0.2376, sparsity=0.1206, support=unsupported
+- `pooled_backend_mode_augmented x delta_state | ridge_affine | pooled` (appendix): test R2=0.2361, sparsity=0.9683, support=unsupported
+
+## Diagnostics
+- 缺少必要 state/context；把当前状态并入 X 后显著提高了全局拟合效果。
+- raw feature matrix 含有精确别名或 one-hot 依赖；报告已同时输出 effective conditioning 以避免把可解释 schema 误判为病态。
+
+## Failure Attribution
+- 更像缺 state/context，而不是纯 command 输入本身不足。
+
+## Skipped Or Unsupported Combos
+- 无。

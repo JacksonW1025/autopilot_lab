@@ -6,13 +6,14 @@ from pathlib import Path
 from linearity_analysis.linearity_analyze import run_analysis
 from linearity_core.config import load_study_config
 from linearity_core.synthetic import generate_synthetic_raw_runs
+from tests.support import write_synthetic_config
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_artifact_and_report_generation_smoke(tmp_path: Path) -> None:
-    config = load_study_config(ROOT / "configs/studies/global_linear_commands_plus_state__delta_state.yaml")
+    config = load_study_config(write_synthetic_config(tmp_path, filename="base_config.json"))
     payload = config.to_dict()
     payload["repeat_count"] = 1
     payload["model"] = ["ols_affine"]
@@ -30,8 +31,22 @@ def test_artifact_and_report_generation_smoke(tmp_path: Path) -> None:
     assert (study_dir / "prepared/schema_inventory.yaml").exists()
     assert (study_dir / "reports/summary.md").exists()
     assert (study_dir / "reports/schema_comparison.md").exists()
+    assert (study_dir / "reports/baseline_stability.md").exists()
+    assert (study_dir / "reports/diagnostic_gate.md").exists()
+    assert (study_dir / "reports/matrix_gallery.md").exists()
+    assert (study_dir / "reports/state_evolution_audit.md").exists()
     assert (study_dir / "summary/study_summary.json").exists()
+    assert (study_dir / "summary/baseline_stability.json").exists()
+    assert (study_dir / "summary/diagnostic_gate.json").exists()
+    assert (study_dir / "summary/matrix_gallery.json").exists()
+    assert (study_dir / "summary/state_evolution_audit.json").exists()
     assert list((study_dir / "fits").rglob("matrix_f.csv"))
     assert list((study_dir / "fits").rglob("bias_b.csv"))
     assert list((study_dir / "fits").rglob("sparsity_mask.csv"))
     assert list((study_dir / "fits").rglob("metrics.json"))
+    gallery_payload = json.loads((study_dir / "summary/matrix_gallery.json").read_text(encoding="utf-8"))
+    if gallery_payload["status"] == "gallery_available":
+        assert list((study_dir / "fits").rglob("matrix_heatmap_abs.png"))
+        assert list((study_dir / "fits").rglob("matrix_heatmap_signed.png"))
+    else:
+        assert gallery_payload["status"] == "no_supported_results"

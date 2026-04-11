@@ -1,0 +1,12 @@
+# 20260411_021124_px4_manual_alternating_pulse_train_throttle_r1
+- px4 raw linearity capture
+- status: completed
+- backend: px4
+- input_type: manual
+- flight_mode: POSCTL
+- x_schema: commands_plus_state
+- y_schema: delta_state
+- ulog_path: /home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/2026-04-11/09_11_17.ulg
+- anomalies: land_timeout_force_disarm, quality_alignment_p95_exceeded, vehicle_status_failsafe
+- recorder_counts: {'vehicle_attitude': 2669, 'vehicle_attitude_setpoint': 0, 'vehicle_angular_velocity': 0, 'vehicle_rates_setpoint': 0, 'vehicle_local_position': 2630, 'rate_ctrl_status': 0, 'control_allocator_status': 0, 'actuator_motors': 0, 'vehicle_status': 64, 'manual_control_setpoint': 590, 'vehicle_control_mode': 64}
+- injector_completion: land_timeout

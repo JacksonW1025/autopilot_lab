@@ -1,0 +1,12 @@
+# 20260411_014618_px4_manual_sweep_yaw_r1
+- px4 raw linearity capture
+- status: completed
+- backend: px4
+- input_type: manual
+- flight_mode: POSCTL
+- x_schema: commands_plus_state
+- y_schema: delta_state
+- ulog_path: /home/car/PX4-Autopilot/build/px4_sitl_default/rootfs/log/2026-04-11/08_46_12.ulg
+- anomalies: quality_alignment_p95_exceeded
+- recorder_counts: {'vehicle_attitude': 2365, 'vehicle_attitude_setpoint': 0, 'vehicle_angular_velocity': 0, 'vehicle_rates_setpoint': 0, 'vehicle_local_position': 2323, 'rate_ctrl_status': 0, 'control_allocator_status': 0, 'actuator_motors': 0, 'vehicle_status': 56, 'manual_control_setpoint': 523, 'vehicle_control_mode': 57}
+- injector_completion: disarmed_after_land

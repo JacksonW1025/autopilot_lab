@@ -223,7 +223,7 @@ def render_summary_markdown(
             "- 主线固定为：数据采集 -> X/Y 构造 -> 全局拟合 -> 稀疏性分析 -> 结论。",
             "- 研究问题是：在当前 study scope 下，是否存在固定的全局线性/仿射映射 `Y ≈ fX (+ b)`。",
             "",
-            "## 真实 PX4 Broad Ablation 结论模板",
+            "## 结论摘要",
             f"- best_linear_schema: `{best_combo}`",
             f"- best_sparse_and_stable_schema: `{best_sparse_combo}`",
             f"- best_y_definition: `{best_y_label}`",
