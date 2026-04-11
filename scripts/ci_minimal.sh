@@ -7,11 +7,12 @@ usage() {
   cat <<'EOF'
 Usage: ci_minimal.sh
 
-Run the minimal regression gate for the global linearity platform:
+Run the minimal regression gate for the linear-f experiment platform:
 - python3 -m pytest -q tests
 - python3 -m py_compile for Python files under src/, tests/, scripts/
 - scripts/doctor_lab.sh --help
-- scripts/smoke_linearity.sh
+- scripts/compare_schemas.sh --help
+- scripts/visualize_fit_matrices.py --help
 EOF
 }
 
@@ -30,5 +31,6 @@ if [[ ${#PY_FILES[@]} -gt 0 ]]; then
 fi
 
 scripts/doctor_lab.sh --help >/dev/null
-scripts/smoke_linearity.sh >/dev/null
+scripts/compare_schemas.sh --help >/dev/null
+scripts/visualize_fit_matrices.py --help >/dev/null
 echo "ci_status=passed"

@@ -42,7 +42,15 @@ def test_known_linear_system_recovers_f() -> None:
         schema_metadata={},
     )
     run_ids = [f"run_{index // 40}" for index in range(len(X))]
-    result = fit_schema_combo(run_ids, ["synthetic"] * len(X), ["POSCTL"] * len(X), matrices, _base_config(), "ols_affine")
+    result = fit_schema_combo(
+        run_ids,
+        ["synthetic"] * len(X),
+        ["POSCTL"] * len(X),
+        ["unit"] * len(X),
+        matrices,
+        _base_config(),
+        "ols_affine",
+    )
     assert np.allclose(result.coefficient_matrix, true_f, atol=1e-6)
     assert np.allclose(result.bias_vector, true_b, atol=1e-6)
     assert result.summary["median_test_r2"] > 0.999999
@@ -88,9 +96,19 @@ def test_sparse_matrix_recovery_identifies_main_nonzero_terms() -> None:
         }
     )
     run_ids = [f"run_{index // 55}" for index in range(len(X))]
-    result = fit_schema_combo(run_ids, ["synthetic"] * len(X), ["POSCTL"] * len(X), matrices, config, "lasso_affine")
+    result = fit_schema_combo(
+        run_ids,
+        ["synthetic"] * len(X),
+        ["POSCTL"] * len(X),
+        ["unit"] * len(X),
+        matrices,
+        config,
+        "lasso_affine",
+    )
     mask = result.sparsity_mask.astype(bool)
     assert mask[0, 0]
     assert mask[3, 1]
     assert mask[5, 2]
     assert result.summary["nonzero_count"] <= 8
+    assert "scenario_consistency" in result.summary
+    assert result.summary["scenario_subgroup_metrics"]["unit"]["sample_count"] > 0

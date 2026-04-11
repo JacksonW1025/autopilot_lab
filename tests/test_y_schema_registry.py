@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from pathlib import Path
-
-from linearity_core.config import load_study_config
 from linearity_core.dataset import build_prepared_sample_table
 from linearity_core.schemas import available_y_schemas, build_schema_matrices
 from linearity_core.synthetic import generate_synthetic_raw_runs
-
-
-ROOT = Path(__file__).resolve().parents[1]
+from tests.support import load_synthetic_config
 
 
 def test_y_schema_registry_contains_required_entries() -> None:
@@ -26,7 +21,12 @@ def test_y_schema_registry_contains_required_entries() -> None:
 
 
 def test_future_and_window_response_shapes(tmp_path: Path) -> None:
-    config = load_study_config(ROOT / "configs/studies/global_linear_full_augmented__window_summary_response.yaml")
+    config = load_synthetic_config(
+        tmp_path,
+        filename="window_config.json",
+        x_schema="full_augmented",
+        y_schema="window_summary_response",
+    )
     run_dirs = generate_synthetic_raw_runs(config, output_root=tmp_path)
     table, _ = build_prepared_sample_table(run_dirs, config)
 

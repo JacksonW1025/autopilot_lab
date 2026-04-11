@@ -15,7 +15,8 @@
     "numpy",
     "pymavlink",
     "MAVProxy",
-    "pyulog"
+    "pyulog",
+    "matplotlib"
   ],
   "system_commands": [
     "ros2",
@@ -24,9 +25,9 @@
     "MicroXRCEAgent"
   ],
   "backend_clis": [
-    "linearity_run_study",
     "linearity_analyze",
     "linearity_compare_schemas",
+    "linearity_matrix_gallery",
     "px4_linearity_capture",
     "px4_linearity_matrix",
     "ardupilot_linearity_capture",
@@ -41,28 +42,49 @@
     "px4": "30e763b6780061d70a14894e3e8b06e6a656f9b8",
     "ardupilot": "e010f97906087a3a1975e1c4fcc1f88a249599ce"
   },
-  "default_smoke_config": "configs/studies/global_linear_commands_only__next_raw_state.yaml",
-  "default_ablation_plan": "configs/ablations/default_schema_ablation.yaml",
+  "default_smoke_config": "configs/studies/px4_visual_demo_offboard_roll_sweep_capture.yaml",
+  "default_ablation_plan": "configs/ablations/px4_real_broad_ablation.yaml",
   "example_study_configs": [
-    "configs/studies/global_linear_commands_only__next_raw_state.yaml",
-    "configs/studies/global_linear_commands_plus_state__delta_state.yaml",
-    "configs/studies/global_linear_pooled_backend_augmented__selected_state_subset.yaml",
-    "configs/studies/global_linear_with_pid_sweep__delta_state.yaml",
-    "configs/studies/global_linear_history_augmented__future_state_horizon.yaml",
-    "configs/studies/global_linear_full_augmented__window_summary_response.yaml",
+    "configs/studies/px4_visual_demo_offboard_roll_sweep_capture.yaml",
+    "configs/studies/px4_visual_demo_offboard_yaw_sweep_capture.yaml",
     "configs/studies/px4_real_nominal_posctl_capture.yaml",
     "configs/studies/px4_real_nominal_offboard_attitude_capture.yaml",
-    "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml"
+    "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml",
+    "configs/studies/px4_diagnostic_posctl_axis_capture.yaml",
+    "configs/studies/px4_diagnostic_posctl_throttle_capture.yaml",
+    "configs/studies/px4_diagnostic_offboard_attitude_axis_capture.yaml",
+    "configs/studies/px4_diagnostic_offboard_attitude_throttle_capture.yaml",
+    "configs/studies/ardupilot_real_nominal_stabilize_capture.yaml",
+    "configs/studies/ardupilot_real_nominal_guided_nogps_capture.yaml",
+    "configs/studies/ardupilot_real_nominal_broad_ablation_analysis.yaml",
+    "configs/studies/ardupilot_diagnostic_stabilize_axis_capture.yaml",
+    "configs/studies/ardupilot_diagnostic_stabilize_throttle_capture.yaml",
+    "configs/studies/ardupilot_diagnostic_guided_nogps_axis_capture.yaml",
+    "configs/studies/ardupilot_diagnostic_guided_nogps_throttle_capture.yaml"
   ],
-  "real_px4": {
+  "px4": {
     "world": "default",
     "airframe": "gz_x500",
-    "capture_configs": [
+    "baseline_capture_configs": [
       "configs/studies/px4_real_nominal_posctl_capture.yaml",
       "configs/studies/px4_real_nominal_offboard_attitude_capture.yaml"
     ],
     "analysis_config": "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml",
     "ablation_plan": "configs/ablations/px4_real_broad_ablation.yaml",
-    "script": "scripts/run_px4_broad_ablation.sh"
+    "baseline_script": "scripts/run_px4_authoritative_baseline.sh",
+    "diagnostic_script": "scripts/run_px4_diagnostic_matrix.sh"
+  },
+  "ardupilot": {
+    "baseline_capture_configs": [
+      "configs/studies/ardupilot_real_nominal_stabilize_capture.yaml",
+      "configs/studies/ardupilot_real_nominal_guided_nogps_capture.yaml"
+    ],
+    "analysis_config": "configs/studies/ardupilot_real_nominal_broad_ablation_analysis.yaml",
+    "ablation_plan": "configs/ablations/ardupilot_real_broad_ablation.yaml",
+    "smoke_script": "scripts/run_ardupilot_guided_nogps_smoke.sh",
+    "partial_baseline_script": "scripts/run_ardupilot_stabilize_partial_baseline.sh",
+    "throttle_diagnostic_script": "scripts/run_ardupilot_stabilize_throttle_diagnostic.sh",
+    "baseline_script": "scripts/run_ardupilot_authoritative_baseline.sh",
+    "diagnostic_script": "scripts/run_ardupilot_diagnostic_matrix.sh"
   }
 }

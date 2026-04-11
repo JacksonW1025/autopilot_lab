@@ -4,11 +4,12 @@
 
 ## 项目背景
 
-- 核心目标：建立一个面向 UAV 输入-响应全局线性关系验证的研究平台
-- 默认主线：`数据采集 -> X/Y 构造 -> 全局拟合 -> 稀疏性分析 -> 结论`
-- 研究问题：在某个 study scope 下，是否存在固定的 `Y ≈ fX (+ b)`，以及 `f` 是否稀疏
-- 当前重点：大胆探索 `X` 与 `Y` 的定义，并比较哪组 schema 最支持全局线性假设
-- PX4 真实链路默认采用 `ROS 直录 + ULog 缺口回填`
+- 核心目标：验证无人机输入 `X` 与未来响应 `Y` 之间是否存在稳定、可解释的全局线性/仿射映射 `Y ≈ fX (+ b)`
+- 当前正式叙事：统一 schema 口径下的线性关系 `f`，以及它是否能跨 `nominal / dynamic / throttle_biased` 三档状态继续成立
+- backend 角色：PX4 与 ArduPilot 都只是证据来源，不是比赛对象
+- 主要结论标准：
+  - `support == supported` 才能作为“得到了可接受线性 `f`”的证据
+  - `generalized_supported` 才能作为“这个 `f` 不只是局部拟合，而是跨 scenario 仍然成立”的证据
 
 ## 环境基线
 
@@ -28,60 +29,71 @@
 - PX4 backend：`src/px4_ros2_backend`
 - ArduPilot backend：`src/ardupilot_mavlink_backend`
 - Raw run：`artifacts/raw/`
+- Matrix 输出：`artifacts/px4_matrix/`、`artifacts/ardupilot_matrix/`
 - Study 输出：`artifacts/studies/`
-- 阶段报告：`docs/STAGE_REPORT_2026-04-07.md`
 
-## 当前默认配置
+## 当前正式配置
 
-- `configs/studies/global_linear_commands_only__next_raw_state.yaml`
-- `configs/studies/global_linear_commands_plus_state__delta_state.yaml`
-- `configs/studies/global_linear_pooled_backend_augmented__selected_state_subset.yaml`
-- `configs/studies/global_linear_with_pid_sweep__delta_state.yaml`
-- `configs/studies/global_linear_history_augmented__future_state_horizon.yaml`
-- `configs/studies/global_linear_full_augmented__window_summary_response.yaml`
-- `configs/ablations/default_schema_ablation.yaml`
-- 真实 PX4：
-  - `configs/studies/px4_real_nominal_posctl_capture.yaml`
-  - `configs/studies/px4_real_nominal_offboard_attitude_capture.yaml`
-  - `configs/studies/px4_real_nominal_broad_ablation_analysis.yaml`
-  - `configs/ablations/px4_real_broad_ablation_balanced.yaml`
+- 当前 canonical compare：
+  - `artifacts/studies/20260411_124108_px4_vs_ardupilot_compare`
+- PX4 formal baseline study：
+  - `artifacts/studies/20260410_224818_px4_real_generalization_ablation`
+- PX4 formal diagnostic study：
+  - `artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix`
+- ArduPilot formal baseline study：
+  - `artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation`
+- ArduPilot formal diagnostic study：
+  - `artifacts/studies/20260411_105433_ardupilot_generalization_diagnostic_matrix`
+
+- 当前 formal analysis configs：
+  - `configs/studies/px4_real_generalization_ablation_analysis.yaml`
+  - `configs/ablations/px4_real_generalization_ablation.yaml`
+  - `configs/studies/px4_generalization_diagnostic_matrix_analysis.yaml`
+  - `configs/ablations/px4_generalization_diagnostic_matrix.yaml`
+  - `configs/studies/ardupilot_real_generalization_ablation_analysis.yaml`
+  - `configs/ablations/ardupilot_real_generalization_ablation.yaml`
+  - `configs/studies/ardupilot_generalization_diagnostic_matrix_analysis.yaml`
+  - `configs/ablations/ardupilot_generalization_diagnostic_matrix.yaml`
+
+- 当前 formal scripts：
+  - `scripts/run_px4_generalization_pilot.sh`
+  - `scripts/run_px4_generalization_full.sh`
+  - `scripts/run_ardupilot_generalization_pilot.sh`
+  - `scripts/run_ardupilot_generalization_full.sh`
 
 ## 当前状态
 
-- [2026-04-06] `linearity_core / linearity_study / linearity_analysis` 已形成当前平台默认前门
-- [2026-04-06] study config 已支持 `x_schema / y_schema / pooling_mode / history_length / prediction_horizon / ablation_plan`
-- [2026-04-06] 分析产物已统一为 `f / b / sparsity_mask / metrics / markdown report / summary json`
-- [2026-04-07] PX4 raw capture 已支持 ULog 缺口回填，可补齐 rate / actuator / internal telemetry
-- [2026-04-07] 条件数诊断已拆分为 `raw_condition_number` 与 `effective_condition_number`
-- [2026-04-07] 当前权威 study 为 `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced`
-- [2026-04-07] 当前权威 raw run 为：
-  - `artifacts/raw/px4/20260407_025915_px4_manual_broad_composite_r1`
-  - `artifacts/raw/px4/20260407_030010_px4_attitude_broad_composite_r1`
-- [2026-04-07] 当前真实 PX4 最优主组合为 `commands_plus_state_history x next_raw_state | ols_affine | pooled`
-- [2026-04-07] 当前结果摘要：
-  - `median_test_r2 ≈ 0.9726`
-  - `commands_only -> commands_plus_state` 提升 `≈ 1.0442`
-  - `commands_plus_state -> history` 提升 `≈ 0.0064`
-  - `actuator_response` 已进入有效比较
-- [2026-04-07] 当前 `doctor_lab.sh` 口径为 `status=ready` 与 `px4_real_ready=true`
-- [2026-04-07] 当前测试口径为 `python3 -m pytest -q tests -> 23 passed`
+- [2026-04-11] generalization full 已全部完成：
+  - PX4 full baseline: done
+  - PX4 full diagnostic: done
+  - ArduPilot full baseline: done
+  - ArduPilot full diagnostic: done
+- [2026-04-11] canonical compare 已切到 `20260411_124108_px4_vs_ardupilot_compare`
+- [2026-04-11] canonical docs 已全部刷新到 generalization full：
+  - `docs/MILESTONE_LINEAR_F_REPORT.md`
+  - `docs/MILESTONE_LINEAR_F_APPENDIX.md`
+  - `docs/RESEARCH_GOAL.md`
+  - `docs/EXPERIMENT_PROTOCOL.md`
+  - `docs/DATA_SCHEMA.md`
+  - `docs/XY_SCHEMA_GUIDE.md`
+- [2026-04-11] 当前 formal conclusion：
+  - 线性关系 `Y ≈ fX (+ b)` 已可作为正面结论正式汇报
+  - 两个 backend 都已给出跨 scenario 的 `generalized_supported` 证据
+  - PX4 generalized-supported 组合明显更多
+  - compare 仍是 `baseline_stability_unresolved`，因此 backend 差异还不是最终主结论
+- [2026-04-11] 当前关键数字：
+  - PX4 baseline generalized_supported=`80`
+  - PX4 diagnostic generalized_supported=`111`
+  - ArduPilot baseline generalized_supported=`12`
+  - ArduPilot diagnostic generalized_supported=`12`
 
 ## 最近变更
 
-- 新增 `src/linearity_core`
-- 新增 `src/linearity_study`
-- 新增 `src/linearity_analysis`
-- 新增 `docs/RESEARCH_GOAL.md`
-- 新增 `docs/XY_SCHEMA_GUIDE.md`
-- 新增 `docs/EXPERIMENT_PROTOCOL.md`
-- 新增 `docs/DATA_SCHEMA.md`
-- 新增 `docs/STAGE_REPORT_2026-04-07.md`
-- 新增 `scripts/run_linearity_study.sh`
-- 新增 `scripts/compare_schemas.sh`
-- 新增 `scripts/smoke_linearity.sh`
-- 新增 `scripts/run_px4_broad_ablation.sh`
-- 新增 PX4 ULog telemetry backfill
-- 新增 raw/effective conditioning diagnostics
+- compare payload / markdown 已纳入 `scenario_generalization`
+- milestone report / appendix 已切到 latest generalization full 四个 study
+- `latest_milestone_refresh.json` 已更新到最新 canonical compare
+- `README.md` 已加入当前结论和推荐阅读顺序
+- `RESEARCH_GOAL.md`、`EXPERIMENT_PROTOCOL.md`、`DATA_SCHEMA.md`、`XY_SCHEMA_GUIDE.md` 已与 latest formal line 同步
 
 ## 常用命令
 
@@ -97,43 +109,38 @@ source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 /home/car/autopilot_lab/scripts/doctor_lab.sh
 ```
 
-统一 smoke：
-
-```bash
-/home/car/autopilot_lab/scripts/smoke_linearity.sh
-```
-
 最小 CI：
 
 ```bash
 /home/car/autopilot_lab/scripts/ci_minimal.sh
 ```
 
-单次 study：
+当前 formal line：
 
 ```bash
-ros2 run linearity_study linearity_run_study \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml
+/home/car/autopilot_lab/scripts/run_px4_generalization_pilot.sh
+/home/car/autopilot_lab/scripts/run_px4_generalization_full.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_generalization_pilot.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_generalization_full.sh
 ```
 
-统一分析：
+支持性 / 历史链路：
 
 ```bash
-ros2 run linearity_analysis linearity_analyze \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
-  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
-```
-
-真实 PX4 broad ablation：
-
-```bash
-/home/car/autopilot_lab/scripts/run_px4_broad_ablation.sh \
-  --plan /home/car/autopilot_lab/configs/ablations/px4_real_broad_ablation_balanced.yaml
+/home/car/autopilot_lab/scripts/run_px4_visual_demos.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_visual_demos.sh --include-guided-nogps
+/home/car/autopilot_lab/scripts/run_ardupilot_guided_nogps_smoke.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_stabilize_partial_baseline.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_stabilize_throttle_diagnostic.sh
+/home/car/autopilot_lab/scripts/run_px4_authoritative_baseline.sh
+/home/car/autopilot_lab/scripts/run_px4_diagnostic_matrix.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_authoritative_baseline.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_diagnostic_matrix.sh
 ```
 
 ## 注意事项
 
 - 所有文档和交互统一使用简体中文
-- 如需系统级操作，可以使用 `sudo`
-- 当前阶段日常建议入口是 balanced PX4 broad ablation
-- `effective_condition_number` 当前仍偏大，现阶段视作诊断信号，不视作阻断项
+- 当前正式主标题是“线性关系 `f` 的证据及其跨 scenario 泛化性”，不是“backend 对比”
+- 只有最新 generalization full artifact 可以进入当前里程碑汇报
+- `20260409` broad baseline / diagnostic 仍保留，但只作为历史阶段背景

@@ -1,37 +1,66 @@
 # autopilot_lab
 
-`autopilot_lab` 是一个面向 UAV 输入-响应全局线性关系验证的研究平台。默认问题是：
+`autopilot_lab` 是一个面向无人机输入到响应关系研究的实验仓库。当前正式主线是：
 
-> 在给定 study scope 下，是否存在固定的全局线性或仿射映射 `Y ≈ fX (+ b)`，并且 `f` 是否稀疏？
+> 在统一的 `X / Y schema` 口径下，验证 PX4 与 ArduPilot 是否都存在稳定、可解释的全局线性或仿射映射 `Y ≈ fX (+ b)`，并进一步检查它是否能在多种 scenario 下继续保持可接受的解释力。
 
-平台主线固定为：
+这里的重点不是比较两种飞控“谁更强”，而是回答两件事：
 
-- 数据采集
-- X/Y 构造
-- 全局拟合
-- 稀疏性分析
-- 结论与 schema 对比
+1. 线性关系 `f` 本身是否成立。
+2. 它在 `nominal / dynamic / throttle_biased` 三档状态下是否还能站得住。
 
-## 当前状态
+## 当前正式结果
 
-当前权威实验固定为：
+当前 canonical compare 已切到 generalization full：
 
-- raw run: `artifacts/raw/px4/20260407_025915_px4_manual_broad_composite_r1`
-- raw run: `artifacts/raw/px4/20260407_030010_px4_attitude_broad_composite_r1`
-- study: `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced`
+- compare artifact: [20260411_124108_px4_vs_ardupilot_compare](/home/car/autopilot_lab/artifacts/studies/20260411_124108_px4_vs_ardupilot_compare)
+- PX4 full baseline: [20260410_224818_px4_real_generalization_ablation](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation)
+- PX4 full diagnostic: [20260411_021910_px4_generalization_diagnostic_matrix](/home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix)
+- ArduPilot full baseline: [20260411_095055_ardupilot_real_generalization_ablation](/home/car/autopilot_lab/artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation)
+- ArduPilot full diagnostic: [20260411_105433_ardupilot_generalization_diagnostic_matrix](/home/car/autopilot_lab/artifacts/studies/20260411_105433_ardupilot_generalization_diagnostic_matrix)
 
-当前结果摘要：
+当前最简明的结论是：
 
-- best schema: `commands_plus_state_history x next_raw_state | ols_affine | pooled`
-- best sparse/stable schema: `commands_plus_state_history x next_raw_state | ridge_affine | pooled`
-- `median_test_r2 ≈ 0.9726`
-- `commands_only -> commands_plus_state` 提升 `≈ 1.0442`
-- `commands_plus_state -> history` 提升 `≈ 0.0064`
-- `actuator_response` 已进入有效比较
-- `raw_condition_number = inf`
-- `effective_condition_number ≈ 1259416.2092`
+- 线性关系 `Y ≈ fX (+ b)` 已经可以作为正面结论正式汇报。
+- 两个 backend 都出现了跨 scenario 的 `generalized_supported` 组合。
+- PX4 的 generalized-supported 证据更宽，ArduPilot 的证据更窄但是真实存在。
+- 现在还不适合把“backend 差异”写成最终主结论，因为 compare 仍然显示 `baseline_stability_unresolved`。
 
-详细状态见 [`docs/STAGE_REPORT_2026-04-07.md`](docs/STAGE_REPORT_2026-04-07.md)。
+## 建议阅读顺序
+
+如果你是第一次进仓库，按这个顺序读：
+
+1. [MILESTONE_LINEAR_F_REPORT.md](docs/MILESTONE_LINEAR_F_REPORT.md)
+   先看当前阶段到底得出了什么结论。
+2. [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
+   再看 artifact 清单、核心数字和代表性组合路径。
+3. [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
+   明确项目真正想回答的问题，以及 `generalized_supported` 现在意味着什么。
+4. [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
+   了解当前正式实验线已经变成什么顺序，旧 broad baseline 现在只是历史阶段。
+5. [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
+   确认 raw/study contract、prepared sample table 和 `scenario_generalization` 产物的口径。
+6. [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
+   最后再看 `X/Y schema` 应该怎么读、现在先看哪些代表性组合。
+
+如果要直接看最新正式对照：
+
+1. [backend_compare.md](/home/car/autopilot_lab/artifacts/studies/20260411_124108_px4_vs_ardupilot_compare/reports/backend_compare.md)
+2. [scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/reports/scenario_generalization.md)
+3. [scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation/reports/scenario_generalization.md)
+
+## 当前研究口径
+
+- 正式 backend：`px4`、`ardupilot`
+- 正式 scenario：`nominal`、`dynamic`、`throttle_biased`
+- 正式 baseline mode：
+  - PX4: `POSCTL`、`OFFBOARD_ATTITUDE`
+  - ArduPilot: `STABILIZE`、`GUIDED_NOGPS`
+- 正式 analysis matrix：
+  - `x_schemas`: `commands_only`, `commands_plus_state`, `commands_plus_state_history`, `full_augmented`, `pooled_backend_mode_augmented`, `feature_mapped_linear`
+  - `y_schemas`: `next_raw_state`, `delta_state`, `selected_state_subset`, `future_state_horizon`, `actuator_response`, `window_summary_response`
+  - `models`: `ols_affine`, `ridge_affine`, `lasso_affine`
+  - `pooling_modes`: `pooled`, `stratified`
 
 ## 仓库结构
 
@@ -39,6 +68,8 @@
 autopilot_lab/
 ├── artifacts/
 │   ├── raw/
+│   ├── px4_matrix/
+│   ├── ardupilot_matrix/
 │   └── studies/
 ├── configs/
 │   ├── ablations/
@@ -56,7 +87,7 @@ autopilot_lab/
     └── px4_ros_com/
 ```
 
-## Quick Start
+## 环境入口
 
 加载环境：
 
@@ -76,116 +107,48 @@ source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 /home/car/autopilot_lab/scripts/doctor_lab.sh
 ```
 
-默认 smoke：
+最小回归：
 
 ```bash
-/home/car/autopilot_lab/scripts/smoke_linearity.sh
+/home/car/autopilot_lab/scripts/ci_minimal.sh
 ```
 
-默认真实 PX4 broad ablation：
+## 当前正式实验入口
+
+当前 formal line 是 generalization 线。建议优先看这些入口：
 
 ```bash
-/home/car/autopilot_lab/scripts/run_px4_broad_ablation.sh \
-  --plan /home/car/autopilot_lab/configs/ablations/px4_real_broad_ablation_balanced.yaml
+/home/car/autopilot_lab/scripts/run_px4_generalization_pilot.sh
+/home/car/autopilot_lab/scripts/run_px4_generalization_full.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_generalization_pilot.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_generalization_full.sh
 ```
 
-## 默认入口
-
-主实验入口：
+支持性实验与历史阶段入口仍保留：
 
 ```bash
-ros2 run linearity_study linearity_run_study \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml
+/home/car/autopilot_lab/scripts/run_px4_visual_demos.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_visual_demos.sh --include-guided-nogps
+/home/car/autopilot_lab/scripts/run_ardupilot_guided_nogps_smoke.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_stabilize_partial_baseline.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_stabilize_throttle_diagnostic.sh
+/home/car/autopilot_lab/scripts/run_px4_authoritative_baseline.sh
+/home/car/autopilot_lab/scripts/run_px4_diagnostic_matrix.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_authoritative_baseline.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_diagnostic_matrix.sh
 ```
 
-统一分析入口：
+辅助入口：
 
 ```bash
-ros2 run linearity_analysis linearity_analyze \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
-  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
+/home/car/autopilot_lab/scripts/run_cross_backend_contract_audit.sh --px4-run <accepted_px4_raw_dir> --ardupilot-run <accepted_ardupilot_raw_dir>
+/home/car/autopilot_lab/scripts/compare_schemas.sh --help
+/home/car/autopilot_lab/scripts/visualize_fit_matrices.py --help
 ```
 
-Schema 对比入口：
+## Study 产物
 
-```bash
-ros2 run linearity_analysis linearity_compare_schemas \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
-  --plan /home/car/autopilot_lab/configs/ablations/default_schema_ablation.yaml \
-  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
-```
-
-Shell 包装：
-
-```bash
-/home/car/autopilot_lab/scripts/run_linearity_study.sh \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml
-
-/home/car/autopilot_lab/scripts/compare_schemas.sh \
-  --config /home/car/autopilot_lab/configs/studies/global_linear_commands_plus_state__delta_state.yaml \
-  --plan /home/car/autopilot_lab/configs/ablations/default_schema_ablation.yaml \
-  --study-dir /home/car/autopilot_lab/artifacts/raw/synthetic
-```
-
-## 真实 PX4 主报告
-
-当前真实 PX4 scope 固定为：
-
-- backend: `px4`
-- airframe: `gz_x500`
-- world: `default`
-- scenario: `nominal`
-- modes: `POSCTL` 与 `OFFBOARD_ATTITUDE`
-
-当前链路采用：
-
-- ROS 直录可见 topic
-- 对缺失的 rate / actuator / internal topic 做 `.ulg` 缺口回填
-
-当前默认配置：
-
-- `configs/studies/px4_real_nominal_posctl_capture.yaml`
-- `configs/studies/px4_real_nominal_offboard_attitude_capture.yaml`
-- `configs/studies/px4_real_nominal_broad_ablation_analysis.yaml`
-- `configs/ablations/px4_real_broad_ablation_balanced.yaml`
-
-当前权威报告产物：
-
-- `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced/reports/summary.md`
-- `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced/reports/schema_comparison.md`
-- `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced/summary/study_summary.json`
-
-## 内置 Schema
-
-X 侧：
-
-- `commands_only`
-- `commands_plus_state`
-- `commands_plus_state_history`
-- `commands_plus_controller_params`
-- `commands_plus_state_plus_params`
-- `pooled_backend_mode_augmented`
-- `full_augmented`
-- `feature_mapped_linear`
-
-Y 侧：
-
-- `next_raw_state`
-- `delta_state`
-- `selected_state_subset`
-- `future_state_horizon`
-- `actuator_response`
-- `tracking_error_response`
-- `window_summary_response`
-- `stability_proxy_response`
-
-## 产物结构
-
-Raw run：
-
-- `artifacts/raw/<backend>/<run_id>/`
-
-Study 输出：
+每个正式 study 至少包含：
 
 - `prepared/sample_table.csv`
 - `prepared/schema_inventory.yaml`
@@ -195,18 +158,28 @@ Study 输出：
 - `fits/<combo>/<model>/metrics.json`
 - `reports/summary.md`
 - `reports/schema_comparison.md`
+- `reports/baseline_stability.md`
+- `reports/diagnostic_gate.md`
+- `reports/matrix_gallery.md`
+- `reports/scenario_generalization.md`
 - `summary/study_summary.json`
+- `summary/baseline_stability.json`
+- `summary/diagnostic_gate.json`
+- `summary/matrix_gallery.json`
+- `summary/scenario_generalization.json`
+
+当某个组合被判为 `supported` 时，还会自动生成：
+
+- `fits/<combo>/<model>/matrix_heatmap_abs.png`
+- `fits/<combo>/<model>/matrix_heatmap_signed.png`
 
 ## 文档
 
-- `docs/RESEARCH_GOAL.md`
-- `docs/XY_SCHEMA_GUIDE.md`
-- `docs/EXPERIMENT_PROTOCOL.md`
-- `docs/DATA_SCHEMA.md`
-- `docs/STAGE_REPORT_2026-04-07.md`
+- [MILESTONE_LINEAR_F_REPORT.md](docs/MILESTONE_LINEAR_F_REPORT.md)
+- [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
+- [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
+- [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
+- [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
+- [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
 
-## 回归门
-
-```bash
-/home/car/autopilot_lab/scripts/ci_minimal.sh
-```
+当前里程碑汇报和附录只以最新 generalization full artifact 为准。20260409 的 broad baseline / diagnostic 仍保留，但只作为历史阶段背景。

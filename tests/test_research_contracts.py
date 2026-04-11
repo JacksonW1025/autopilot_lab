@@ -4,27 +4,23 @@ import json
 from pathlib import Path
 
 from linearity_analysis.linearity_analyze import run_analysis
-from linearity_core.config import load_study_config
 from linearity_core.io import read_yaml, write_yaml
 from linearity_core.research_contract import apply_manifest_research_contract, build_acceptance_block, unavailable_acceptance_block
 from linearity_core.synthetic import generate_synthetic_raw_runs
-
-
-ROOT = Path(__file__).resolve().parents[1]
+from tests.support import load_synthetic_config
 
 
 def _tiny_synthetic_config(tmp_path: Path):
-    config = load_study_config(ROOT / "configs/studies/global_linear_commands_plus_state__delta_state.yaml")
-    payload = config.to_dict()
-    payload["repeat_count"] = 3
-    payload["model"] = ["ols_affine"]
-    payload["pooling_mode"] = "pooled"
-    payload["ablation_plan"] = None
-    payload["reporting"] = {"stability_repeats": 1}
-    payload["synthetic"] = {"sample_count": 96, "noise_std": 0.02, "sparse_matrix_density": 0.18}
-    config_path = tmp_path / "tiny_synthetic.json"
-    config_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
-    return load_study_config(config_path)
+    return load_synthetic_config(
+        tmp_path,
+        filename="tiny_synthetic.json",
+        repeat_count=3,
+        model=["ols_affine"],
+        pooling_mode="pooled",
+        ablation_plan=None,
+        reporting={"stability_repeats": 1},
+        synthetic={"sample_count": 96, "noise_std": 0.02, "sparse_matrix_density": 0.18},
+    )
 
 
 def test_manifest_research_contract_sets_required_fields() -> None:

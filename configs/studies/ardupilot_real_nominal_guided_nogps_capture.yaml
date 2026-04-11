@@ -1,0 +1,63 @@
+study_name: ardupilot_real_nominal_guided_nogps_capture
+backend: ardupilot
+research_tier: authoritative_research
+flight_mode: GUIDED_NOGPS
+scenario: nominal
+config_profile: ardupilot_real_guided_nogps_nominal
+seed: 203
+repeat_count: 1
+sampling_rate_hz: 20.0
+x_schema: commands_plus_state
+y_schema: delta_state
+x_include_groups: []
+x_exclude_groups: []
+y_include_groups: []
+y_exclude_groups: []
+feature_map: identity
+run_level_covariates_as_inputs: false
+stratify_by:
+  - mode
+pooling_mode: pooled
+history_length: 3
+prediction_horizon: 2
+prediction_horizon_unit: steps
+parameter_sweep: {}
+internal_signals_enabled: true
+perturbation_strategy: broad_exploration
+model:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+sparsity:
+  threshold: 0.05
+  ridge_alpha: 0.6
+  lasso_alpha: 0.04
+  bootstrap_repeats: 6
+  stability_selection_threshold: 0.6
+reporting:
+  stability_repeats: 2
+  max_alignment_error_ms: 150
+input_type: attitude
+axis: composite
+profile_type: broad
+amplitude: 0.10
+bias: 0.0
+start_after_s: 1.0
+duration_s: 6.0
+hold_s: 1.0
+hover_thrust: -0.69
+timing_required: false
+ready_timeout_s: 30.0
+land_timeout_s: 10.0
+extras:
+  ardupilot_ready_timeout_s: 30.0
+  ardupilot_tail_s: 2.0
+  ardupilot_land_settle_s: 2.0
+  broad_frequencies_hz:
+    - 0.15
+    - 0.35
+    - 0.70
+  roll_amplitude: 1.0
+  pitch_amplitude: 0.8
+  yaw_amplitude: 0.4
+  thrust_delta: 0.10

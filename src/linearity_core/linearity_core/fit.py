@@ -181,7 +181,7 @@ def _soft_threshold(value: float, threshold: float) -> float:
     return 0.0
 
 
-def _solve_lasso(X: np.ndarray, Y: np.ndarray, alpha: float, max_iter: int = 200) -> np.ndarray:
+def _solve_lasso(X: np.ndarray, Y: np.ndarray, alpha: float, max_iter: int = 200, tolerance: float = 1e-6) -> np.ndarray:
     feature_count = X.shape[1]
     target_count = Y.shape[1]
     beta = np.zeros((feature_count, target_count), dtype=float)
@@ -190,11 +190,22 @@ def _solve_lasso(X: np.ndarray, Y: np.ndarray, alpha: float, max_iter: int = 200
     for target_index in range(target_count):
         y = Y[:, target_index]
         weights = np.zeros(feature_count, dtype=float)
+        residual = y.copy()
         for _ in range(max_iter):
+            max_delta = 0.0
             for feature_index in range(feature_count):
-                residual = y - X @ weights + X[:, feature_index] * weights[feature_index]
-                rho = float(np.dot(X[:, feature_index], residual))
-                weights[feature_index] = _soft_threshold(rho, alpha) / gram_diag[feature_index]
+                column = X[:, feature_index]
+                old_weight = weights[feature_index]
+                if old_weight != 0.0:
+                    residual += column * old_weight
+                rho = float(np.dot(column, residual))
+                new_weight = _soft_threshold(rho, alpha) / gram_diag[feature_index]
+                if new_weight != 0.0:
+                    residual -= column * new_weight
+                weights[feature_index] = new_weight
+                max_delta = max(max_delta, abs(new_weight - old_weight))
+            if max_delta <= tolerance:
+                break
         beta[:, target_index] = weights
     return beta
 
@@ -221,7 +232,13 @@ def _fit_single_model(
         standardized_beta = beta
     elif model_name == "lasso_affine":
         alpha = float(config.sparsity.get("lasso_alpha", 0.05))
-        beta = _solve_lasso(Xs, Y_centered, alpha=alpha, max_iter=int(config.sparsity.get("lasso_max_iter", 200)))
+        beta = _solve_lasso(
+            Xs,
+            Y_centered,
+            alpha=alpha,
+            max_iter=int(config.sparsity.get("lasso_max_iter", 200)),
+            tolerance=float(config.sparsity.get("lasso_tolerance", 1e-6)),
+        )
         standardized_beta = beta
     elif model_name == "thresholded_ols_affine":
         beta = _solve_ols(Xs, Y_centered)
@@ -303,8 +320,28 @@ def _group_consistency(
         if len(value_indices) == 0:
             continue
         predictions = _predict(X[value_indices], coef, bias)
-        metrics[value] = _metrics_bundle(Y[value_indices], predictions)
+        metrics[value] = {
+            **_metrics_bundle(Y[value_indices], predictions),
+            "sample_count": float(len(value_indices)),
+        }
     return metrics
+
+
+def _consistency_score(metrics: dict[str, dict[str, float]]) -> float:
+    r2_values = [
+        float(item.get("r2", math.nan))
+        for item in metrics.values()
+        if math.isfinite(float(item.get("r2", math.nan)))
+    ]
+    if not r2_values:
+        return math.nan
+    if len(r2_values) == 1:
+        return 1.0
+    best = max(r2_values)
+    worst = min(r2_values)
+    if best <= 0.0:
+        return 0.0
+    return max(0.0, min(1.0, worst / best))
 
 
 @dataclass(slots=True)
@@ -320,6 +357,7 @@ def fit_schema_combo(
     table_run_ids: list[str],
     backends: list[str],
     modes: list[str],
+    scenarios: list[str],
     matrices: SchemaMatrices,
     config: StudyConfig,
     model_name: str,
@@ -330,6 +368,7 @@ def fit_schema_combo(
     run_ids = [table_run_ids[index] for index in valid_indices]
     backends_valid = [backends[index] for index in valid_indices]
     modes_valid = [modes[index] for index in valid_indices]
+    scenarios_valid = [scenarios[index] for index in valid_indices]
 
     stability_repeats = int(config.reporting.get("stability_repeats", 3))
     summaries: list[dict[str, Any]] = []
@@ -428,6 +467,7 @@ def fit_schema_combo(
     all_indices = np.arange(X.shape[0], dtype=int)
     backend_consistency = _group_consistency("backend", backends_valid, all_indices, Y, mean_coef, mean_bias, X)
     mode_consistency = _group_consistency("mode", modes_valid, all_indices, Y, mean_coef, mean_bias, X)
+    scenario_subgroup_metrics = _group_consistency("scenario", scenarios_valid, all_indices, Y, mean_coef, mean_bias, X)
     nonzero_count = int(np.sum(stable_mask))
     sparsity_ratio = 1.0 - (nonzero_count / max(1, stable_mask.size))
 
@@ -461,6 +501,8 @@ def fit_schema_combo(
         "selection_frequency": frequency.tolist(),
         "backend_consistency": backend_consistency,
         "mode_consistency": mode_consistency,
+        "scenario_consistency": _consistency_score(scenario_subgroup_metrics),
+        "scenario_subgroup_metrics": scenario_subgroup_metrics,
         "top_influential": top_influential,
     }
     return ModelResult(

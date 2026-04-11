@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORLD="default"
 REPEAT=1
+ACCEPTED_TARGET=0
+MAX_ATTEMPTS_PER_CONFIG=""
 SKIP_CAPTURE=0
 MATRIX_DIR=""
 ANALYSIS_CONFIG="${ROOT_DIR}/configs/studies/px4_real_nominal_broad_ablation_analysis.yaml"
@@ -11,7 +13,8 @@ ABLATION_PLAN="${ROOT_DIR}/configs/ablations/px4_real_broad_ablation.yaml"
 
 usage() {
   cat <<'EOF'
-Usage: run_px4_broad_ablation.sh [--world default] [--repeat 1] [--skip-capture --matrix-dir DIR]
+Usage: run_px4_broad_ablation.sh [--world default] [--repeat 1] [--accepted-target 0]
+                                  [--max-attempts-per-config N] [--skip-capture --matrix-dir DIR]
                                   [--analysis-config PATH] [--plan PATH]
 
 Run the first real PX4 broad-ablation report:
@@ -25,6 +28,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --world) WORLD="$2"; shift ;;
     --repeat) REPEAT="$2"; shift ;;
+    --accepted-target) ACCEPTED_TARGET="$2"; shift ;;
+    --max-attempts-per-config) MAX_ATTEMPTS_PER_CONFIG="$2"; shift ;;
     --skip-capture) SKIP_CAPTURE=1 ;;
     --matrix-dir) MATRIX_DIR="$2"; shift ;;
     --analysis-config) ANALYSIS_CONFIG="$2"; shift ;;
@@ -54,18 +59,20 @@ run_py() {
 }
 
 if [[ $SKIP_CAPTURE -eq 0 ]]; then
+  MATRIX_ARGS=(
+    --world "${WORLD}"
+    --pattern px4_real_nominal_posctl_capture.yaml
+    --pattern px4_real_nominal_offboard_attitude_capture.yaml
+    --repeat "${REPEAT}"
+    --accepted-target "${ACCEPTED_TARGET}"
+  )
+  if [[ -n "${MAX_ATTEMPTS_PER_CONFIG}" ]]; then
+    MATRIX_ARGS+=(--max-attempts-per-config "${MAX_ATTEMPTS_PER_CONFIG}")
+  fi
   if command -v ros2 >/dev/null 2>&1 && ros2 pkg prefix px4_ros2_backend >/dev/null 2>&1; then
-    MATRIX_OUTPUT="$(ros2 run px4_ros2_backend px4_linearity_matrix \
-      --world "${WORLD}" \
-      --pattern px4_real_nominal_posctl_capture.yaml \
-      --pattern px4_real_nominal_offboard_attitude_capture.yaml \
-      --repeat "${REPEAT}")"
+    MATRIX_OUTPUT="$(ros2 run px4_ros2_backend px4_linearity_matrix "${MATRIX_ARGS[@]}")"
   else
-    MATRIX_OUTPUT="$(run_py 'from px4_ros2_backend.linearity_matrix import main; main()' \
-      --world "${WORLD}" \
-      --pattern px4_real_nominal_posctl_capture.yaml \
-      --pattern px4_real_nominal_offboard_attitude_capture.yaml \
-      --repeat "${REPEAT}")"
+    MATRIX_OUTPUT="$(run_py 'from px4_ros2_backend.linearity_matrix import main; main()' "${MATRIX_ARGS[@]}")"
   fi
   printf '%s\n' "${MATRIX_OUTPUT}"
   MATRIX_DIR="$(printf '%s\n' "${MATRIX_OUTPUT}" | awk -F= '/^matrix_dir=/{print $2}' | tail -n 1)"

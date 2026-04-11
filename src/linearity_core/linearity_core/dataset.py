@@ -23,6 +23,20 @@ from .canonical import (
 from .config import StudyConfig
 from .io import read_rows_csv, read_yaml
 
+PREPARED_SAMPLE_IDENTITY_COLUMNS = [
+    "sample_id",
+    "run_id",
+    "backend",
+    "mode",
+    "scenario",
+    "config_profile",
+    "research_tier",
+    "research_acceptance",
+    "seed",
+    "timestamp",
+    "logical_step",
+]
+
 
 def _float_value(value: Any, default: float = math.nan) -> float:
     if value in ("", None):
@@ -212,21 +226,31 @@ def _ardupilot_rows_from_manifest(run_dir: Path, manifest: dict[str, Any]) -> li
     input_rows = _sorted_rows(telemetry_dir / "input_trace.csv", "publish_time_ns")
     attitude_rows = _sorted_rows(telemetry_dir / "attitude.csv", "received_time_ns")
     position_rows = _sorted_rows(telemetry_dir / "local_position.csv", "received_time_ns")
+    heartbeat_rows = _sorted_rows(telemetry_dir / "heartbeat.csv", "received_time_ns")
+    sys_status_rows = _sorted_rows(telemetry_dir / "sys_status.csv", "received_time_ns")
     bin_att_rows = _sorted_rows(telemetry_dir / "bin_att.csv", "received_time_ns")
     bin_rate_rows = _sorted_rows(telemetry_dir / "bin_rate.csv", "received_time_ns")
     bin_motb_rows = _sorted_rows(telemetry_dir / "bin_motb.csv", "received_time_ns")
     bin_rcou_rows = _sorted_rows(telemetry_dir / "bin_rcou.csv", "received_time_ns")
 
     parameter_snapshot = manifest.get("parameter_snapshot_after", {}) or {}
+    study_config = manifest.get("study_config", {}) or {}
+    reporting = study_config.get("reporting", {}) if isinstance(study_config, dict) else {}
+    max_alignment_error_ns = int(float(reporting.get("max_alignment_error_ms", 150.0)) * 1_000_000.0)
     base_rows: list[dict[str, Any]] = []
     for index, input_row in enumerate(input_rows):
         timestamp_ns = _int_value(input_row.get("publish_time_ns"), 0)
-        attitude = _nearest_row(attitude_rows, "received_time_ns", timestamp_ns)
-        position = _nearest_row(position_rows, "received_time_ns", timestamp_ns)
-        bin_att = _nearest_row(bin_att_rows, "received_time_ns", timestamp_ns)
-        bin_rate = _nearest_row(bin_rate_rows, "received_time_ns", timestamp_ns)
-        bin_motb = _nearest_row(bin_motb_rows, "received_time_ns", timestamp_ns)
-        bin_rcou = _nearest_row(bin_rcou_rows, "received_time_ns", timestamp_ns)
+        attitude, attitude_delta = _nearest_row_with_delta(attitude_rows, "received_time_ns", timestamp_ns)
+        position, position_delta = _nearest_row_with_delta(position_rows, "received_time_ns", timestamp_ns)
+        heartbeat, heartbeat_delta = _nearest_row_with_delta(heartbeat_rows, "received_time_ns", timestamp_ns)
+        sys_status, sys_status_delta = _nearest_row_with_delta(sys_status_rows, "received_time_ns", timestamp_ns)
+        bin_att, bin_att_delta = _nearest_row_with_delta(bin_att_rows, "received_time_ns", timestamp_ns)
+        bin_rate, bin_rate_delta = _nearest_row_with_delta(bin_rate_rows, "received_time_ns", timestamp_ns)
+        bin_motb, bin_motb_delta = _nearest_row_with_delta(bin_motb_rows, "received_time_ns", timestamp_ns)
+        bin_rcou, bin_rcou_delta = _nearest_row_with_delta(bin_rcou_rows, "received_time_ns", timestamp_ns)
+        alignment_deltas = [value for value in (attitude_delta, position_delta) if value is not None]
+        max_core_alignment_ns = max(alignment_deltas) if alignment_deltas else math.nan
+        alignment_failed = bool(alignment_deltas) and max_core_alignment_ns > max_alignment_error_ns
 
         roll = _float_value(bin_att.get("roll") if bin_att else attitude.get("roll") if attitude else None)
         pitch = _float_value(bin_att.get("pitch") if bin_att else attitude.get("pitch") if attitude else None)
@@ -283,6 +307,25 @@ def _ardupilot_rows_from_manifest(run_dir: Path, manifest: dict[str, Any]) -> li
             "tracking_error_rate_yaw": _float_value(bin_rate.get("des_yaw_rate") if bin_rate else None) - yaw_rate,
             "run_status": str(manifest.get("status", "")),
             "runtime_failsafe": 0,
+            "quality_alignment_attitude_ns": float(attitude_delta) if attitude_delta is not None else math.nan,
+            "quality_alignment_rates_ns": float(bin_rate_delta) if bin_rate_delta is not None else math.nan,
+            "quality_alignment_position_ns": float(position_delta) if position_delta is not None else math.nan,
+            "quality_alignment_attitude_setpoint_ns": math.nan,
+            "quality_alignment_rates_setpoint_ns": math.nan,
+            "quality_alignment_integrator_ns": float(bin_att_delta) if bin_att_delta is not None else math.nan,
+            "quality_alignment_allocator_ns": float(bin_motb_delta) if bin_motb_delta is not None else math.nan,
+            "quality_alignment_actuator_ns": float(bin_rcou_delta) if bin_rcou_delta is not None else math.nan,
+            "quality_alignment_status_ns": float(heartbeat_delta if heartbeat_delta is not None else sys_status_delta if sys_status_delta is not None else math.nan),
+            "quality_missing_attitude": 1.0 if attitude is None and bin_att is None else 0.0,
+            "quality_missing_rates": 1.0 if bin_rate is None and attitude is None else 0.0,
+            "quality_missing_local_position": 1.0 if position is None else 0.0,
+            "quality_missing_attitude_setpoint": 1.0,
+            "quality_missing_rates_setpoint": 1.0,
+            "quality_missing_integrator": 1.0 if bin_att is None else 0.0,
+            "quality_missing_allocator": 1.0 if bin_motb is None else 0.0,
+            "quality_missing_actuator": 1.0 if bin_rcou is None else 0.0,
+            "quality_missing_status": 1.0 if heartbeat is None and sys_status is None else 0.0,
+            "quality_alignment_failed": 1.0 if alignment_failed else 0.0,
         }
         for actuator_index, column in enumerate(ACTUATOR_COLUMNS, start=1):
             row[column] = _normalize_actuator(_float_value(bin_rcou.get(f"c{actuator_index}") if bin_rcou else None), backend="ardupilot")
@@ -367,6 +410,21 @@ class PreparedSampleTable:
 
     def to_csv_rows(self) -> list[dict[str, Any]]:
         return self.rows
+
+
+def prepared_sample_table_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
+    ordered_keys: list[str] = []
+    seen: set[str] = set()
+    for key in PREPARED_SAMPLE_IDENTITY_COLUMNS:
+        if key not in seen:
+            ordered_keys.append(key)
+            seen.add(key)
+    for row in rows:
+        for key in row.keys():
+            if key not in seen:
+                ordered_keys.append(key)
+                seen.add(key)
+    return ordered_keys
 
 
 def build_prepared_sample_table(run_dirs: list[Path], config: StudyConfig) -> tuple[PreparedSampleTable, dict[str, Any]]:

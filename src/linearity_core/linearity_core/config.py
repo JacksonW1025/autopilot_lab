@@ -13,11 +13,22 @@ from .research_contract import SUPPORTED_RESEARCH_TIERS
 
 SUPPORTED_BACKENDS = {"synthetic", "px4", "ardupilot"}
 SUPPORTED_INPUT_TYPES = {"manual", "attitude", "rate"}
-SUPPORTED_PROFILE_TYPES = {"baseline", "step", "pulse", "sweep", "random", "broad"}
+SUPPORTED_PROFILE_TYPES = {
+    "baseline",
+    "step",
+    "pulse",
+    "pulse_train",
+    "alternating_pulse_train",
+    "sweep",
+    "random",
+    "broad",
+    "multi_broad",
+}
 SUPPORTED_AXIS = {"roll", "pitch", "yaw", "throttle", "composite"}
 SUPPORTED_POOLING_MODES = {"pooled", "stratified", "compare_both"}
 SUPPORTED_PREDICTION_UNITS = {"steps", "seconds"}
 SUPPORTED_OUTPUT_SEMANTICS = {"future_state", "delta_state", "current_raw_state", "raw_state", "delayed_state", "horizon_summary"}
+SUPPORTED_BACKEND_MODE_COVARIATES = {"backend", "mode", "scenario", "config_profile"}
 DEFAULT_MODELS = ["ols_affine", "ridge_affine", "lasso_affine", "thresholded_ols_affine"]
 DEFAULT_X_SCHEMAS = [
     "commands_only",
@@ -95,6 +106,7 @@ class StudyConfig:
     y_exclude_groups: list[str] = field(default_factory=list)
     feature_map: str | dict[str, Any] = "identity"
     run_level_covariates_as_inputs: list[str] | bool = field(default_factory=list)
+    backend_mode_covariates: list[str] = field(default_factory=lambda: ["backend", "mode", "scenario", "config_profile"])
     stratify_by: list[str] = field(default_factory=list)
     pooling_mode: str = "pooled"
     output_semantics: str = "future_state"
@@ -170,6 +182,7 @@ class StudyConfig:
             "y_exclude_groups",
             "feature_map",
             "run_level_covariates_as_inputs",
+            "backend_mode_covariates",
             "stratify_by",
             "pooling_mode",
             "output_semantics",
@@ -266,6 +279,13 @@ class StudyConfig:
         else:
             normalized_run_level_inputs = _as_str_list(run_level_inputs)
 
+        backend_mode_covariates = [value.strip().lower() for value in _as_str_list(data.get("backend_mode_covariates", []))]
+        if not backend_mode_covariates:
+            backend_mode_covariates = ["backend", "mode", "scenario", "config_profile"]
+        invalid_backend_mode_covariates = sorted(set(backend_mode_covariates) - SUPPORTED_BACKEND_MODE_COVARIATES)
+        if invalid_backend_mode_covariates:
+            raise ValueError(f"不支持的 backend_mode_covariates: {', '.join(invalid_backend_mode_covariates)}")
+
         return cls(
             study_name=str(data["study_name"]),
             backend=backend,
@@ -284,6 +304,7 @@ class StudyConfig:
             y_exclude_groups=_as_str_list(data.get("y_exclude_groups", [])),
             feature_map=data.get("feature_map", "identity"),
             run_level_covariates_as_inputs=normalized_run_level_inputs,
+            backend_mode_covariates=backend_mode_covariates,
             stratify_by=_as_str_list(data.get("stratify_by", [])),
             pooling_mode=pooling_mode,
             output_semantics=output_semantics,
@@ -372,7 +393,7 @@ class StudyConfig:
         if self.input_type == "manual":
             return "STABILIZE"
         if self.input_type == "attitude":
-            return "GUIDED_ATTITUDE"
+            return "GUIDED_NOGPS"
         return "GUIDED_NOGPS"
 
     def parameter_overrides_for_backend(self, backend: str) -> dict[str, Any]:

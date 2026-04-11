@@ -12,6 +12,7 @@ from linearity_core.schemas import SchemaMatrices, build_schema_matrices
 from linearity_core.fit import fit_schema_combo
 from px4_ros2_backend.experiment_runner import _px4_data_quality
 from px4_ros2_backend import ulog_backfill
+from tests.support import load_synthetic_config
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -355,7 +356,11 @@ def _write_px4_acceptance_fixture(
     base_received_offset = 7_000_000
     timestamps = [1_000_000 + index * 50_000 for index in range(len(phases))]
     timestamp_samples = [value - 2_000 for value in timestamps]
-    active_indices = [index for index, phase in enumerate(phases) if phase.endswith("_active") or phase == "experiment"]
+    active_indices = [
+        index
+        for index, phase in enumerate(phases)
+        if phase.endswith("_active") or "_active_" in phase or phase == "experiment"
+    ]
     if nonzero_active_count is None:
         nonzero_active_count = len(active_indices)
     active_nonzero_indices = set(active_indices[: max(0, nonzero_active_count)])
@@ -763,7 +768,113 @@ def test_px4_acceptance_rejects_failsafe_truncated_run(tmp_path: Path) -> None:
     assert "experiment_truncated_before_expected_active_samples" in acceptance["rejection_reasons"]
 
 
-def test_fit_summary_reports_raw_and_effective_conditioning() -> None:
+def test_px4_acceptance_rejects_single_pulse_throttle_shape(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "single_pulse" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    phases = ["pulse_active"] * 6 + ["recover"] * 114
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=phases,
+        experiment_started=True,
+        completion_reason="disarmed_after_land",
+        nonzero_active_count=6,
+    )
+    config = _acceptance_test_config()
+    config.sampling_rate_hz = 20.0
+    config.duration_s = 6.0
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 120, "vehicle_angular_velocity": 120, "vehicle_local_position": 120, "vehicle_status": 120, "vehicle_control_mode": 120, "actuator_motors": 120}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is False
+    assert acceptance["active_nonzero_command_samples"] == 6
+    assert "insufficient_active_nonzero_command_samples" in acceptance["rejection_reasons"]
+
+
+def test_px4_acceptance_accepts_pulse_train_throttle_shape(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "pulse_train" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    phases = ["pulse_active"] * 35 + ["pulse_gap"] * 85
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=phases,
+        experiment_started=True,
+        completion_reason="disarmed_after_land",
+        nonzero_active_count=35,
+    )
+    config = _acceptance_test_config()
+    config.sampling_rate_hz = 20.0
+    config.duration_s = 6.0
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 120, "vehicle_angular_velocity": 120, "vehicle_local_position": 120, "vehicle_status": 120, "vehicle_control_mode": 120, "actuator_motors": 120}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is True
+    assert acceptance["active_nonzero_command_samples"] == 35
+    assert acceptance["rejection_reasons"] == []
+
+
+def test_px4_acceptance_accepts_alternating_pulse_train_active_phases(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "alternating_pulse_train" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    alternating = []
+    for index in range(35):
+        alternating.append("alternating_pulse_active_pos" if index % 2 == 0 else "alternating_pulse_active_neg")
+    phases = alternating + ["pulse_gap"] * 85
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=phases,
+        experiment_started=True,
+        completion_reason="disarmed_after_land",
+        nonzero_active_count=35,
+    )
+    config = _acceptance_test_config()
+    config.sampling_rate_hz = 20.0
+    config.duration_s = 6.0
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 120, "vehicle_angular_velocity": 120, "vehicle_local_position": 120, "vehicle_status": 120, "vehicle_control_mode": 120, "actuator_motors": 120}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is True
+    assert acceptance["active_phase_present"] is True
+    assert acceptance["active_nonzero_command_samples"] == 35
+    assert acceptance["rejection_reasons"] == []
+
+
+def test_fit_summary_reports_raw_and_effective_conditioning(tmp_path: Path) -> None:
     rng = np.random.default_rng(7)
     sample_count = 32
     position_z = rng.normal(size=sample_count)
@@ -799,11 +910,12 @@ def test_fit_summary_reports_raw_and_effective_conditioning() -> None:
         valid_mask=np.ones(sample_count, dtype=bool),
         schema_metadata={},
     )
-    config = load_study_config(ROOT / "configs/studies/global_linear_commands_plus_state__delta_state.yaml")
+    config = load_synthetic_config(tmp_path, filename="conditioning_config.json")
     result = fit_schema_combo(
         [f"run_{index // 16}" for index in range(sample_count)],
         ["px4"] * sample_count,
         ["POSCTL" if index % 2 == 0 else "OFFBOARD_ATTITUDE" for index in range(sample_count)],
+        ["nominal"] * sample_count,
         matrices,
         config,
         "ols_affine",

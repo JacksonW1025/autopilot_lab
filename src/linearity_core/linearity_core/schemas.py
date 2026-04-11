@@ -86,9 +86,21 @@ def _controller_param_columns(table: PreparedSampleTable) -> list[str]:
     return _dynamic_group_columns(table, CONTROLLER_PARAM_PREFIX)
 
 
-def _backend_mode_columns(table: PreparedSampleTable) -> list[str]:
-    prefixes = (BACKEND_PREFIX, MODE_PREFIX, SCENARIO_PREFIX, CONFIG_PROFILE_PREFIX)
-    return [name for name in table.numeric_columns if name.startswith(prefixes)]
+def _backend_mode_columns(table: PreparedSampleTable, config: StudyConfig) -> list[str]:
+    prefixes: list[str] = []
+    mapping = {
+        "backend": BACKEND_PREFIX,
+        "mode": MODE_PREFIX,
+        "scenario": SCENARIO_PREFIX,
+        "config_profile": CONFIG_PROFILE_PREFIX,
+    }
+    for name in config.backend_mode_covariates:
+        prefix = mapping.get(name)
+        if prefix is not None:
+            prefixes.append(prefix)
+    if not prefixes:
+        return []
+    return [name for name in table.numeric_columns if name.startswith(tuple(prefixes))]
 
 
 def _history_columns(table: PreparedSampleTable, base_columns: list[str], run_ids: list[str], history_length: int) -> tuple[np.ndarray, list[str]]:
@@ -220,14 +232,14 @@ def _resolve_feature_columns(table: PreparedSampleTable, config: StudyConfig, x_
         elif group == "controller_params":
             feature_columns.extend(_controller_param_columns(table))
         elif group == "backend_mode":
-            feature_columns.extend(_backend_mode_columns(table))
+            feature_columns.extend(_backend_mode_columns(table, config))
         elif group == "internal":
             feature_columns.extend([name for name in INTERNAL_COLUMNS if name in table.numeric_columns])
         elif group == "actuator_feedback":
             feature_columns.extend([name for name in ACTUATOR_COLUMNS if name in table.numeric_columns])
     if isinstance(config.run_level_covariates_as_inputs, bool) and config.run_level_covariates_as_inputs:
         feature_columns.extend(_controller_param_columns(table))
-        feature_columns.extend(_backend_mode_columns(table))
+        feature_columns.extend(_backend_mode_columns(table, config))
     elif isinstance(config.run_level_covariates_as_inputs, list):
         feature_columns.extend([name for name in table.numeric_columns if name in config.run_level_covariates_as_inputs])
     return [name for name in _unique_in_order(feature_columns) if name in table.numeric_columns]

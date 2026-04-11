@@ -16,8 +16,10 @@ Usage: run_px4_diagnostic_matrix.sh [--world default] [--repeat 1] [--skip-captu
 
 Run the PX4-only diagnostic matrix:
   1. expand POSCTL and OFFBOARD_ATTITUDE single-axis configs across small/medium/large amplitudes
-  2. capture raw runs
-  3. analyze the accepted-only diagnostic matrix separately from the authoritative baseline
+     for roll / pitch / yaw
+  2. add dedicated throttle-only configs with pulse-train injection
+  3. capture raw runs
+  4. analyze the accepted-only diagnostic matrix separately from the authoritative baseline
 EOF
 }
 
@@ -53,6 +55,10 @@ run_py() {
   python3 -c "$module_expr" "$@"
 }
 
+run_stage_check() {
+  run_py 'from linearity_analysis.stage_checks import main; main()' "$@"
+}
+
 TMP_CONFIG_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_CONFIG_DIR}"' EXIT
 
@@ -70,7 +76,11 @@ base_paths = [
     root / "configs/studies/px4_diagnostic_posctl_axis_capture.yaml",
     root / "configs/studies/px4_diagnostic_offboard_attitude_axis_capture.yaml",
 ]
-axes = ("roll", "pitch", "yaw", "throttle")
+throttle_paths = [
+    root / "configs/studies/px4_diagnostic_posctl_throttle_capture.yaml",
+    root / "configs/studies/px4_diagnostic_offboard_attitude_throttle_capture.yaml",
+]
+axes = ("roll", "pitch", "yaw")
 tiers = (("small", 0.5), ("medium", 1.0), ("large", 1.5))
 
 for base_path in base_paths:
@@ -90,14 +100,30 @@ for base_path in base_paths:
             item.setdefault("extras", {})
             item["extras"]["amplitude_tier"] = label
             item["extras"]["amplitude_factor"] = factor
-            if axis == "throttle":
-                item["profile_type"] = "pulse"
-                item["extras"]["pulse_width_s"] = min(float(item["duration_s"]), 0.35)
-            else:
-                item["profile_type"] = "sweep"
+            item["profile_type"] = "sweep"
             output_path = out_dir / f"{item['study_name']}.yaml"
             output_path.write_text(yaml.safe_dump(item, sort_keys=False, allow_unicode=True), encoding="utf-8")
             print(output_path)
+
+for base_path in throttle_paths:
+    payload = yaml.safe_load(base_path.read_text(encoding="utf-8"))
+    base_amplitude = float(payload["amplitude"])
+    base_study_name = str(payload["study_name"])
+    base_profile = str(payload["config_profile"])
+    base_seed = int(payload["seed"])
+    for tier_index, (label, factor) in enumerate(tiers):
+        item = copy.deepcopy(payload)
+        item["axis"] = "throttle"
+        item["amplitude"] = round(base_amplitude * factor, 6)
+        item["study_name"] = f"{base_study_name}__{label}"
+        item["config_profile"] = f"{base_profile}__{label}"
+        item["seed"] = base_seed + tier_index
+        item.setdefault("extras", {})
+        item["extras"]["amplitude_tier"] = label
+        item["extras"]["amplitude_factor"] = factor
+        output_path = out_dir / f"{item['study_name']}.yaml"
+        output_path.write_text(yaml.safe_dump(item, sort_keys=False, allow_unicode=True), encoding="utf-8")
+        print(output_path)
 PY
 )"
 
@@ -125,14 +151,22 @@ fi
 RUNS_MANIFEST="${MATRIX_DIR}/runs.csv"
 
 if command -v ros2 >/dev/null 2>&1 && ros2 pkg prefix linearity_analysis >/dev/null 2>&1; then
-  ros2 run linearity_analysis linearity_compare_schemas \
+  ANALYSIS_OUTPUT="$(ros2 run linearity_analysis linearity_compare_schemas \
     --config "${ANALYSIS_CONFIG}" \
     --plan "${ABLATION_PLAN}" \
-    --runs-manifest "${RUNS_MANIFEST}"
+    --runs-manifest "${RUNS_MANIFEST}")"
 else
-  run_py 'from linearity_analysis.linearity_compare_schemas import main; main()' \
+  ANALYSIS_OUTPUT="$(run_py 'from linearity_analysis.linearity_compare_schemas import main; main()' \
     --config "${ANALYSIS_CONFIG}" \
     --plan "${ABLATION_PLAN}" \
-    --runs-manifest "${RUNS_MANIFEST}"
+    --runs-manifest "${RUNS_MANIFEST}")"
+fi
+printf '%s\n' "${ANALYSIS_OUTPUT}"
+
+STUDY_DIR="$(printf '%s\n' "${ANALYSIS_OUTPUT}" | awk -F= '/^study_dir=/{print $2}' | tail -n 1)"
+if [[ -z "${STUDY_DIR}" ]]; then
+  echo "study_dir is required" >&2
+  exit 1
 fi
 
+run_stage_check diagnostic-artifact --study-dir "${STUDY_DIR}"

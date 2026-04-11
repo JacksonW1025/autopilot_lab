@@ -8,12 +8,23 @@ from typing import Any
 import numpy as np
 
 from linearity_core.config import AblationPlan, StudyConfig, load_ablation_plan, load_study_config
-from linearity_core.dataset import PreparedSampleTable, build_prepared_sample_table
-from linearity_core.fit import fit_schema_combo
+from linearity_core.dataset import PreparedSampleTable, build_prepared_sample_table, prepared_sample_table_fieldnames
+from linearity_core.fit import _consistency_score, _group_consistency, fit_schema_combo
 from linearity_core.io import ensure_study_directories, read_rows_csv, read_yaml, write_json, write_rows_csv, write_yaml
 from linearity_core.research_contract import manifest_acceptance_state
 from linearity_core.report import render_comparison_markdown, render_summary_markdown, summarize_results
 from linearity_core.schemas import available_x_schemas, available_y_schemas, build_schema_matrices
+from linearity_core.study_artifacts import (
+    build_baseline_stability_payload,
+    build_diagnostic_gate_payload,
+    build_scenario_generalization_payload,
+    build_state_evolution_audit_payload,
+    render_baseline_stability_markdown,
+    render_diagnostic_gate_markdown,
+    render_scenario_generalization_markdown,
+    render_state_evolution_audit_markdown,
+)
+from linearity_analysis.matrix_gallery import write_matrix_gallery_artifacts
 
 
 def _discover_run_dirs_from_study_dir(path: Path) -> list[Path]:
@@ -89,11 +100,12 @@ def _drop_zero_variance_features(matrices, run_ids: list[str]) -> tuple[np.ndarr
     return matrices.X[:, keep_mask], [name for name, keep in zip(matrices.feature_names, keep_mask) if keep], valid_rows, keep_mask
 
 
-def _subset_result_rows(table: PreparedSampleTable, matrices, valid_mask: np.ndarray) -> tuple[list[str], list[str], list[str]]:
+def _subset_result_rows(table: PreparedSampleTable, matrices, valid_mask: np.ndarray) -> tuple[list[str], list[str], list[str], list[str]]:
     run_ids = table.string_column("run_id")
     backends = table.string_column("backend")
     modes = table.string_column("mode")
-    return run_ids, backends, modes
+    scenarios = table.string_column("scenario")
+    return run_ids, backends, modes, scenarios
 
 
 def _save_matrix_csv(path: Path, row_names: list[str], column_names: list[str], matrix: np.ndarray) -> None:
@@ -121,6 +133,7 @@ def _run_stratified_fit(
     base_run_ids = table.string_column("run_id")
     base_backends = table.string_column("backend")
     base_modes = table.string_column("mode")
+    base_scenarios = table.string_column("scenario")
     grouping_keys = stratify_by or ["backend", "mode"]
     group_index: dict[tuple[str, ...], list[int]] = {}
     for index, row in enumerate(table.rows):
@@ -141,6 +154,7 @@ def _run_stratified_fit(
         subset_run_ids = [base_run_ids[index] for index in indices]
         subset_backends = [base_backends[index] for index in indices]
         subset_modes = [base_modes[index] for index in indices]
+        subset_scenarios = [base_scenarios[index] for index in indices]
         local_matrices = type(matrices)(
             X=matrices.X[indices],
             Y=matrices.Y[indices],
@@ -149,7 +163,7 @@ def _run_stratified_fit(
             valid_mask=matrices.valid_mask[indices],
             schema_metadata=dict(matrices.schema_metadata),
         )
-        model_result = fit_schema_combo(subset_run_ids, subset_backends, subset_modes, local_matrices, config, model_name)
+        model_result = fit_schema_combo(subset_run_ids, subset_backends, subset_modes, subset_scenarios, local_matrices, config, model_name)
         group_results.append({"group_key": list(key), "summary": model_result.summary})
         coef_blocks.append(model_result.coefficient_matrix)
         bias_blocks.append(model_result.bias_vector)
@@ -162,6 +176,27 @@ def _run_stratified_fit(
     stacked_coef = np.stack(coef_blocks, axis=0)
     stacked_bias = np.stack(bias_blocks, axis=0)
     stacked_mask = np.stack(mask_blocks, axis=0)
+    valid_indices = np.flatnonzero(matrices.valid_mask)
+    X_valid = matrices.X[valid_indices]
+    Y_valid = matrices.Y[valid_indices]
+    backends_valid = [base_backends[index] for index in valid_indices]
+    modes_valid = [base_modes[index] for index in valid_indices]
+    scenarios_valid = [base_scenarios[index] for index in valid_indices]
+    all_indices = np.arange(X_valid.shape[0], dtype=int)
+    mean_coef = np.mean(stacked_coef, axis=0)
+    mean_bias = np.mean(stacked_bias, axis=0)
+    backend_consistency = _group_consistency("backend", backends_valid, all_indices, Y_valid, mean_coef, mean_bias, X_valid)
+    mode_consistency = _group_consistency("mode", modes_valid, all_indices, Y_valid, mean_coef, mean_bias, X_valid)
+    scenario_subgroup_metrics = _group_consistency(
+        "scenario",
+        scenarios_valid,
+        all_indices,
+        Y_valid,
+        mean_coef,
+        mean_bias,
+        X_valid,
+    )
+    scenario_consistency = _consistency_score(scenario_subgroup_metrics)
     aggregate_summary = {
         "model_name": model_name,
         "group_results": group_results,
@@ -182,15 +217,17 @@ def _run_stratified_fit(
         "conditioning_extra_pruned_features": sorted(
             {name for item in group_results for name in item["summary"].get("conditioning_extra_pruned_features", [])}
         ),
-        "backend_consistency": {},
-        "mode_consistency": {},
+        "backend_consistency": backend_consistency,
+        "mode_consistency": mode_consistency,
+        "scenario_consistency": scenario_consistency,
+        "scenario_subgroup_metrics": scenario_subgroup_metrics,
         "top_influential": {},
         "selection_frequency": np.mean(stacked_mask, axis=0).tolist(),
     }
     return {
         "summary": aggregate_summary,
-        "coefficient_matrix": np.mean(stacked_coef, axis=0),
-        "bias_vector": np.mean(stacked_bias, axis=0),
+        "coefficient_matrix": mean_coef,
+        "bias_vector": mean_bias,
         "sparsity_mask": (np.mean(stacked_mask, axis=0) >= 0.60).astype(float),
         "residual_rows": residual_rows,
     }
@@ -247,7 +284,7 @@ def run_analysis(
     study_id = f"{datetime.now(timezone.utc).astimezone():%Y%m%d_%H%M%S}_{study_name}"
     paths = ensure_study_directories(study_id, root=output_root)
     table, inventory = build_prepared_sample_table(filtered_run_dirs, config)
-    write_rows_csv(paths["sample_table_path"], table.to_csv_rows(), fieldnames=list(table.rows[0].keys()) if table.rows else [])
+    write_rows_csv(paths["sample_table_path"], table.to_csv_rows(), fieldnames=prepared_sample_table_fieldnames(table.rows))
 
     plan = ablation_plan
     x_schemas = plan.x_schemas if plan else [config.x_schema]
@@ -279,7 +316,7 @@ def run_analysis(
         for x_schema in x_schemas:
             for y_schema in y_schemas:
                 matrices = build_schema_matrices(table, config, x_schema, y_schema)
-                run_ids, backends, modes = _subset_result_rows(table, matrices, matrices.valid_mask)
+                run_ids, backends, modes, scenarios = _subset_result_rows(table, matrices, matrices.valid_mask)
                 X, feature_names, valid_mask, keep_mask = _drop_zero_variance_features(matrices, run_ids)
                 matrices = type(matrices)(
                     X=X,
@@ -325,7 +362,7 @@ def run_analysis(
                         sparsity_mask = fitted["sparsity_mask"]
                         residual_rows = fitted["residual_rows"]
                     else:
-                        model_result = fit_schema_combo(run_ids, backends, modes, matrices, config, model_name)
+                        model_result = fit_schema_combo(run_ids, backends, modes, scenarios, matrices, config, model_name)
                         summary = model_result.summary
                         coefficient_matrix = model_result.coefficient_matrix
                         bias_vector = model_result.bias_vector
@@ -362,28 +399,53 @@ def run_analysis(
     paths["summary_report_path"].write_text(render_summary_markdown(study_name, summary, results, skipped_results=skipped_results), encoding="utf-8")
     paths["comparison_report_path"].write_text(render_comparison_markdown(study_name, results, skipped_results=skipped_results), encoding="utf-8")
     write_json(paths["summary_json_path"], {"study_name": study_name, **summary})
-    write_yaml(
-        paths["manifest_path"],
-        {
-            "study_name": study_name,
-            "study_id": study_id,
-            "source_run_dirs": [str(path) for path in run_dirs],
-            "source_backends": sorted(set(table.string_column("backend"))),
-            "source_modes": sorted(set(mode for mode in table.string_column("mode") if mode)),
-            "source_scenarios": sorted(set(scenario for scenario in table.string_column("scenario") if scenario)),
-            "source_config_profiles": sorted(set(profile for profile in table.string_column("config_profile") if profile)),
-            "source_seeds": sorted(set(int(seed) for seed in table.column("seed"))) if table.rows else [],
-            "report_matrix": {
-                "x_schemas": x_schemas,
-                "y_schemas": y_schemas,
-                "models": models,
-                "pooling_modes": pooling_modes,
-                "stratify_by": stratify_by,
-                "repeat_count": config.repeat_count,
-                "appendix_x_schemas": sorted(appendix_x_schemas),
-            },
-            "summary": summary,
+    study_manifest = {
+        "study_name": study_name,
+        "study_id": study_id,
+        "source_run_dirs": [str(path) for path in run_dirs],
+        "source_backends": sorted(set(table.string_column("backend"))),
+        "source_modes": sorted(set(mode for mode in table.string_column("mode") if mode)),
+        "source_scenarios": sorted(set(scenario for scenario in table.string_column("scenario") if scenario)),
+        "source_config_profiles": sorted(set(profile for profile in table.string_column("config_profile") if profile)),
+        "source_seeds": sorted(set(int(seed) for seed in table.column("seed"))) if table.rows else [],
+        "report_matrix": {
+            "x_schemas": x_schemas,
+            "y_schemas": y_schemas,
+            "models": models,
+            "pooling_modes": pooling_modes,
+            "stratify_by": stratify_by,
+            "repeat_count": config.repeat_count,
+            "appendix_x_schemas": sorted(appendix_x_schemas),
         },
+        "summary": summary,
+    }
+    write_yaml(paths["manifest_path"], study_manifest)
+
+    baseline_stability = build_baseline_stability_payload(paths["base_dir"], study_name, summary, schema_inventory, study_manifest)
+    paths["baseline_stability_report_path"].write_text(render_baseline_stability_markdown(baseline_stability), encoding="utf-8")
+    write_json(paths["baseline_stability_json_path"], baseline_stability)
+
+    state_evolution_audit = build_state_evolution_audit_payload(paths["base_dir"], study_name, schema_inventory, study_manifest)
+    paths["state_evolution_audit_report_path"].write_text(
+        render_state_evolution_audit_markdown(state_evolution_audit),
+        encoding="utf-8",
+    )
+    write_json(paths["state_evolution_audit_json_path"], state_evolution_audit)
+
+    scenario_generalization = build_scenario_generalization_payload(paths["base_dir"], study_name, study_manifest)
+    paths["scenario_generalization_report_path"].write_text(
+        render_scenario_generalization_markdown(scenario_generalization),
+        encoding="utf-8",
+    )
+    write_json(paths["scenario_generalization_json_path"], scenario_generalization)
+
+    diagnostic_gate = build_diagnostic_gate_payload(run_dirs)
+    paths["diagnostic_gate_report_path"].write_text(render_diagnostic_gate_markdown(diagnostic_gate), encoding="utf-8")
+    write_json(paths["diagnostic_gate_json_path"], diagnostic_gate)
+    write_matrix_gallery_artifacts(
+        paths["base_dir"],
+        report_path=paths["matrix_gallery_report_path"],
+        summary_path=paths["matrix_gallery_json_path"],
     )
     return paths["base_dir"]
 

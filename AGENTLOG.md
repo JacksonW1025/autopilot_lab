@@ -2,57 +2,74 @@
 
 ## 目标
 
-围绕 `Y ≈ fX (+ b)` 构建一个可持续推进的 UAV 全局线性研究平台。默认主线固定为：
+围绕 `Y ≈ fX (+ b)` 构建一个可持续推进的无人机全局线性研究平台。当前唯一正式主线是：
 
-- 构造候选 `X`
-- 构造候选 `Y`
+- 采集真实或仿真 raw run
+- 在统一 `X / Y schema` 下构造样本
 - 拟合全局线性/仿射矩阵 `f`
-- 估计稀疏性
-- 比较不同 `X/Y schema`
+- 用稀疏性、稳定性、泛化表现判断该 `f` 是否可接受
+- 用 PX4 与 ArduPilot 的相似性增强结论，而不是把研究写成 backend 竞赛
 
 ## 2026-04-06
 
 - 建立 `linearity_core / linearity_study / linearity_analysis` 三层结构
 - 统一 study config、sample table、fit artifact、study summary 的输出口径
-- 新增 `linearity_run_study / linearity_analyze / linearity_compare_schemas`
-- 新增 `scripts/run_linearity_study.sh`、`scripts/compare_schemas.sh`、`scripts/smoke_linearity.sh`
-- 建立 synthetic backendless smoke 与基础测试集
+- 建立基础 synthetic smoke 与测试集
 
 ## 2026-04-07
 
-### 真实 PX4 主报告链路
+- 固定 PX4 正式 scope：`gz_x500/default + nominal + POSCTL/OFFBOARD_ATTITUDE`
+- 建立 PX4 真实 capture、analysis、broad ablation 链路
+- PX4 raw capture 支持 `ROS 直录 + ULog 缺口回填`
+- 条件数诊断拆分为 `raw_condition_number` 与 `effective_condition_number`
 
-- 固定真实 PX4 scope：`gz_x500/default + nominal + POSCTL/OFFBOARD_ATTITUDE`
-- 新增真实 capture config、analysis config 与 balanced broad ablation plan
-- `scripts/run_px4_broad_ablation.sh` 成为当前真实 PX4 主入口
-- 当前权威 raw run：
-  - `artifacts/raw/px4/20260407_025915_px4_manual_broad_composite_r1`
-  - `artifacts/raw/px4/20260407_030010_px4_attitude_broad_composite_r1`
-- 当前权威 study：
-  - `artifacts/studies/20260407_031229_px4_real_broad_ablation_balanced`
+## 2026-04-09
 
-### PX4 telemetry 与 conditioning
+### 仓库主线收敛
 
-- PX4 raw capture 现支持 `ROS 直录 + ULog 缺口回填`
-- 已补齐 rate / actuator / internal telemetry 的分析输入链路
-- 条件数诊断现拆分为：
-  - `raw_condition_number`
-  - `effective_condition_number`
-- `selected_state_subset` 已按 `output_semantics` 解释，不再混淆当前态与未来响应
+- 删除旧阶段报告、旧 generic/public study configs
+- 删除旧的 backendless 入口与 smoke 入口
+- README / PJINFO / lab.lock 统一改到当前正式实验主线
 
-### 当前结果
+### Artifact 与契约冻结
 
-- best schema: `commands_plus_state_history x next_raw_state | ols_affine | pooled`
-- best sparse/stable schema: `commands_plus_state_history x next_raw_state | ridge_affine | pooled`
-- `median_test_r2 ≈ 0.9726`
-- `commands_only -> commands_plus_state` 提升 `≈ 1.0442`
-- `commands_plus_state -> history` 提升 `≈ 0.0064`
-- `actuator_response` 已进入有效比较
-- `raw_condition_number = inf`
-- `effective_condition_number ≈ 1259416.2092`
+- 冻结 raw/study contract：`manifest`、`data_quality.acceptance`、prepared sample table 身份列、X/Y schema naming 跨 backend 对齐
+- 新增稳定输出：
+  - `reports/baseline_stability.md`
+  - `reports/diagnostic_gate.md`
+  - `reports/matrix_gallery.md`
+- supported 组合现在会自动生成 `matrix_heatmap_abs.png` 与 `matrix_heatmap_signed.png`
 
-### 当前文档入口
+### ArduPilot 正式接入
 
-- `README.md`
-- `PJINFO.md`
-- `docs/STAGE_REPORT_2026-04-07.md`
+- ArduPilot 可视化默认改为 best-effort `MAVProxy --console --map`
+- `GUIDED_ATTITUDE` 统一改名为 `GUIDED_NOGPS`
+- 新增 `GUIDED_NOGPS` smoke、`STABILIZE` partial baseline、`STABILIZE` throttle diagnostic、contract audit、formal compare 链路
+
+### PX4 live 修复
+
+- 定位 PX4 POSCTL live blocker：OFFBOARD setpoint 会因时基问题出现秒级断流
+- 注入器 timer 改为显式 `SYSTEM_TIME`
+- 修复后最小 POSCTL smoke 恢复 accepted，`input_trace` 最大间隔回到约 `0.0558s`
+- 修复后 PX4 authoritative baseline raw capture 已重新达到：
+  - `POSCTL = 5 accepted`
+  - `OFFBOARD_ATTITUDE = 5 accepted`
+
+## 2026-04-11
+
+### Generalization Full 收口
+
+- 完成 PX4 generalization full：
+  - baseline
+  - diagnostic
+- 完成 ArduPilot generalization full：
+  - baseline
+  - diagnostic
+- canonical compare 已切到 latest generalization full 四个 study
+- 当前正式主文档与附录已全部刷新到 generalization 线
+
+## 当前重点
+
+- 保持 canonical artifact、README、PJINFO 与 docs 同步
+- 优先清理 superseded artifact 与临时日志，保持仓库精简
+- 后续如果继续扩实验，优先读透 generalized-supported 组合的 `matrix_f` 热力图，而不是盲目继续扩 schema
