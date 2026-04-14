@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -9,19 +10,23 @@ import numpy as np
 
 from linearity_core.config import AblationPlan, StudyConfig, load_ablation_plan, load_study_config
 from linearity_core.dataset import PreparedSampleTable, build_prepared_sample_table, prepared_sample_table_fieldnames
-from linearity_core.fit import _consistency_score, _group_consistency, fit_schema_combo
+from linearity_core.fit import _consistency_score, _group_consistency, _metrics_bundle, _predict, fit_schema_combo, fit_schema_combo_holdout
 from linearity_core.io import ensure_study_directories, read_rows_csv, read_yaml, write_json, write_rows_csv, write_yaml
 from linearity_core.research_contract import manifest_acceptance_state
-from linearity_core.report import render_comparison_markdown, render_summary_markdown, summarize_results
+from linearity_core.report import classify_support, render_comparison_markdown, render_summary_markdown, summarize_results
 from linearity_core.schemas import available_x_schemas, available_y_schemas, build_schema_matrices
 from linearity_core.study_artifacts import (
     build_baseline_stability_payload,
     build_diagnostic_gate_payload,
+    build_scenario_holdout_payload,
     build_scenario_generalization_payload,
+    build_sparsity_overlap_payload,
     build_state_evolution_audit_payload,
     render_baseline_stability_markdown,
     render_diagnostic_gate_markdown,
+    render_scenario_holdout_markdown,
     render_scenario_generalization_markdown,
+    render_sparsity_overlap_markdown,
     render_state_evolution_audit_markdown,
 )
 from linearity_analysis.matrix_gallery import write_matrix_gallery_artifacts
@@ -233,6 +238,321 @@ def _run_stratified_fit(
     }
 
 
+def _holdout_support(summary: dict[str, Any], holdout_test_r2: float) -> str:
+    support_view = dict(summary)
+    support_view["median_test_r2"] = holdout_test_r2
+    return classify_support(support_view)
+
+
+def _run_stratified_holdout_fit(
+    table: PreparedSampleTable,
+    matrices,
+    config: StudyConfig,
+    model_name: str,
+    stratify_by: list[str],
+    *,
+    holdout_scenario: str,
+) -> dict[str, Any]:
+    base_run_ids = table.string_column("run_id")
+    base_backends = table.string_column("backend")
+    base_modes = table.string_column("mode")
+    base_scenarios = table.string_column("scenario")
+    grouping_keys = stratify_by or ["backend", "mode"]
+    group_index: dict[tuple[str, ...], list[int]] = {}
+    for index, row in enumerate(table.rows):
+        key = tuple(str(row.get(name, "")) for name in grouping_keys)
+        group_index.setdefault(key, []).append(index)
+
+    group_results: list[dict[str, Any]] = []
+    coef_blocks: list[np.ndarray] = []
+    bias_blocks: list[np.ndarray] = []
+    mask_blocks: list[np.ndarray] = []
+    residual_rows: list[dict[str, Any]] = []
+    holdout_y_true: list[np.ndarray] = []
+    holdout_y_pred: list[np.ndarray] = []
+    minimum_train_rows = max(3, len(matrices.feature_names) + 1)
+    for key, indices in sorted(group_index.items()):
+        subset_run_ids = [base_run_ids[index] for index in indices]
+        subset_backends = [base_backends[index] for index in indices]
+        subset_modes = [base_modes[index] for index in indices]
+        subset_scenarios = [base_scenarios[index] for index in indices]
+        local_matrices = type(matrices)(
+            X=matrices.X[indices],
+            Y=matrices.Y[indices],
+            feature_names=matrices.feature_names,
+            response_names=matrices.response_names,
+            valid_mask=matrices.valid_mask[indices],
+            schema_metadata=dict(matrices.schema_metadata),
+        )
+        valid_local_indices = np.flatnonzero(local_matrices.valid_mask)
+        if len(valid_local_indices) == 0:
+            continue
+        train_valid_indices = np.asarray(
+            [index for index, local_index in enumerate(valid_local_indices) if subset_scenarios[local_index] != holdout_scenario],
+            dtype=int,
+        )
+        test_valid_indices = np.asarray(
+            [index for index, local_index in enumerate(valid_local_indices) if subset_scenarios[local_index] == holdout_scenario],
+            dtype=int,
+        )
+        if len(train_valid_indices) < minimum_train_rows or len(test_valid_indices) == 0:
+            continue
+
+        model_result = fit_schema_combo_holdout(
+            subset_run_ids,
+            subset_backends,
+            subset_modes,
+            subset_scenarios,
+            local_matrices,
+            config,
+            model_name,
+            train_valid_indices=train_valid_indices,
+            test_valid_indices=test_valid_indices,
+            split_name="holdout",
+        )
+        group_results.append({"group_key": list(key), "summary": model_result.summary})
+        coef_blocks.append(model_result.coefficient_matrix)
+        bias_blocks.append(model_result.bias_vector)
+        mask_blocks.append(model_result.sparsity_mask)
+        residual_rows.extend(model_result.residual_rows)
+
+        X_valid = local_matrices.X[valid_local_indices]
+        Y_valid = local_matrices.Y[valid_local_indices]
+        predictions = _predict(X_valid[test_valid_indices], model_result.coefficient_matrix, model_result.bias_vector)
+        holdout_y_true.append(Y_valid[test_valid_indices])
+        holdout_y_pred.append(predictions)
+
+    if not group_results:
+        raise ValueError("stratified holdout fitting 没有足够样本")
+
+    stacked_coef = np.stack(coef_blocks, axis=0)
+    stacked_bias = np.stack(bias_blocks, axis=0)
+    stacked_mask = np.stack(mask_blocks, axis=0)
+    valid_indices = np.flatnonzero(matrices.valid_mask)
+    X_valid = matrices.X[valid_indices]
+    Y_valid = matrices.Y[valid_indices]
+    backends_valid = [base_backends[index] for index in valid_indices]
+    modes_valid = [base_modes[index] for index in valid_indices]
+    scenarios_valid = [base_scenarios[index] for index in valid_indices]
+    all_indices = np.arange(X_valid.shape[0], dtype=int)
+    mean_coef = np.mean(stacked_coef, axis=0)
+    mean_bias = np.mean(stacked_bias, axis=0)
+    backend_consistency = _group_consistency("backend", backends_valid, all_indices, Y_valid, mean_coef, mean_bias, X_valid)
+    mode_consistency = _group_consistency("mode", modes_valid, all_indices, Y_valid, mean_coef, mean_bias, X_valid)
+    scenario_subgroup_metrics = _group_consistency(
+        "scenario",
+        scenarios_valid,
+        all_indices,
+        Y_valid,
+        mean_coef,
+        mean_bias,
+        X_valid,
+    )
+    scenario_consistency = _consistency_score(scenario_subgroup_metrics)
+    holdout_metrics = _metrics_bundle(np.vstack(holdout_y_true), np.vstack(holdout_y_pred))
+    aggregate_summary = {
+        "model_name": model_name,
+        "group_results": group_results,
+        "median_test_r2": float(np.median([item["summary"]["median_test_r2"] for item in group_results])),
+        "median_test_mse": float(np.median([item["summary"]["median_test_mse"] for item in group_results])),
+        "median_test_mae": float(np.median([item["summary"]["median_test_mae"] for item in group_results])),
+        "coefficient_stability": float(np.mean([item["summary"]["coefficient_stability"] for item in group_results])),
+        "nonzero_count": int(np.sum(np.mean(stacked_mask, axis=0) >= 0.60)),
+        "sparsity_ratio": float(1.0 - (np.sum(np.mean(stacked_mask, axis=0) >= 0.60) / max(1, stacked_mask.shape[1] * stacked_mask.shape[2]))),
+        "raw_condition_number": float(np.median([item["summary"].get("raw_condition_number", np.nan) for item in group_results])),
+        "effective_condition_number": float(np.median([item["summary"].get("effective_condition_number", np.nan) for item in group_results])),
+        "condition_number": float(np.median([item["summary"].get("condition_number", np.nan) for item in group_results])),
+        "raw_singular_values": group_results[0]["summary"].get("raw_singular_values", []),
+        "singular_values": group_results[0]["summary"].get("singular_values", []),
+        "effective_singular_values": group_results[0]["summary"].get("effective_singular_values", []),
+        "conditioning_pruned_features": sorted({name for item in group_results for name in item["summary"].get("conditioning_pruned_features", [])}),
+        "conditioning_baseline_drops": sorted({name for item in group_results for name in item["summary"].get("conditioning_baseline_drops", [])}),
+        "conditioning_extra_pruned_features": sorted(
+            {name for item in group_results for name in item["summary"].get("conditioning_extra_pruned_features", [])}
+        ),
+        "backend_consistency": backend_consistency,
+        "mode_consistency": mode_consistency,
+        "scenario_consistency": scenario_consistency,
+        "scenario_subgroup_metrics": scenario_subgroup_metrics,
+        "top_influential": {},
+        "selection_frequency": np.mean(stacked_mask, axis=0).tolist(),
+        "holdout_test_r2": holdout_metrics["r2"],
+        "holdout_test_mse": holdout_metrics["mse"],
+        "holdout_test_mae": holdout_metrics["mae"],
+        "holdout_sample_count": int(sum(block.shape[0] for block in holdout_y_true)),
+        "holdout_scenarios": [holdout_scenario],
+    }
+    return {
+        "summary": aggregate_summary,
+        "coefficient_matrix": mean_coef,
+        "bias_vector": mean_bias,
+        "sparsity_mask": (np.mean(stacked_mask, axis=0) >= 0.60).astype(float),
+        "residual_rows": residual_rows,
+    }
+
+
+def _build_scenario_holdout_artifacts(
+    table: PreparedSampleTable,
+    config: StudyConfig,
+    study_dir: Path,
+    study_name: str,
+    expected_scenarios: list[str],
+    results: list[dict[str, Any]],
+    skipped_results: list[dict[str, Any]],
+    combo_contexts: dict[tuple[str, str], dict[str, Any]],
+    *,
+    stratify_by: list[str],
+) -> tuple[dict[str, Any], dict[str, dict[str, dict[str, Any]]]]:
+    holdout_entries: list[dict[str, Any]] = []
+    holdout_snapshots: dict[str, dict[str, dict[str, Any]]] = {}
+    if len(expected_scenarios) < 3:
+        return build_scenario_holdout_payload(study_dir, study_name, expected_scenarios, holdout_entries), holdout_snapshots
+
+    for result in results:
+        combo_key = (
+            str(result.get("x_schema", "")),
+            str(result.get("y_schema", "")),
+        )
+        context = combo_contexts.get(combo_key)
+        summary = dict(result.get("summary", {}) or {})
+        support = classify_support(summary)
+        holdouts: list[dict[str, Any]] = []
+        per_scenario_snapshots: dict[str, dict[str, Any]] = {}
+        if context is not None:
+            matrices = context["matrices"]
+            run_ids = context["run_ids"]
+            backends = context["backends"]
+            modes = context["modes"]
+            scenarios = context["scenarios"]
+            valid_indices = np.flatnonzero(matrices.valid_mask)
+            valid_scenarios = [scenarios[index] for index in valid_indices]
+            for scenario_name in expected_scenarios:
+                train_valid_indices = np.asarray(
+                    [index for index, label in enumerate(valid_scenarios) if label != scenario_name],
+                    dtype=int,
+                )
+                test_valid_indices = np.asarray(
+                    [index for index, label in enumerate(valid_scenarios) if label == scenario_name],
+                    dtype=int,
+                )
+                if len(train_valid_indices) == 0 or len(test_valid_indices) == 0:
+                    holdouts.append(
+                        {
+                            "scenario": scenario_name,
+                            "train_sample_count": int(len(train_valid_indices)),
+                            "test_sample_count": int(len(test_valid_indices)),
+                            "test_r2": float("nan"),
+                            "test_mse": float("nan"),
+                            "test_mae": float("nan"),
+                            "support": "unsupported",
+                        }
+                    )
+                    continue
+                try:
+                    if result.get("pooling_mode") == "stratified":
+                        fitted = _run_stratified_holdout_fit(
+                            table,
+                            matrices,
+                            config,
+                            str(result.get("model_name", "")),
+                            stratify_by,
+                            holdout_scenario=scenario_name,
+                        )
+                        holdout_summary = dict(fitted["summary"])
+                        holdout_coef = fitted["coefficient_matrix"]
+                        holdout_mask = fitted["sparsity_mask"]
+                    else:
+                        model_result = fit_schema_combo_holdout(
+                            run_ids,
+                            backends,
+                            modes,
+                            scenarios,
+                            matrices,
+                            config,
+                            str(result.get("model_name", "")),
+                            train_valid_indices=train_valid_indices,
+                            test_valid_indices=test_valid_indices,
+                            split_name="holdout",
+                        )
+                        holdout_summary = dict(model_result.summary)
+                        holdout_coef = model_result.coefficient_matrix
+                        holdout_mask = model_result.sparsity_mask
+                    holdout_support = _holdout_support(holdout_summary, float(holdout_summary.get("holdout_test_r2", np.nan)))
+                    holdouts.append(
+                        {
+                            "scenario": scenario_name,
+                            "train_sample_count": int(len(train_valid_indices)),
+                            "test_sample_count": int(len(test_valid_indices)),
+                            "test_r2": float(holdout_summary.get("holdout_test_r2", np.nan)),
+                            "test_mse": float(holdout_summary.get("holdout_test_mse", np.nan)),
+                            "test_mae": float(holdout_summary.get("holdout_test_mae", np.nan)),
+                            "support": holdout_support,
+                        }
+                    )
+                    per_scenario_snapshots[scenario_name] = {
+                        "summary": holdout_summary,
+                        "feature_names": list(matrices.feature_names),
+                        "response_names": list(matrices.response_names),
+                        "coefficient_matrix": np.asarray(holdout_coef, dtype=float).tolist(),
+                        "sparsity_mask": np.asarray(holdout_mask, dtype=float).tolist(),
+                    }
+                except ValueError:
+                    holdouts.append(
+                        {
+                            "scenario": scenario_name,
+                            "train_sample_count": int(len(train_valid_indices)),
+                            "test_sample_count": int(len(test_valid_indices)),
+                            "test_r2": float("nan"),
+                            "test_mse": float("nan"),
+                            "test_mae": float("nan"),
+                            "support": "unsupported",
+                        }
+                    )
+
+        if holdouts and all(item["support"] == "supported" for item in holdouts):
+            holdout_status = "all_holdouts_supported"
+        elif support == "supported" and any(item["support"] == "supported" for item in holdouts):
+            holdout_status = "supported_but_holdout_local"
+        else:
+            holdout_status = "holdout_failed"
+
+        holdout_entries.append(
+            {
+                "x_schema": result.get("x_schema", ""),
+                "y_schema": result.get("y_schema", ""),
+                "pooling_mode": result.get("pooling_mode", ""),
+                "model_name": result.get("model_name", ""),
+                "support": support,
+                "median_test_r2": float(summary.get("median_test_r2", np.nan)),
+                "effective_condition_number": float(summary.get("effective_condition_number", np.nan)),
+                "coefficient_stability": float(summary.get("coefficient_stability", np.nan)),
+                "holdout_status": holdout_status,
+                "holdouts": holdouts,
+            }
+        )
+        if per_scenario_snapshots:
+            holdout_snapshots[" | ".join([str(result.get("x_schema", "")), str(result.get("y_schema", "")), str(result.get("model_name", "")), str(result.get("pooling_mode", ""))])] = per_scenario_snapshots
+
+    for skipped in skipped_results:
+        holdout_entries.append(
+            {
+                "x_schema": skipped.get("x_schema", ""),
+                "y_schema": skipped.get("y_schema", ""),
+                "pooling_mode": skipped.get("pooling_mode", ""),
+                "model_name": skipped.get("model_name", ""),
+                "support": "skipped",
+                "median_test_r2": float(skipped.get("summary", {}).get("median_test_r2", np.nan)),
+                "effective_condition_number": float(skipped.get("summary", {}).get("condition_number", np.nan)),
+                "coefficient_stability": float(skipped.get("summary", {}).get("coefficient_stability", 0.0)),
+                "holdout_status": "holdout_failed",
+                "holdouts": [],
+            }
+        )
+
+    payload = build_scenario_holdout_payload(study_dir, study_name, expected_scenarios, holdout_entries)
+    return payload, holdout_snapshots
+
+
 def _skip_payload(
     x_schema: str,
     y_schema: str,
@@ -311,6 +631,7 @@ def run_analysis(
 
     results: list[dict[str, Any]] = []
     skipped_results: list[dict[str, Any]] = []
+    combo_contexts: dict[tuple[str, str], dict[str, Any]] = {}
     appendix_x_schemas = set(plan.reporting.get("appendix_x_schemas", [])) if plan else set()
     for pooling_mode in pooling_modes:
         for x_schema in x_schemas:
@@ -348,6 +669,14 @@ def run_analysis(
                     for model_name in models:
                         skipped_results.append(_skip_payload(x_schema, y_schema, pooling_mode, model_name, skip_reason, matrices, valid_row_count=valid_row_count))
                     continue
+
+                combo_contexts[(x_schema, y_schema)] = {
+                    "matrices": matrices,
+                    "run_ids": run_ids,
+                    "backends": backends,
+                    "modes": modes,
+                    "scenarios": scenarios,
+                }
 
                 combo_dir = paths["fits_dir"] / f"{x_schema}__{y_schema}__{pooling_mode}"
                 combo_dir.mkdir(parents=True, exist_ok=True)
@@ -438,6 +767,40 @@ def run_analysis(
         encoding="utf-8",
     )
     write_json(paths["scenario_generalization_json_path"], scenario_generalization)
+
+    scenario_holdout, holdout_snapshots = _build_scenario_holdout_artifacts(
+        table,
+        config,
+        paths["base_dir"],
+        study_name,
+        list(study_manifest.get("source_scenarios", []) or []),
+        results,
+        skipped_results,
+        combo_contexts,
+        stratify_by=stratify_by,
+    )
+    paths["scenario_holdout_report_path"].write_text(
+        render_scenario_holdout_markdown(scenario_holdout),
+        encoding="utf-8",
+    )
+    write_json(paths["scenario_holdout_json_path"], scenario_holdout)
+
+    sparsity_overlap = build_sparsity_overlap_payload(
+        paths["base_dir"],
+        study_name,
+        summary,
+        schema_inventory,
+        study_manifest,
+        scenario_holdout,
+        holdout_snapshots,
+        top_k=10,
+        high_frequency_threshold=0.80,
+    )
+    paths["sparsity_overlap_report_path"].write_text(
+        render_sparsity_overlap_markdown(sparsity_overlap),
+        encoding="utf-8",
+    )
+    write_json(paths["sparsity_overlap_json_path"], sparsity_overlap)
 
     diagnostic_gate = build_diagnostic_gate_payload(run_dirs)
     paths["diagnostic_gate_report_path"].write_text(render_diagnostic_gate_markdown(diagnostic_gate), encoding="utf-8")

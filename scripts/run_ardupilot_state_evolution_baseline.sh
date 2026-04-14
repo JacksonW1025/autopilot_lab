@@ -4,29 +4,28 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VEHICLE="ArduCopter"
 FRAME="quad"
+MODE=""
 STAGE="pilot"
 ACCEPTED_TARGET=""
 MAX_ATTEMPTS_PER_CONFIG=""
 SKIP_SITL=0
 SKIP_CAPTURE=0
 MATRIX_DIR=""
-ANALYSIS_CONFIG="${ROOT_DIR}/configs/studies/ardupilot_real_generalization_ablation_analysis.yaml"
-ABLATION_PLAN="${ROOT_DIR}/configs/ablations/ardupilot_real_generalization_ablation.yaml"
 
 usage() {
   cat <<'EOF'
-Usage: run_ardupilot_generalization_baseline.sh [--stage pilot|full] [--vehicle ArduCopter] [--frame quad]
-                                                [--accepted-target N] [--max-attempts-per-config N]
-                                                [--skip-sitl] [--skip-capture --matrix-dir DIR]
-                                                [--analysis-config PATH] [--plan PATH]
+Usage: run_ardupilot_state_evolution_baseline.sh --mode stabilize|guided_nogps [--stage pilot|full]
+                                                 [--vehicle ArduCopter] [--frame quad]
+                                                 [--accepted-target N] [--max-attempts-per-config N]
+                                                 [--skip-sitl] [--skip-capture --matrix-dir DIR]
 
-Run the ArduPilot generalization baseline with decorrelated multi_broad excitation
-across nominal / dynamic / throttle_biased scenarios.
+Run the Formal V2 ArduPilot mode-isolated state-evolution baseline.
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --mode) MODE="$2"; shift ;;
     --stage) STAGE="$2"; shift ;;
     --vehicle) VEHICLE="$2"; shift ;;
     --frame) FRAME="$2"; shift ;;
@@ -35,8 +34,6 @@ while [[ $# -gt 0 ]]; do
     --skip-sitl) SKIP_SITL=1 ;;
     --skip-capture) SKIP_CAPTURE=1 ;;
     --matrix-dir) MATRIX_DIR="$2"; shift ;;
-    --analysis-config) ANALYSIS_CONFIG="$2"; shift ;;
-    --plan) ABLATION_PLAN="$2"; shift ;;
     --help|-h)
       usage
       exit 0
@@ -50,6 +47,21 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
+case "${MODE}" in
+  stabilize)
+    BASE_CAPTURE="${ROOT_DIR}/configs/studies/ardupilot_real_nominal_stabilize_capture.yaml"
+    MODE_UPPER="STABILIZE"
+    ;;
+  guided_nogps)
+    BASE_CAPTURE="${ROOT_DIR}/configs/studies/ardupilot_real_nominal_guided_nogps_capture.yaml"
+    MODE_UPPER="GUIDED_NOGPS"
+    ;;
+  *)
+    echo "--mode must be stabilize or guided_nogps" >&2
+    exit 2
+    ;;
+esac
+
 case "${STAGE}" in
   pilot|full) ;;
   *)
@@ -60,9 +72,9 @@ esac
 
 if [[ -z "${ACCEPTED_TARGET}" ]]; then
   if [[ "${STAGE}" == "pilot" ]]; then
-    ACCEPTED_TARGET=3
+    ACCEPTED_TARGET=8
   else
-    ACCEPTED_TARGET=5
+    ACCEPTED_TARGET=10
   fi
 fi
 
@@ -85,7 +97,7 @@ TMP_CONFIG_DIR="$(mktemp -d)"
 trap 'rm -rf "${TMP_CONFIG_DIR}"' EXIT
 
 GENERATED_CONFIGS="$(
-  ROOT_DIR="${ROOT_DIR}" TMP_CONFIG_DIR="${TMP_CONFIG_DIR}" python3 - <<'PY'
+  ROOT_DIR="${ROOT_DIR}" TMP_CONFIG_DIR="${TMP_CONFIG_DIR}" BASE_CAPTURE="${BASE_CAPTURE}" MODE="${MODE}" python3 - <<'PY'
 import copy
 import os
 from pathlib import Path
@@ -94,10 +106,12 @@ import yaml
 
 root = Path(os.environ["ROOT_DIR"])
 out_dir = Path(os.environ["TMP_CONFIG_DIR"])
-base_paths = [
-    root / "configs/studies/ardupilot_real_nominal_stabilize_capture.yaml",
-    root / "configs/studies/ardupilot_real_nominal_guided_nogps_capture.yaml",
-]
+base_path = Path(os.environ["BASE_CAPTURE"])
+mode_label = os.environ["MODE"]
+payload = yaml.safe_load(base_path.read_text(encoding="utf-8"))
+base_amplitude = float(payload["amplitude"])
+base_seed = int(payload["seed"])
+input_type = str(payload["input_type"]).strip().lower()
 multi_broad_phases = {
     "roll": [0.0, 0.9, 1.8],
     "pitch": [0.4, 1.3, 2.2],
@@ -155,42 +169,58 @@ scenario_specs = [
     ),
 ]
 
-for base_index, base_path in enumerate(base_paths):
-    payload = yaml.safe_load(base_path.read_text(encoding="utf-8"))
-    base_amplitude = float(payload["amplitude"])
-    base_seed = int(payload["seed"])
-    mode_label = str(payload["flight_mode"]).strip().lower()
-    input_type = str(payload["input_type"]).strip().lower()
-    for scenario_index, (scenario_name, spec) in enumerate(scenario_specs):
-        item = copy.deepcopy(payload)
-        item["study_name"] = f"ardupilot_real_generalization_{mode_label}_{scenario_name}_capture"
-        item["scenario"] = scenario_name
-        item["config_profile"] = f"ardupilot_real_{mode_label}_generalization_{scenario_name}"
-        item["seed"] = base_seed + base_index * 1000 + scenario_index * 100
-        item["profile_type"] = "multi_broad"
-        item["perturbation_strategy"] = "generalization_multi_broad"
-        item["amplitude"] = round(base_amplitude * float(spec["amplitude_scale"]), 6)
-        extras = dict(item.get("extras", {}) or {})
-        nominal_throttle = float(extras.get("throttle_amplitude", extras.get("thrust_delta", 0.12 if input_type == "manual" else 0.10)))
-        extras["multi_broad_frequencies_hz"] = spec["frequencies"]
-        extras["multi_broad_phases_rad"] = multi_broad_phases
-        if input_type == "manual":
-            extras["throttle_amplitude"] = round(nominal_throttle * float(spec["throttle_scale"]), 6)
-            extras["ardupilot_manual_throttle_scale"] = float(spec["manual_throttle_scale"])
-            extras["ardupilot_manual_throttle_bias"] = float(spec["manual_throttle_bias"])
-        else:
-            extras["thrust_delta"] = round(nominal_throttle * float(spec["throttle_scale"]), 6)
-        if abs(float(spec.get("throttle_bias", 0.0))) > 0.0:
-            extras["multi_broad_axis_bias"] = {"throttle": float(spec["throttle_bias"])}
-        else:
-            extras.pop("multi_broad_axis_bias", None)
-        extras.pop("broad_frequencies_hz", None)
-        item["extras"] = extras
-        output_path = out_dir / f"{item['study_name']}.yaml"
-        output_path.write_text(yaml.safe_dump(item, sort_keys=False, allow_unicode=True), encoding="utf-8")
-        print(output_path)
+for scenario_index, (scenario_name, spec) in enumerate(scenario_specs):
+    item = copy.deepcopy(payload)
+    item["study_name"] = f"ardupilot_state_evolution_{mode_label}_{scenario_name}_baseline_capture"
+    item["scenario"] = scenario_name
+    item["config_profile"] = f"ardupilot_state_evolution_{mode_label}_{scenario_name}_baseline"
+    item["seed"] = base_seed + scenario_index * 100
+    item["profile_type"] = "multi_broad"
+    item["perturbation_strategy"] = "generalization_multi_broad"
+    item["amplitude"] = round(base_amplitude * float(spec["amplitude_scale"]), 6)
+    extras = dict(item.get("extras", {}) or {})
+    nominal_throttle = float(extras.get("throttle_amplitude", extras.get("thrust_delta", 0.12 if input_type == "manual" else 0.10)))
+    extras["multi_broad_frequencies_hz"] = spec["frequencies"]
+    extras["multi_broad_phases_rad"] = multi_broad_phases
+    if input_type == "manual":
+        extras["throttle_amplitude"] = round(nominal_throttle * float(spec["throttle_scale"]), 6)
+        extras["ardupilot_manual_throttle_scale"] = float(spec["manual_throttle_scale"])
+        extras["ardupilot_manual_throttle_bias"] = float(spec["manual_throttle_bias"])
+    else:
+        extras["thrust_delta"] = round(nominal_throttle * float(spec["throttle_scale"]), 6)
+    if abs(float(spec.get("throttle_bias", 0.0))) > 0.0:
+        extras["multi_broad_axis_bias"] = {"throttle": float(spec["throttle_bias"])}
+    else:
+        extras.pop("multi_broad_axis_bias", None)
+    item["extras"] = extras
+    output_path = out_dir / f"{item['study_name']}.yaml"
+    output_path.write_text(yaml.safe_dump(item, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    print(output_path)
 PY
 )"
+
+PLAN_PATH="${TMP_CONFIG_DIR}/ablation_plan.yaml"
+ANALYSIS_CONFIG_PATH="${TMP_CONFIG_DIR}/analysis.yaml"
+ROOT_DIR="${ROOT_DIR}" MODE="${MODE}" MODE_UPPER="${MODE_UPPER}" TMP_CONFIG_DIR="${TMP_CONFIG_DIR}" python3 - <<'PY'
+import os
+from pathlib import Path
+
+import yaml
+
+root = Path(os.environ["ROOT_DIR"])
+tmp_dir = Path(os.environ["TMP_CONFIG_DIR"])
+mode_label = os.environ["MODE"]
+mode_upper = os.environ["MODE_UPPER"]
+plan = yaml.safe_load((root / "configs/ablations/ardupilot_state_evolution_targeted_baseline.yaml").read_text(encoding="utf-8"))
+plan["output_study_name"] = f"ardupilot_state_evolution_{mode_label}_baseline"
+(tmp_dir / "ablation_plan.yaml").write_text(yaml.safe_dump(plan, sort_keys=False, allow_unicode=True), encoding="utf-8")
+analysis = yaml.safe_load((root / "configs/studies/ardupilot_state_evolution_targeted_baseline_analysis.yaml").read_text(encoding="utf-8"))
+analysis["study_name"] = f"ardupilot_state_evolution_{mode_label}_baseline_analysis"
+analysis["flight_mode"] = mode_upper
+analysis["config_profile"] = f"ardupilot_state_evolution_{mode_label}_baseline_analysis"
+analysis["ablation_plan"] = str(tmp_dir / "ablation_plan.yaml")
+(tmp_dir / "analysis.yaml").write_text(yaml.safe_dump(analysis, sort_keys=False, allow_unicode=True), encoding="utf-8")
+PY
 
 CONFIG_ARGS=()
 CONFIG_NAMES=()
@@ -199,11 +229,6 @@ while IFS= read -r config_path; do
   CONFIG_ARGS+=(--config "${config_path}")
   CONFIG_NAMES+=(--config-name "$(basename "${config_path}")")
 done <<< "${GENERATED_CONFIGS}"
-
-if [[ ${#CONFIG_NAMES[@]} -eq 0 ]]; then
-  echo "No generalization configs were generated" >&2
-  exit 1
-fi
 
 if [[ $SKIP_CAPTURE -eq 0 ]]; then
   MATRIX_ARGS=(
@@ -236,13 +261,13 @@ fi
 RUNS_MANIFEST="${MATRIX_DIR}/runs.csv"
 if command -v ros2 >/dev/null 2>&1 && ros2 pkg prefix linearity_analysis >/dev/null 2>&1; then
   ANALYSIS_OUTPUT="$(ros2 run linearity_analysis linearity_compare_schemas \
-    --config "${ANALYSIS_CONFIG}" \
-    --plan "${ABLATION_PLAN}" \
+    --config "${ANALYSIS_CONFIG_PATH}" \
+    --plan "${PLAN_PATH}" \
     --runs-manifest "${RUNS_MANIFEST}")"
 else
   ANALYSIS_OUTPUT="$(run_py 'from linearity_analysis.linearity_compare_schemas import main; main()' \
-    --config "${ANALYSIS_CONFIG}" \
-    --plan "${ABLATION_PLAN}" \
+    --config "${ANALYSIS_CONFIG_PATH}" \
+    --plan "${PLAN_PATH}" \
     --runs-manifest "${RUNS_MANIFEST}")"
 fi
 printf '%s\n' "${ANALYSIS_OUTPUT}"
@@ -262,6 +287,8 @@ run_stage_check full-baseline \
   --required-path summary/scenario_generalization.json \
   --required-path reports/scenario_holdout.md \
   --required-path summary/scenario_holdout.json \
+  --required-path reports/state_evolution_audit.md \
+  --required-path summary/state_evolution_audit.json \
   --required-path reports/sparsity_overlap.md \
   --required-path summary/sparsity_overlap.json
 

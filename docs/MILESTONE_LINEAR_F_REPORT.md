@@ -41,6 +41,11 @@
 1. 线性关系 `Y ≈ fX (+ b)` 本身是否成立。
 2. 这个关系在 `nominal / dynamic / throttle_biased` 三档状态下是否还能站得住。
 
+Formal V2 现在有两条同级正式线：
+
+- generalization full 四-study 线，负责回答“线性关系总体是否存在，以及能否跨 scenario 成立”。
+- ArduPilot mode-isolated targeted line，负责回答“state-evolution 在不混 mode 时能否形成成熟正结论，否则能否成熟地下负结论”；当前 overall_status=`mode_isolated_state_evolution_still_inconclusive`。
+
 ## 这次正式做了哪些实验
 
 正式实验分成四份 study：
@@ -49,11 +54,6 @@
 - PX4 diagnostic：姿态轴全部 accepted，throttle boundary=`mixed`。
 - ArduPilot baseline：`30/30 accepted`，覆盖 `STABILIZE` 与 `GUIDED_NOGPS`，并同时覆盖三档 scenario。
 - ArduPilot diagnostic：姿态轴全部 accepted，throttle boundary=`none`。
-
-支持性实验也都已完成，但它们现在不再是主结论来源，而是实验准备度和契约一致性的旁证：
-
-- ArduPilot `GUIDED_NOGPS` smoke 已证明 mode-entry 能稳定进入 active phase。
-- `STABILIZE` partial baseline、throttle-only diagnostic 和 contract audit 也都已通过，所以现在比较的是线性证据本身，不是链路是否能跑。
 
 ## 现在已经能说清楚的结论
 
@@ -92,9 +92,21 @@
 - ArduPilot baseline 的代表性 generalized-supported 组合是 `commands_only | actuator_response | ridge_affine | pooled`。
 - ArduPilot diagnostic 的代表性 generalized-supported 组合是 `commands_only | actuator_response | ridge_affine | pooled`。
 - ArduPilot baseline 的最优高分组合是 `commands_plus_state_history | selected_state_subset | ols_affine | pooled`，`median_test_r2=1.0000`，但它仍然不是最稳的 supported 主结论。
-- state-evolution audit 的直接结论是：厚化 baseline 没有改变 ArduPilot 当前明确 supported 的主集合，state-evolution 路径的主阻塞仍然是 mixed/condition_number，而不是单纯 R2 不够。
+- state-evolution audit 的直接结论是：厚化 baseline 没有改变 ArduPilot 当前明确 supported 的主集合，state-evolution 路径的主阻塞仍然是 condition_number/mixed，而不是单纯 R2 不够。
 
 这说明 ArduPilot 不是没有跨场景线性证据，而是目前更稳的证据主要集中在较简单的命令驱动路径上。高分的 state-evolution 组合仍然要同时面对条件数和稳定性问题。
+
+### 4b. mode-isolated targeted line 正在回答更窄但更关键的问题
+
+- STABILIZE targeted status=`inconclusive`，结论：该 mode 当前还没有成熟正结论，也还没满足成熟负结论的稳定性条件。
+- GUIDED_NOGPS targeted status=`inconclusive`，结论：该 mode 当前还没有成熟正结论，也还没满足成熟负结论的稳定性条件。
+- targeted aggregate artifact: `../artifacts/studies/20260413_134505_ardupilot_state_evolution_validation`
+- STABILIZE targeted baseline: `../artifacts/studies/20260413_115811_ardupilot_state_evolution_stabilize_baseline`
+- STABILIZE targeted diagnostic: `../artifacts/studies/20260413_122521_ardupilot_state_evolution_stabilize_diagnostic`
+- GUIDED_NOGPS targeted baseline: `../artifacts/studies/20260413_124654_ardupilot_state_evolution_guided_nogps_baseline`
+- GUIDED_NOGPS targeted diagnostic: `../artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic`
+
+这条线不是 supplementary。它和 generalization full 一样，都是 Formal V2 的正式输入，只是回答的问题更聚焦于 ArduPilot state-evolution 本身。
 
 ### 5. 两个 backend 的相似性仍然在增强主结论，但不能说得过满
 
@@ -108,7 +120,7 @@
 ## 现在还不能说得过头的地方
 
 - compare 的 gate/stability 主判断仍然是 `baseline_stability_unresolved`。
-- ArduPilot baseline stability 当前状态仍是 `changed`，不是完全锁死不变的状态。
+- ArduPilot baseline stability 当前状态仍是 `unknown`，不是完全锁死不变的状态。
 
 所以当前还不适合把“backend 差异已经被完全解释清楚”当成主标题。更稳妥的说法是：
 
@@ -118,9 +130,9 @@
 
 ## 历史阶段结论怎么处理
 
-20260409 那一轮 broad baseline / diagnostic 没有被删除，但它现在只作为历史阶段结论保留。
+20260409 那一轮 broad baseline / diagnostic 和准备性 artifact 不再进入 Formal V2 正式口径。
 
-当前正式结论的主输入，已经切换为这轮 generalization full 四个 study 和新的 compare artifact。
+当前正式结论的主输入，已经切换为 generalization full 四个 study、targeted validation 和新的 compare artifact。
 
 ## 下一步建议
 
@@ -137,12 +149,13 @@
 ## Artifact 路径
 
 - PX4 baseline: `../artifacts/studies/20260410_224818_px4_real_generalization_ablation`
-- ArduPilot baseline: `../artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation`
+- ArduPilot baseline: `../artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation`
 - PX4 diagnostic: `../artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix`
-- ArduPilot diagnostic: `../artifacts/studies/20260411_105433_ardupilot_generalization_diagnostic_matrix`
-- final compare: `../artifacts/studies/20260411_124108_px4_vs_ardupilot_compare`
-- state-evolution audit: `../artifacts/studies/20260411_095055_ardupilot_real_generalization_ablation/reports/state_evolution_audit.md`
-- guided smoke: `../artifacts/ardupilot_matrix/20260409_121755_ardupilot`
-- partial baseline: `../artifacts/studies/20260409_122239_ardupilot_stabilize_partial_baseline`
-- throttle diagnostic: `../artifacts/studies/20260409_122955_ardupilot_diagnostic_stabilize_throttle`
-- contract audit: `../artifacts/studies/20260409_123128_cross_backend_contract_audit`
+- ArduPilot diagnostic: `../artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix`
+- final compare: `../artifacts/studies/20260413_134755_px4_vs_ardupilot_compare`
+- state-evolution audit: `../artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/state_evolution_audit.md`
+- targeted validation: `../artifacts/studies/20260413_134505_ardupilot_state_evolution_validation`
+- STABILIZE targeted baseline: `../artifacts/studies/20260413_115811_ardupilot_state_evolution_stabilize_baseline`
+- STABILIZE targeted diagnostic: `../artifacts/studies/20260413_122521_ardupilot_state_evolution_stabilize_diagnostic`
+- GUIDED_NOGPS targeted baseline: `../artifacts/studies/20260413_124654_ardupilot_state_evolution_guided_nogps_baseline`
+- GUIDED_NOGPS targeted diagnostic: `../artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic`

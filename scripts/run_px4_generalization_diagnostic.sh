@@ -226,7 +226,11 @@ run_stage_check diagnostic-artifact --study-dir "${STUDY_DIR}"
 run_stage_check artifact-paths \
   --study-dir "${STUDY_DIR}" \
   --required-path reports/scenario_generalization.md \
-  --required-path summary/scenario_generalization.json
+  --required-path summary/scenario_generalization.json \
+  --required-path reports/scenario_holdout.md \
+  --required-path summary/scenario_holdout.json \
+  --required-path reports/sparsity_overlap.md \
+  --required-path summary/sparsity_overlap.json
 
 echo "matrix_dir=${MATRIX_DIR}"
 echo "study_dir=${STUDY_DIR}"

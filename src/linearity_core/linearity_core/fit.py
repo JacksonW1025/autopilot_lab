@@ -353,6 +353,25 @@ class ModelResult:
     residual_rows: list[dict[str, Any]]
 
 
+def _valid_subset(
+    table_run_ids: list[str],
+    backends: list[str],
+    modes: list[str],
+    scenarios: list[str],
+    matrices: SchemaMatrices,
+) -> dict[str, Any]:
+    valid_indices = np.flatnonzero(matrices.valid_mask)
+    return {
+        "valid_indices": valid_indices,
+        "X": matrices.X[valid_indices],
+        "Y": matrices.Y[valid_indices],
+        "run_ids": [table_run_ids[index] for index in valid_indices],
+        "backends": [backends[index] for index in valid_indices],
+        "modes": [modes[index] for index in valid_indices],
+        "scenarios": [scenarios[index] for index in valid_indices],
+    }
+
+
 def fit_schema_combo(
     table_run_ids: list[str],
     backends: list[str],
@@ -510,5 +529,92 @@ def fit_schema_combo(
         coefficient_matrix=mean_coef,
         bias_vector=mean_bias,
         sparsity_mask=stable_mask.astype(float),
+        residual_rows=residual_rows,
+    )
+
+
+def fit_schema_combo_holdout(
+    table_run_ids: list[str],
+    backends: list[str],
+    modes: list[str],
+    scenarios: list[str],
+    matrices: SchemaMatrices,
+    config: StudyConfig,
+    model_name: str,
+    *,
+    train_valid_indices: np.ndarray,
+    test_valid_indices: np.ndarray,
+    split_name: str = "holdout",
+) -> ModelResult:
+    valid = _valid_subset(table_run_ids, backends, modes, scenarios, matrices)
+    X = valid["X"]
+    Y = valid["Y"]
+    valid_indices = valid["valid_indices"]
+    run_ids_valid = valid["run_ids"]
+    backends_valid = valid["backends"]
+    modes_valid = valid["modes"]
+    scenarios_valid = valid["scenarios"]
+
+    train_indices = np.asarray(train_valid_indices, dtype=int)
+    test_indices = np.asarray(test_valid_indices, dtype=int)
+    if train_indices.ndim != 1 or test_indices.ndim != 1:
+        raise ValueError("train_valid_indices/test_valid_indices 必须是一维索引。")
+    if len(train_indices) == 0:
+        raise ValueError("显式 holdout split 至少需要一个 train 样本。")
+    if len(test_indices) == 0:
+        raise ValueError("显式 holdout split 至少需要一个 test 样本。")
+
+    train_matrices = type(matrices)(
+        X=X[train_indices],
+        Y=Y[train_indices],
+        feature_names=matrices.feature_names,
+        response_names=matrices.response_names,
+        valid_mask=np.ones(len(train_indices), dtype=bool),
+        schema_metadata=dict(matrices.schema_metadata),
+    )
+    trained = fit_schema_combo(
+        [run_ids_valid[index] for index in train_indices],
+        [backends_valid[index] for index in train_indices],
+        [modes_valid[index] for index in train_indices],
+        [scenarios_valid[index] for index in train_indices],
+        train_matrices,
+        config,
+        model_name,
+    )
+
+    predictions = _predict(X[test_indices], trained.coefficient_matrix, trained.bias_vector)
+    holdout_metrics = _metrics_bundle(Y[test_indices], predictions)
+    summary = dict(trained.summary)
+    summary.update(
+        {
+            f"{split_name}_test_r2": holdout_metrics["r2"],
+            f"{split_name}_test_mse": holdout_metrics["mse"],
+            f"{split_name}_test_mae": holdout_metrics["mae"],
+            f"{split_name}_sample_count": int(len(test_indices)),
+            f"{split_name}_scenarios": sorted({scenarios_valid[index] for index in test_indices if scenarios_valid[index]}),
+            f"{split_name}_modes": sorted({modes_valid[index] for index in test_indices if modes_valid[index]}),
+        }
+    )
+
+    residual_rows: list[dict[str, Any]] = []
+    for row_offset, sample_index in enumerate(test_indices):
+        residual_rows.append(
+            {
+                "sample_index": int(valid_indices[sample_index]),
+                "backend": backends_valid[sample_index],
+                "mode": modes_valid[sample_index],
+                "scenario": scenarios_valid[sample_index],
+                "run_id": run_ids_valid[sample_index],
+                "target_norm": float(np.linalg.norm(Y[test_indices][row_offset])),
+                "prediction_norm": float(np.linalg.norm(predictions[row_offset])),
+                "residual_norm": float(np.linalg.norm(Y[test_indices][row_offset] - predictions[row_offset])),
+            }
+        )
+
+    return ModelResult(
+        summary=summary,
+        coefficient_matrix=trained.coefficient_matrix,
+        bias_vector=trained.bias_vector,
+        sparsity_mask=trained.sparsity_mask,
         residual_rows=residual_rows,
     )

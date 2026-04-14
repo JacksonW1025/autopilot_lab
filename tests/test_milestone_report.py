@@ -90,6 +90,7 @@ def test_write_milestone_docs_renders_current_artifact_context(tmp_path: Path) -
     partial_baseline_dir = tmp_path / "20260409_122239_ardupilot_stabilize_partial_baseline"
     throttle_dir = tmp_path / "20260409_122955_ardupilot_diagnostic_stabilize_throttle"
     contract_dir = tmp_path / "20260409_123128_cross_backend_contract_audit"
+    validation_dir = tmp_path / "20260413_090000_ardupilot_state_evolution_validation"
 
     px4_combo = {
         "x_schema": "commands_plus_state_history",
@@ -177,6 +178,29 @@ def test_write_milestone_docs_renders_current_artifact_context(tmp_path: Path) -
             },
         },
     )
+    _write_summary(
+        validation_dir / "summary" / "state_evolution_validation.json",
+        {
+            "overall_status": "mode_isolated_state_evolution_has_mature_positive_evidence",
+            "modes": {
+                "stabilize": {
+                    "mode": "STABILIZE",
+                    "status": "mature_positive",
+                    "baseline_dir": str(tmp_path / "20260413_080000_ardupilot_state_evolution_stabilize_baseline"),
+                    "diagnostic_dir": str(tmp_path / "20260413_083000_ardupilot_state_evolution_stabilize_diagnostic"),
+                    "conclusion": "stabilize positive",
+                },
+                "guided_nogps": {
+                    "mode": "GUIDED_NOGPS",
+                    "status": "mature_negative",
+                    "baseline_dir": str(tmp_path / "20260413_084500_ardupilot_state_evolution_guided_nogps_baseline"),
+                    "diagnostic_dir": str(tmp_path / "20260413_090000_ardupilot_state_evolution_guided_nogps_diagnostic"),
+                    "conclusion": "guided negative",
+                },
+            },
+            "conclusion": "formal v2 targeted line is ready",
+        },
+    )
     for path in (guided_smoke_dir, partial_baseline_dir, throttle_dir, contract_dir):
         path.mkdir(parents=True, exist_ok=True)
 
@@ -186,17 +210,18 @@ def test_write_milestone_docs_renders_current_artifact_context(tmp_path: Path) -
         px4_diagnostic_dir=px4_diag,
         ardupilot_diagnostic_dir=ap_diag,
         compare_dir=compare_dir,
-        guided_smoke_dir=guided_smoke_dir,
-        partial_baseline_dir=partial_baseline_dir,
-        throttle_diagnostic_dir=throttle_dir,
-        contract_audit_dir=contract_dir,
+        state_evolution_validation_dir=validation_dir,
         docs_dir=docs_dir,
     )
     report_text = Path(outputs["report_path"]).read_text(encoding="utf-8")
     appendix_text = Path(outputs["appendix_path"]).read_text(encoding="utf-8")
     assert "里程碑报告" in report_text
+    assert "Formal V2" in report_text
     assert "generalization full" in report_text
     assert "state-evolution audit" in report_text
+    assert "STABILIZE targeted baseline" in report_text
+    assert "GUIDED_NOGPS targeted diagnostic" in appendix_text
     assert "技术附录" in appendix_text
+    assert "targeted_overall_status" in appendix_text
     assert "厚化 baseline 没有改变 ArduPilot 当前明确 supported 的主集合" in appendix_text
     assert "generalized_supported" in appendix_text

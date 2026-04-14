@@ -5,6 +5,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
+from .canonical import STRICT_RAW_X_SCHEMAS
 from .config import StudyConfig
 from .dataset import PREPARED_SAMPLE_IDENTITY_COLUMNS, build_prepared_sample_table, prepared_sample_table_fieldnames
 from .io import read_rows_csv, read_yaml
@@ -727,6 +730,560 @@ def render_scenario_generalization_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+HOLDOUT_STATUS_ORDER = {
+    "all_holdouts_supported": 2,
+    "supported_but_holdout_local": 1,
+    "holdout_failed": 0,
+}
+BASELINE_DIAGNOSTIC_STUDY_PAIRS = {
+    "px4_real_generalization_ablation": "px4_generalization_diagnostic_matrix",
+    "px4_generalization_diagnostic_matrix": "px4_real_generalization_ablation",
+    "ardupilot_real_generalization_ablation": "ardupilot_generalization_diagnostic_matrix",
+    "ardupilot_generalization_diagnostic_matrix": "ardupilot_real_generalization_ablation",
+}
+
+
+def build_scenario_holdout_payload(
+    study_dir: Path,
+    study_name: str,
+    expected_scenarios: list[str],
+    entries: list[dict[str, Any]],
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "status": "holdout_unavailable",
+        "study_name": study_name,
+        "study_dir": str(study_dir),
+        "expected_scenarios": sorted(str(item) for item in expected_scenarios if str(item).strip()),
+        "entries": [],
+        "counts": {
+            "all_holdouts_supported": 0,
+            "supported_but_holdout_local": 0,
+            "holdout_failed": 0,
+        },
+        "representative_combo": "",
+        "conclusion": "study 的 scenario 数不足 3，无法做 leave-one-scenario-out。",
+    }
+    if len(payload["expected_scenarios"]) < 3:
+        return payload
+
+    ordered_entries = sorted(
+        entries,
+        key=lambda item: (
+            HOLDOUT_STATUS_ORDER.get(str(item.get("holdout_status", "")), -1),
+            _safe_float(item.get("median_test_r2")),
+            _safe_float(item.get("coefficient_stability")),
+            -_safe_float(item.get("effective_condition_number")),
+        ),
+        reverse=True,
+    )
+    counts = Counter(str(item.get("holdout_status", "holdout_failed")) for item in ordered_entries)
+    payload["status"] = "holdout_available"
+    payload["entries"] = ordered_entries
+    payload["counts"] = {
+        "all_holdouts_supported": int(counts.get("all_holdouts_supported", 0)),
+        "supported_but_holdout_local": int(counts.get("supported_but_holdout_local", 0)),
+        "holdout_failed": int(counts.get("holdout_failed", 0)),
+    }
+    if ordered_entries:
+        payload["representative_combo"] = _combo_key(ordered_entries[0])
+
+    if payload["counts"]["all_holdouts_supported"] > 0:
+        payload["conclusion"] = "当前 study 已出现 leave-one-scenario-out 仍然全部保持 supported 的组合，线性关系不只是在 pooled 数据上成立。"
+    elif payload["counts"]["supported_but_holdout_local"] > 0:
+        payload["conclusion"] = "当前 study 的 supported 组合在 pooled 汇总上成立，但留出单个 scenario 后仍带有明显局部性。"
+    else:
+        payload["conclusion"] = "当前 study 还没有出现跨三个 holdout 都稳定通过的组合，leave-one-scenario-out 证据仍偏弱。"
+    return payload
+
+
+def render_scenario_holdout_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# Scenario Holdout",
+        "",
+        f"- status: `{payload.get('status', 'holdout_unavailable')}`",
+        f"- expected_scenarios: {', '.join(payload.get('expected_scenarios', [])) or 'none'}",
+    ]
+    if payload.get("status") != "holdout_available":
+        lines.append(f"- reason: {payload.get('conclusion', 'holdout analysis is unavailable.')}")
+        return "\n".join(lines)
+
+    counts = payload.get("counts", {})
+    lines.extend(
+        [
+            "",
+            "## Status Counts",
+            f"- all_holdouts_supported: {int(counts.get('all_holdouts_supported', 0))}",
+            f"- supported_but_holdout_local: {int(counts.get('supported_but_holdout_local', 0))}",
+            f"- holdout_failed: {int(counts.get('holdout_failed', 0))}",
+            f"- representative_combo: `{payload.get('representative_combo', '')}`",
+            "",
+            "## Combo Reading",
+        ]
+    )
+    for entry in payload.get("entries", []):
+        holdout_text = ", ".join(
+            f"{item.get('scenario', '')}={_safe_float(item.get('test_r2')):.4f}:{item.get('support', '')}"
+            for item in entry.get("holdouts", [])
+        ) or "none"
+        lines.append(
+            f"- `{_combo_key(entry)}`: holdout_status={entry.get('holdout_status', 'holdout_failed')}; "
+            f"support={entry.get('support', '')}; median_test_r2={_safe_float(entry.get('median_test_r2')):.4f}; "
+            f"coefficient_stability={_safe_float(entry.get('coefficient_stability')):.4f}; "
+            f"effective_condition_number={_safe_float(entry.get('effective_condition_number')):.4f}; "
+            f"holdouts=[{holdout_text}]"
+        )
+    lines.extend(["", "## Conclusion", f"- {payload.get('conclusion', '')}"])
+    return "\n".join(lines)
+
+
+def _study_pair_candidates(study_name: str) -> list[str]:
+    candidates: list[str] = []
+    mapped = BASELINE_DIAGNOSTIC_STUDY_PAIRS.get(study_name)
+    if mapped:
+        candidates.append(mapped)
+    if "_baseline" in study_name:
+        candidates.append(study_name.replace("_baseline", "_diagnostic"))
+    if "_diagnostic" in study_name:
+        candidates.append(study_name.replace("_diagnostic", "_baseline"))
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for item in candidates:
+        if item and item not in seen:
+            deduped.append(item)
+            seen.add(item)
+    return deduped
+
+
+def _find_counterpart_study_dir(current_study_dir: Path, study_name: str, current_manifest: dict[str, Any]) -> Path | None:
+    current_backends = sorted(current_manifest.get("source_backends", []) or [])
+    current_modes = sorted(current_manifest.get("source_modes", []) or [])
+    for candidate_name in _study_pair_candidates(study_name):
+        matches: list[Path] = []
+        for candidate in sorted(STUDY_ARTIFACT_ROOT.glob(f"*_{candidate_name}")):
+            if candidate.resolve() == current_study_dir.resolve():
+                continue
+            manifest_path = candidate / "manifest.yaml"
+            if not manifest_path.exists():
+                continue
+            manifest = read_yaml(manifest_path)
+            if str(manifest.get("study_name", "")).strip() != candidate_name:
+                continue
+            if current_backends and sorted(manifest.get("source_backends", []) or []) != current_backends:
+                continue
+            if current_modes and sorted(manifest.get("source_modes", []) or []) != current_modes:
+                continue
+            matches.append(candidate)
+        if matches:
+            return matches[-1]
+    return None
+
+
+def _load_matrix_csv(path: Path) -> tuple[list[str], list[str], np.ndarray]:
+    rows = read_rows_csv(path)
+    if not rows:
+        return [], [], np.zeros((0, 0), dtype=float)
+    response_names = [name for name in rows[0].keys() if name != "feature"]
+    feature_names = [str(row.get("feature", "")) for row in rows]
+    matrix = np.asarray(
+        [[_safe_float(row.get(response)) for response in response_names] for row in rows],
+        dtype=float,
+    )
+    return feature_names, response_names, matrix
+
+
+def _selection_frequency_matrix(summary: dict[str, Any], feature_count: int, response_count: int) -> np.ndarray | None:
+    raw = summary.get("selection_frequency")
+    if raw is None:
+        return None
+    try:
+        matrix = np.asarray(raw, dtype=float)
+    except (TypeError, ValueError):
+        return None
+    if matrix.shape != (feature_count, response_count):
+        return None
+    return matrix
+
+
+def _top_edge_records(
+    feature_names: list[str],
+    response_names: list[str],
+    coefficient_matrix: np.ndarray,
+    *,
+    selection_frequency: np.ndarray | None = None,
+    top_k: int = 10,
+) -> list[dict[str, Any]]:
+    if coefficient_matrix.size == 0:
+        return []
+    records: list[dict[str, Any]] = []
+    for feature_index, feature_name in enumerate(feature_names):
+        for response_index, response_name in enumerate(response_names):
+            weight = _safe_float(coefficient_matrix[feature_index, response_index])
+            if not math.isfinite(weight) or abs(weight) <= 0.0:
+                continue
+            record = {
+                "feature": feature_name,
+                "response": response_name,
+                "weight": weight,
+                "abs_weight": abs(weight),
+            }
+            if selection_frequency is not None:
+                record["selection_frequency"] = float(selection_frequency[feature_index, response_index])
+            records.append(record)
+    records.sort(key=lambda item: (float(item.get("abs_weight", 0.0)), str(item.get("feature", "")), str(item.get("response", ""))), reverse=True)
+    return records[:top_k]
+
+
+def _edge_pairs_from_mask(feature_names: list[str], response_names: list[str], matrix: np.ndarray, *, threshold: float = 0.5) -> set[tuple[str, str]]:
+    if matrix.size == 0:
+        return set()
+    edges: set[tuple[str, str]] = set()
+    for feature_index, feature_name in enumerate(feature_names):
+        for response_index, response_name in enumerate(response_names):
+            value = _safe_float(matrix[feature_index, response_index])
+            if math.isfinite(value) and value >= threshold:
+                edges.add((feature_name, response_name))
+    return edges
+
+
+def _combo_snapshot_from_arrays(
+    combo: dict[str, Any],
+    summary: dict[str, Any],
+    feature_names: list[str],
+    response_names: list[str],
+    coefficient_matrix: np.ndarray,
+    sparsity_mask: np.ndarray,
+    *,
+    top_k: int,
+    high_frequency_threshold: float,
+) -> dict[str, Any]:
+    selection_frequency = _selection_frequency_matrix(summary, len(feature_names), len(response_names))
+    dominant_edges = _top_edge_records(
+        feature_names,
+        response_names,
+        coefficient_matrix,
+        selection_frequency=selection_frequency,
+        top_k=top_k,
+    )
+    high_frequency_edges = set()
+    if selection_frequency is not None:
+        high_frequency_edges = _edge_pairs_from_mask(
+            feature_names,
+            response_names,
+            selection_frequency,
+            threshold=high_frequency_threshold,
+        )
+    return {
+        "status": "snapshot_available",
+        "combo": {
+            "x_schema": combo.get("x_schema", ""),
+            "y_schema": combo.get("y_schema", ""),
+            "pooling_mode": combo.get("pooling_mode", ""),
+            "model_name": combo.get("model_name", ""),
+        },
+        "summary": summary,
+        "support": classify_support(summary),
+        "stable_edges": _edge_pairs_from_mask(feature_names, response_names, sparsity_mask),
+        "top_edges": {(item["feature"], item["response"]) for item in dominant_edges},
+        "high_frequency_edges": high_frequency_edges,
+        "dominant_edges": dominant_edges[: min(5, len(dominant_edges))],
+    }
+
+
+def _combo_snapshot_from_disk(
+    study_dir: Path,
+    combo: dict[str, Any],
+    *,
+    top_k: int,
+    high_frequency_threshold: float,
+) -> dict[str, Any]:
+    if not combo:
+        return {"status": "snapshot_unavailable"}
+    fit_dir = (
+        study_dir
+        / "fits"
+        / f"{combo.get('x_schema', '')}__{combo.get('y_schema', '')}__{combo.get('pooling_mode', '')}"
+        / str(combo.get("model_name", ""))
+    )
+    metrics = _load_combo_metrics(study_dir, combo)
+    feature_names, response_names, coefficient_matrix = _load_matrix_csv(fit_dir / "matrix_f.csv")
+    mask_feature_names, mask_response_names, sparsity_mask = _load_matrix_csv(fit_dir / "sparsity_mask.csv")
+    if not feature_names or not response_names or coefficient_matrix.size == 0:
+        return {"status": "snapshot_unavailable"}
+    if (mask_feature_names, mask_response_names) != (feature_names, response_names):
+        sparsity_mask = np.zeros_like(coefficient_matrix)
+    return _combo_snapshot_from_arrays(
+        combo,
+        metrics,
+        feature_names,
+        response_names,
+        coefficient_matrix,
+        sparsity_mask,
+        top_k=top_k,
+        high_frequency_threshold=high_frequency_threshold,
+    )
+
+
+def _comparison_payload(
+    current_snapshot: dict[str, Any],
+    comparison_snapshot: dict[str, Any],
+    *,
+    label: str,
+    comparison_ref: str,
+) -> dict[str, Any]:
+    if current_snapshot.get("status") != "snapshot_available" or comparison_snapshot.get("status") != "snapshot_available":
+        return {
+            "status": "comparison_unavailable",
+            "label": label,
+            "comparison_ref": comparison_ref,
+        }
+    stable_overlap = _overlap_payload(
+        set(current_snapshot.get("stable_edges", set())),
+        set(comparison_snapshot.get("stable_edges", set())),
+    )
+    top_overlap = _overlap_payload(
+        set(current_snapshot.get("top_edges", set())),
+        set(comparison_snapshot.get("top_edges", set())),
+    )
+    high_frequency_overlap = _overlap_payload(
+        set(current_snapshot.get("high_frequency_edges", set())),
+        set(comparison_snapshot.get("high_frequency_edges", set())),
+    )
+    top_overlap["top_k"] = max(top_overlap.get("current_nonzero_count", 0), top_overlap.get("previous_nonzero_count", 0))
+    high_frequency_overlap["threshold"] = 0.80
+    return {
+        "status": "comparison_available",
+        "label": label,
+        "comparison_ref": comparison_ref,
+        "stable_mask_overlap": stable_overlap,
+        "top_edge_overlap": top_overlap,
+        "high_frequency_edge_overlap": high_frequency_overlap,
+        "current_dominant_edges": list(current_snapshot.get("dominant_edges", [])),
+        "comparison_dominant_edges": list(comparison_snapshot.get("dominant_edges", [])),
+    }
+
+
+def _representative_overlap_combo(study_dir: Path) -> dict[str, Any]:
+    candidates = _iter_fit_metric_payloads(study_dir)
+    if not candidates:
+        return {}
+    state_candidates = [
+        item
+        for item in candidates
+        if item["x_schema"] in STATE_EVOLUTION_X_SCHEMAS and item["y_schema"] in STATE_EVOLUTION_Y_SCHEMAS
+    ]
+    pool = state_candidates or candidates
+    return max(
+        pool,
+        key=lambda item: (
+            _state_evolution_support_rank(classify_support(item.get("summary", {}))),
+            _safe_float(item.get("summary", {}).get("median_test_r2")),
+            -_safe_float(item.get("summary", {}).get("effective_condition_number")) if math.isfinite(_safe_float(item.get("summary", {}).get("effective_condition_number"))) else float("-inf"),
+            _safe_float(item.get("summary", {}).get("coefficient_stability")),
+        ),
+    )
+
+
+def build_sparsity_overlap_payload(
+    current_study_dir: Path,
+    study_name: str,
+    current_summary: dict[str, Any],
+    current_inventory: dict[str, Any],
+    current_manifest: dict[str, Any],
+    scenario_holdout_payload: dict[str, Any],
+    holdout_fit_snapshots: dict[str, dict[str, dict[str, Any]]],
+    *,
+    top_k: int = 10,
+    high_frequency_threshold: float = 0.80,
+) -> dict[str, Any]:
+    representative_combo = _representative_overlap_combo(current_study_dir)
+    payload: dict[str, Any] = {
+        "status": "overlap_unavailable",
+        "study_name": study_name,
+        "study_dir": str(current_study_dir),
+        "representative_combo": {},
+        "baseline_vs_diagnostic": {"status": "comparison_unavailable"},
+        "full_vs_holdouts": [],
+        "data_thickening": {"status": "comparison_unavailable"},
+        "reporting_targets": {
+            "baseline_vs_diagnostic_jaccard_target": 0.55,
+            "data_thickening_jaccard_target": 0.55,
+            "holdout_median_jaccard_target": 0.55,
+            "holdout_min_jaccard_target": 0.50,
+            "high_frequency_overlap_nonempty": True,
+            "top_k": top_k,
+            "high_frequency_threshold": high_frequency_threshold,
+        },
+        "assessment": {},
+        "conclusion": "当前 study 找不到可读的代表性组合，因此无法计算 sparsity overlap。",
+    }
+    if not representative_combo:
+        return payload
+
+    combo = {
+        "x_schema": representative_combo.get("x_schema", ""),
+        "y_schema": representative_combo.get("y_schema", ""),
+        "pooling_mode": representative_combo.get("pooling_mode", ""),
+        "model_name": representative_combo.get("model_name", ""),
+    }
+    current_snapshot = _combo_snapshot_from_disk(
+        current_study_dir,
+        combo,
+        top_k=top_k,
+        high_frequency_threshold=high_frequency_threshold,
+    )
+    payload["status"] = "overlap_available"
+    payload["representative_combo"] = {
+        **combo,
+        "support": classify_support(representative_combo.get("summary", {})),
+        "median_test_r2": _safe_float(representative_combo.get("summary", {}).get("median_test_r2")),
+        "effective_condition_number": _safe_float(representative_combo.get("summary", {}).get("effective_condition_number")),
+        "coefficient_stability": _safe_float(representative_combo.get("summary", {}).get("coefficient_stability")),
+    }
+
+    counterpart_dir = _find_counterpart_study_dir(current_study_dir, study_name, current_manifest)
+    if counterpart_dir is not None:
+        payload["baseline_vs_diagnostic"] = _comparison_payload(
+            current_snapshot,
+            _combo_snapshot_from_disk(
+                counterpart_dir,
+                combo,
+                top_k=top_k,
+                high_frequency_threshold=high_frequency_threshold,
+            ),
+            label="baseline_vs_diagnostic",
+            comparison_ref=str(counterpart_dir),
+        )
+
+    previous_study_dir = _find_previous_comparable_study(current_study_dir, study_name, current_manifest, current_inventory)
+    if previous_study_dir is not None:
+        payload["data_thickening"] = _comparison_payload(
+            current_snapshot,
+            _combo_snapshot_from_disk(
+                previous_study_dir,
+                combo,
+                top_k=top_k,
+                high_frequency_threshold=high_frequency_threshold,
+            ),
+            label="data_thickening",
+            comparison_ref=str(previous_study_dir),
+        )
+
+    combo_holdouts = holdout_fit_snapshots.get(_combo_key(combo), {})
+    holdout_comparisons: list[dict[str, Any]] = []
+    for scenario_name in sorted(combo_holdouts):
+        snapshot = combo_holdouts[scenario_name]
+        holdout_comparisons.append(
+            _comparison_payload(
+                current_snapshot,
+                _combo_snapshot_from_arrays(
+                    combo,
+                    dict(snapshot.get("summary", {}) or {}),
+                    list(snapshot.get("feature_names", []) or []),
+                    list(snapshot.get("response_names", []) or []),
+                    np.asarray(snapshot.get("coefficient_matrix"), dtype=float),
+                    np.asarray(snapshot.get("sparsity_mask"), dtype=float),
+                    top_k=top_k,
+                    high_frequency_threshold=high_frequency_threshold,
+                ),
+                label="full_vs_holdout",
+                comparison_ref=scenario_name,
+            )
+        )
+    payload["full_vs_holdouts"] = holdout_comparisons
+
+    holdout_jaccards = [
+        _safe_float(item.get("stable_mask_overlap", {}).get("jaccard_overlap"))
+        for item in holdout_comparisons
+        if item.get("status") == "comparison_available"
+    ]
+    finite_holdout_jaccards = [value for value in holdout_jaccards if math.isfinite(value)]
+    baseline_jaccard = _safe_float(payload.get("baseline_vs_diagnostic", {}).get("stable_mask_overlap", {}).get("jaccard_overlap"))
+    thickening_jaccard = _safe_float(payload.get("data_thickening", {}).get("stable_mask_overlap", {}).get("jaccard_overlap"))
+    holdout_high_freq_nonempty = all(
+        int(item.get("high_frequency_edge_overlap", {}).get("intersection_count", 0)) > 0
+        for item in holdout_comparisons
+        if item.get("status") == "comparison_available"
+    )
+    assessment = {
+        "baseline_vs_diagnostic_meets_target": math.isfinite(baseline_jaccard) and baseline_jaccard >= 0.55,
+        "data_thickening_meets_target": math.isfinite(thickening_jaccard) and thickening_jaccard >= 0.55,
+        "holdout_median_jaccard": float(np.median(finite_holdout_jaccards)) if finite_holdout_jaccards else math.nan,
+        "holdout_min_jaccard": min(finite_holdout_jaccards) if finite_holdout_jaccards else math.nan,
+        "holdout_meets_target": bool(finite_holdout_jaccards)
+        and float(np.median(finite_holdout_jaccards)) >= 0.55
+        and min(finite_holdout_jaccards) >= 0.50,
+        "high_frequency_overlap_nonempty": (
+            int(payload.get("baseline_vs_diagnostic", {}).get("high_frequency_edge_overlap", {}).get("intersection_count", 0)) > 0
+            or int(payload.get("data_thickening", {}).get("high_frequency_edge_overlap", {}).get("intersection_count", 0)) > 0
+            or holdout_high_freq_nonempty
+        ),
+    }
+    payload["assessment"] = assessment
+    if assessment["holdout_meets_target"] and assessment["high_frequency_overlap_nonempty"]:
+        payload["conclusion"] = "代表性组合的 dominant edges 在 baseline/diagnostic、holdout 与厚化对照之间基本稳定，sparsity 可以正式进入主报告。"
+    elif finite_holdout_jaccards:
+        payload["conclusion"] = "代表性组合已经出现非偶然的 overlap，但 holdout 或厚化对照仍不足以把 sparsity 写成完全成熟结论。"
+    else:
+        payload["conclusion"] = "当前只有代表性组合本体，缺少可用的 holdout/thickening overlap，因此 sparsity 还不能单独升格。"
+    return payload
+
+
+def render_sparsity_overlap_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# Sparsity Overlap",
+        "",
+        f"- status: `{payload.get('status', 'overlap_unavailable')}`",
+    ]
+    representative = dict(payload.get("representative_combo", {}) or {})
+    if representative:
+        lines.extend(
+            [
+                f"- representative_combo: `{_combo_key(representative)}`",
+                f"- representative_support: `{representative.get('support', '')}`",
+            ]
+        )
+    if payload.get("status") != "overlap_available":
+        lines.append(f"- reason: {payload.get('conclusion', 'overlap artifact is unavailable.')}")
+        return "\n".join(lines)
+
+    def _comparison_lines(section: dict[str, Any], label: str) -> list[str]:
+        if section.get("status") != "comparison_available":
+            return [f"- {label}: comparison_unavailable"]
+        stable = dict(section.get("stable_mask_overlap", {}) or {})
+        top_edges = dict(section.get("top_edge_overlap", {}) or {})
+        high_freq = dict(section.get("high_frequency_edge_overlap", {}) or {})
+        return [
+            f"- {label}: stable_jaccard={_safe_float(stable.get('jaccard_overlap')):.4f}; "
+            f"stable_intersection_union={int(stable.get('intersection_count', 0))}/{int(stable.get('union_count', 0))}; "
+            f"top_edge_jaccard={_safe_float(top_edges.get('jaccard_overlap')):.4f}; "
+            f"high_frequency_jaccard={_safe_float(high_freq.get('jaccard_overlap')):.4f}"
+        ]
+
+    lines.extend(["", "## Comparisons"])
+    lines.extend(_comparison_lines(dict(payload.get("baseline_vs_diagnostic", {}) or {}), "baseline_vs_diagnostic"))
+    for item in payload.get("full_vs_holdouts", []):
+        lines.extend(_comparison_lines(dict(item or {}), f"full_vs_holdout[{item.get('comparison_ref', '')}]"))
+    lines.extend(_comparison_lines(dict(payload.get("data_thickening", {}) or {}), "data_thickening"))
+
+    assessment = dict(payload.get("assessment", {}) or {})
+    lines.extend(
+        [
+            "",
+            "## Assessment",
+            f"- baseline_vs_diagnostic_meets_target: {str(bool(assessment.get('baseline_vs_diagnostic_meets_target'))).lower()}",
+            f"- data_thickening_meets_target: {str(bool(assessment.get('data_thickening_meets_target'))).lower()}",
+            f"- holdout_median_jaccard: {_safe_float(assessment.get('holdout_median_jaccard')):.4f}",
+            f"- holdout_min_jaccard: {_safe_float(assessment.get('holdout_min_jaccard')):.4f}",
+            f"- holdout_meets_target: {str(bool(assessment.get('holdout_meets_target'))).lower()}",
+            f"- high_frequency_overlap_nonempty: {str(bool(assessment.get('high_frequency_overlap_nonempty'))).lower()}",
+            "",
+            "## Conclusion",
+            f"- {payload.get('conclusion', '')}",
+        ]
+    )
+    return "\n".join(lines)
+
+
 def _diagnostic_records(run_dirs: list[Path]) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for run_dir in run_dirs:
@@ -1191,6 +1748,182 @@ def _load_scenario_generalization(study_dir: Path) -> dict[str, Any]:
         return read_yaml(path)
     manifest = _load_study_manifest(study_dir)
     return build_scenario_generalization_payload(study_dir, str(manifest.get("study_name", "")), manifest)
+
+
+def _load_scenario_holdout(study_dir: Path) -> dict[str, Any]:
+    path = study_dir / "summary" / "scenario_holdout.json"
+    return read_yaml(path) if path.exists() else {}
+
+
+def _load_sparsity_overlap(study_dir: Path) -> dict[str, Any]:
+    path = study_dir / "summary" / "sparsity_overlap.json"
+    return read_yaml(path) if path.exists() else {}
+
+
+def _strict_raw_state_evolution_entries(summary: dict[str, Any]) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    for item in summary.get("ranking", []):
+        if (
+            str(item.get("x_schema", "")) in STRICT_RAW_X_SCHEMAS
+            and str(item.get("x_schema", "")) in STATE_EVOLUTION_X_SCHEMAS
+            and str(item.get("y_schema", "")) in STATE_EVOLUTION_Y_SCHEMAS
+        ):
+            entries.append(item)
+    return entries
+
+
+def _holdout_status_for_combo(payload: dict[str, Any], combo_key: str) -> str:
+    for entry in payload.get("entries", []):
+        if _combo_key(entry) == combo_key:
+            return str(entry.get("holdout_status", ""))
+    return ""
+
+
+def _entry_lookup(summary: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {_combo_key(item): dict(item) for item in summary.get("ranking", [])}
+
+
+def _mode_validation_payload(mode: str, baseline_dir: Path, diagnostic_dir: Path) -> dict[str, Any]:
+    baseline_summary = _load_study_summary(baseline_dir)
+    diagnostic_summary = _load_study_summary(diagnostic_dir)
+    baseline_holdout = _load_scenario_holdout(baseline_dir)
+    diagnostic_holdout = _load_scenario_holdout(diagnostic_dir)
+    baseline_overlap = _load_sparsity_overlap(baseline_dir)
+    baseline_entries = _entry_lookup({"ranking": _strict_raw_state_evolution_entries(baseline_summary)})
+    diagnostic_entries = _entry_lookup({"ranking": _strict_raw_state_evolution_entries(diagnostic_summary)})
+    candidate_keys = sorted(set(baseline_entries) & set(diagnostic_entries))
+    positive_candidates: list[dict[str, Any]] = []
+    for combo_key in candidate_keys:
+        baseline_entry = baseline_entries[combo_key]
+        diagnostic_entry = diagnostic_entries[combo_key]
+        if (
+            str(baseline_entry.get("support", "")).strip().lower() == "supported"
+            and str(diagnostic_entry.get("support", "")).strip().lower() == "supported"
+            and _holdout_status_for_combo(baseline_holdout, combo_key) == "all_holdouts_supported"
+            and _holdout_status_for_combo(diagnostic_holdout, combo_key) == "all_holdouts_supported"
+        ):
+            positive_candidates.append(
+                {
+                    "combo": combo_key,
+                    "baseline_r2": _safe_float(baseline_entry.get("median_test_r2")),
+                    "diagnostic_r2": _safe_float(diagnostic_entry.get("median_test_r2")),
+                }
+            )
+
+    positive_candidates.sort(key=lambda item: (item["baseline_r2"], item["diagnostic_r2"]), reverse=True)
+    if positive_candidates:
+        return {
+            "mode": mode,
+            "status": "mature_positive",
+            "baseline_dir": str(baseline_dir),
+            "diagnostic_dir": str(diagnostic_dir),
+            "positive_combo": positive_candidates[0]["combo"],
+            "conclusion": "该 mode 已出现 strict-raw-linear state-evolution 组合，同时通过 baseline、diagnostic 与全部 scenario holdout。",
+        }
+
+    representative = dict(baseline_overlap.get("representative_combo", {}) or {})
+    stable_jaccard = _safe_float(
+        baseline_overlap.get("baseline_vs_diagnostic", {}).get("stable_mask_overlap", {}).get("jaccard_overlap")
+    )
+    high_frequency_nonempty = bool(
+        baseline_overlap.get("assessment", {}).get("high_frequency_overlap_nonempty")
+    )
+    holdout_meets_target = bool(
+        baseline_overlap.get("assessment", {}).get("holdout_meets_target")
+    )
+    if (
+        representative
+        and representative.get("x_schema") in STATE_EVOLUTION_X_SCHEMAS
+        and representative.get("y_schema") in STATE_EVOLUTION_Y_SCHEMAS
+        and _safe_float(representative.get("median_test_r2")) >= 0.70
+        and _safe_float(representative.get("effective_condition_number")) > 1e6
+        and math.isfinite(stable_jaccard)
+        and stable_jaccard >= 0.55
+        and high_frequency_nonempty
+        and holdout_meets_target
+    ):
+        return {
+            "mode": mode,
+            "status": "mature_negative",
+            "baseline_dir": str(baseline_dir),
+            "diagnostic_dir": str(diagnostic_dir),
+            "positive_combo": "",
+            "representative_combo": _combo_key(representative),
+            "conclusion": "该 mode 的 state-evolution 仍呈现高 R2 + 高条件数 + 稀疏边基本不换的病态结构，因此可以成熟地下负结论。",
+        }
+
+    return {
+        "mode": mode,
+        "status": "inconclusive",
+        "baseline_dir": str(baseline_dir),
+        "diagnostic_dir": str(diagnostic_dir),
+        "positive_combo": "",
+        "representative_combo": _combo_key(representative) if representative else "",
+        "conclusion": "该 mode 当前还没有成熟正结论，也还没满足成熟负结论的稳定性条件。",
+    }
+
+
+def build_ardupilot_state_evolution_validation_payload(
+    *,
+    stabilize_baseline_dir: Path,
+    stabilize_diagnostic_dir: Path,
+    guided_nogps_baseline_dir: Path,
+    guided_nogps_diagnostic_dir: Path,
+) -> dict[str, Any]:
+    stabilize = _mode_validation_payload("STABILIZE", stabilize_baseline_dir, stabilize_diagnostic_dir)
+    guided = _mode_validation_payload("GUIDED_NOGPS", guided_nogps_baseline_dir, guided_nogps_diagnostic_dir)
+    statuses = [stabilize.get("status", ""), guided.get("status", "")]
+    if "mature_positive" in statuses:
+        overall = "mode_isolated_state_evolution_has_mature_positive_evidence"
+        conclusion = "Formal V2 的 mode-isolated targeted line 已经给出至少一个 mode 的成熟 state-evolution 正结论。"
+    elif all(status == "mature_negative" for status in statuses):
+        overall = "mode_isolated_state_evolution_is_maturely_negative"
+        conclusion = "Formal V2 的 mode-isolated targeted line 目前更支持成熟负结论：ArduPilot 的 state-evolution 仍病态，成熟线性证据主要停留在 command-driven 路径。"
+    else:
+        overall = "mode_isolated_state_evolution_still_inconclusive"
+        conclusion = "Formal V2 targeted line 已经形成正式 artifact，但 state-evolution 还没有完全收敛到成熟正/负结论。"
+    return {
+        "status": "validation_available",
+        "overall_status": overall,
+        "modes": {
+            "stabilize": stabilize,
+            "guided_nogps": guided,
+        },
+        "reporting_targets": {
+            "baseline_vs_diagnostic_jaccard_target": 0.55,
+            "holdout_median_jaccard_target": 0.55,
+            "holdout_min_jaccard_target": 0.50,
+            "high_frequency_overlap_nonempty": True,
+        },
+        "conclusion": conclusion,
+    }
+
+
+def render_ardupilot_state_evolution_validation_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# ArduPilot State-Evolution Validation",
+        "",
+        f"- status: `{payload.get('status', 'validation_unavailable')}`",
+        f"- overall_status: `{payload.get('overall_status', 'unknown')}`",
+    ]
+    for mode_key in ("stabilize", "guided_nogps"):
+        section = dict(payload.get("modes", {}).get(mode_key, {}) or {})
+        lines.extend(
+            [
+                "",
+                f"## {section.get('mode', mode_key.upper())}",
+                f"- status: `{section.get('status', 'unknown')}`",
+                f"- baseline_dir: `{section.get('baseline_dir', '')}`",
+                f"- diagnostic_dir: `{section.get('diagnostic_dir', '')}`",
+            ]
+        )
+        if section.get("positive_combo"):
+            lines.append(f"- positive_combo: `{section.get('positive_combo', '')}`")
+        if section.get("representative_combo"):
+            lines.append(f"- representative_combo: `{section.get('representative_combo', '')}`")
+        lines.append(f"- conclusion: {section.get('conclusion', '')}")
+    lines.extend(["", "## Conclusion", f"- {payload.get('conclusion', '')}"])
+    return "\n".join(lines)
 
 
 def _study_acceptance_count(study_dir: Path) -> int:

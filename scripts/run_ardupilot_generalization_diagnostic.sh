@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VEHICLE="ArduCopter"
 FRAME="quad"
 STAGE="pilot"
+MAX_ATTEMPTS_PER_CONFIG=""
 SKIP_SITL=0
 SKIP_CAPTURE=0
 MATRIX_DIR=""
@@ -14,6 +15,7 @@ ABLATION_PLAN="${ROOT_DIR}/configs/ablations/ardupilot_generalization_diagnostic
 usage() {
   cat <<'EOF'
 Usage: run_ardupilot_generalization_diagnostic.sh [--stage pilot|full] [--vehicle ArduCopter] [--frame quad]
+                                                  [--max-attempts-per-config N]
                                                   [--skip-sitl] [--skip-capture --matrix-dir DIR]
                                                   [--analysis-config PATH] [--plan PATH]
 
@@ -28,6 +30,7 @@ while [[ $# -gt 0 ]]; do
     --stage) STAGE="$2"; shift ;;
     --vehicle) VEHICLE="$2"; shift ;;
     --frame) FRAME="$2"; shift ;;
+    --max-attempts-per-config) MAX_ATTEMPTS_PER_CONFIG="$2"; shift ;;
     --skip-sitl) SKIP_SITL=1 ;;
     --skip-capture) SKIP_CAPTURE=1 ;;
     --matrix-dir) MATRIX_DIR="$2"; shift ;;
@@ -199,6 +202,9 @@ if [[ $SKIP_CAPTURE -eq 0 ]]; then
   if [[ $SKIP_SITL -eq 1 ]]; then
     MATRIX_ARGS+=(--skip-sitl)
   fi
+  if [[ -n "${MAX_ATTEMPTS_PER_CONFIG}" ]]; then
+    MATRIX_ARGS+=(--max-attempts-per-config "${MAX_ATTEMPTS_PER_CONFIG}")
+  fi
   if command -v ros2 >/dev/null 2>&1 && ros2 pkg prefix ardupilot_mavlink_backend >/dev/null 2>&1; then
     MATRIX_OUTPUT="$(ros2 run ardupilot_mavlink_backend ardupilot_linearity_matrix "${MATRIX_ARGS[@]}")"
   else
@@ -238,7 +244,11 @@ run_stage_check diagnostic-artifact --study-dir "${STUDY_DIR}"
 run_stage_check artifact-paths \
   --study-dir "${STUDY_DIR}" \
   --required-path reports/scenario_generalization.md \
-  --required-path summary/scenario_generalization.json
+  --required-path summary/scenario_generalization.json \
+  --required-path reports/scenario_holdout.md \
+  --required-path summary/scenario_holdout.json \
+  --required-path reports/sparsity_overlap.md \
+  --required-path summary/sparsity_overlap.json
 
 echo "matrix_dir=${MATRIX_DIR}"
 echo "study_dir=${STUDY_DIR}"

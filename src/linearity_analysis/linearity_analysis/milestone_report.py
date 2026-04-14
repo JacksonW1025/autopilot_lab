@@ -64,6 +64,26 @@ def _state_evolution_audit(study_dir: Path) -> dict[str, Any]:
     return read_yaml(study_dir / "summary" / "state_evolution_audit.json")
 
 
+def _state_evolution_validation(study_dir: Path | None) -> dict[str, Any]:
+    if study_dir is None:
+        return {}
+    return read_yaml(study_dir / "summary" / "state_evolution_validation.json")
+
+
+def _targeted_input_lines(validation_payload: dict[str, Any], docs_dir: Path) -> list[str]:
+    lines: list[str] = []
+    modes = dict(validation_payload.get("modes", {}) or {})
+    for mode_key, mode_label in (("stabilize", "STABILIZE"), ("guided_nogps", "GUIDED_NOGPS")):
+        section = dict(modes.get(mode_key, {}) or {})
+        baseline_dir = str(section.get("baseline_dir", "") or "").strip()
+        diagnostic_dir = str(section.get("diagnostic_dir", "") or "").strip()
+        if baseline_dir:
+            lines.append(f"- {mode_label} targeted baseline: `{_relative_from_docs(Path(baseline_dir), docs_dir)}`")
+        if diagnostic_dir:
+            lines.append(f"- {mode_label} targeted diagnostic: `{_relative_from_docs(Path(diagnostic_dir), docs_dir)}`")
+    return lines
+
+
 def _first_supported_combo(summary: dict[str, Any]) -> dict[str, Any]:
     for item in summary.get("ranking", []):
         if str(item.get("support", "")).strip().lower() == "supported":
@@ -87,11 +107,8 @@ def render_milestone_report(
     px4_diagnostic_dir: Path,
     ardupilot_diagnostic_dir: Path,
     compare_dir: Path,
-    guided_smoke_dir: Path,
-    partial_baseline_dir: Path,
-    throttle_diagnostic_dir: Path,
-    contract_audit_dir: Path,
     docs_dir: Path,
+    state_evolution_validation_dir: Path | None = None,
 ) -> str:
     px4_summary = _load_study_summary(px4_baseline_dir)
     ap_summary = _load_study_summary(ardupilot_baseline_dir)
@@ -101,6 +118,10 @@ def render_milestone_report(
     ap_diag = _diagnostic_section(ardupilot_diagnostic_dir)
     compare_payload = read_yaml(compare_dir / "summary" / "backend_compare.json")
     state_audit = _state_evolution_audit(ardupilot_baseline_dir)
+    validation_payload = _state_evolution_validation(state_evolution_validation_dir)
+    targeted_input_lines = _targeted_input_lines(validation_payload, docs_dir) if validation_payload else []
+    stabilize_validation = dict(validation_payload.get("modes", {}).get("stabilize", {}) or {})
+    guided_validation = dict(validation_payload.get("modes", {}).get("guided_nogps", {}) or {})
 
     px4_best = dict(px4_summary.get("best_result", {}) or {})
     ap_best = dict(ap_summary.get("best_result", {}) or {})
@@ -162,6 +183,16 @@ def render_milestone_report(
             "1. 线性关系 `Y ≈ fX (+ b)` 本身是否成立。",
             "2. 这个关系在 `nominal / dynamic / throttle_biased` 三档状态下是否还能站得住。",
             "",
+            "Formal V2 现在有两条同级正式线：",
+            "",
+            "- generalization full 四-study 线，负责回答“线性关系总体是否存在，以及能否跨 scenario 成立”。",
+            (
+                f"- ArduPilot mode-isolated targeted line，负责回答“state-evolution 在不混 mode 时能否形成成熟正结论，"
+                f"否则能否成熟地下负结论”；当前 overall_status=`{validation_payload.get('overall_status', 'not_refreshed')}`。"
+                if validation_payload
+                else "- ArduPilot mode-isolated targeted line 尚未写入当前里程碑文档。"
+            ),
+            "",
             "## 这次正式做了哪些实验",
             "",
             "正式实验分成四份 study：",
@@ -170,11 +201,6 @@ def render_milestone_report(
             f"- PX4 diagnostic：姿态轴全部 accepted，throttle boundary=`{px4_diag.get('throttle_boundary', 'none')}`。",
             f"- ArduPilot baseline：`{ap_baseline.get('accepted_run_count', 0)}/{ap_baseline.get('expected_accepted_run_count', 0)} accepted`，覆盖 `STABILIZE` 与 `GUIDED_NOGPS`，并同时覆盖三档 scenario。",
             f"- ArduPilot diagnostic：姿态轴全部 accepted，throttle boundary=`{ap_diag.get('throttle_boundary', 'none')}`。",
-            "",
-            "支持性实验也都已完成，但它们现在不再是主结论来源，而是实验准备度和契约一致性的旁证：",
-            "",
-            "- ArduPilot `GUIDED_NOGPS` smoke 已证明 mode-entry 能稳定进入 active phase。",
-            "- `STABILIZE` partial baseline、throttle-only diagnostic 和 contract audit 也都已通过，所以现在比较的是线性证据本身，不是链路是否能跑。",
             "",
             "## 现在已经能说清楚的结论",
             "",
@@ -217,6 +243,27 @@ def render_milestone_report(
             "",
             "这说明 ArduPilot 不是没有跨场景线性证据，而是目前更稳的证据主要集中在较简单的命令驱动路径上。高分的 state-evolution 组合仍然要同时面对条件数和稳定性问题。",
             "",
+            "### 4b. mode-isolated targeted line 正在回答更窄但更关键的问题",
+            "",
+            (
+                f"- STABILIZE targeted status=`{stabilize_validation.get('status', 'not_refreshed')}`，结论：{stabilize_validation.get('conclusion', 'n/a')}"
+                if validation_payload
+                else "- STABILIZE targeted line: not_refreshed."
+            ),
+            (
+                f"- GUIDED_NOGPS targeted status=`{guided_validation.get('status', 'not_refreshed')}`，结论：{guided_validation.get('conclusion', 'n/a')}"
+                if validation_payload
+                else "- GUIDED_NOGPS targeted line: not_refreshed."
+            ),
+            (
+                f"- targeted aggregate artifact: `{_relative_from_docs(state_evolution_validation_dir, docs_dir)}`"
+                if validation_payload and state_evolution_validation_dir is not None
+                else "- targeted aggregate artifact: unavailable."
+            ),
+            *targeted_input_lines,
+            "",
+            "这条线不是 supplementary。它和 generalization full 一样，都是 Formal V2 的正式输入，只是回答的问题更聚焦于 ArduPilot state-evolution 本身。",
+            "",
             "### 5. 两个 backend 的相似性仍然在增强主结论，但不能说得过满",
             "",
             "- 两边都已经完成 full baseline 与 full diagnostic。",
@@ -239,9 +286,9 @@ def render_milestone_report(
             "",
             "## 历史阶段结论怎么处理",
             "",
-            "20260409 那一轮 broad baseline / diagnostic 没有被删除，但它现在只作为历史阶段结论保留。",
+            "20260409 那一轮 broad baseline / diagnostic 和准备性 artifact 不再进入 Formal V2 正式口径。",
             "",
-            "当前正式结论的主输入，已经切换为这轮 generalization full 四个 study 和新的 compare artifact。",
+            "当前正式结论的主输入，已经切换为 generalization full 四个 study、targeted validation 和新的 compare artifact。",
             "",
             "## 下一步建议",
             "",
@@ -263,10 +310,12 @@ def render_milestone_report(
             f"- ArduPilot diagnostic: `{_relative_from_docs(ardupilot_diagnostic_dir, docs_dir)}`",
             f"- final compare: `{_relative_from_docs(compare_dir, docs_dir)}`",
             f"- state-evolution audit: `{_relative_from_docs(ardupilot_baseline_dir / 'reports' / 'state_evolution_audit.md', docs_dir)}`",
-            f"- guided smoke: `{_relative_from_docs(guided_smoke_dir, docs_dir)}`",
-            f"- partial baseline: `{_relative_from_docs(partial_baseline_dir, docs_dir)}`",
-            f"- throttle diagnostic: `{_relative_from_docs(throttle_diagnostic_dir, docs_dir)}`",
-            f"- contract audit: `{_relative_from_docs(contract_audit_dir, docs_dir)}`",
+            (
+                f"- targeted validation: `{_relative_from_docs(state_evolution_validation_dir, docs_dir)}`"
+                if validation_payload and state_evolution_validation_dir is not None
+                else "- targeted validation: `unavailable`"
+            ),
+            *targeted_input_lines,
         ]
     )
 
@@ -278,11 +327,8 @@ def render_milestone_appendix(
     px4_diagnostic_dir: Path,
     ardupilot_diagnostic_dir: Path,
     compare_dir: Path,
-    guided_smoke_dir: Path,
-    partial_baseline_dir: Path,
-    throttle_diagnostic_dir: Path,
-    contract_audit_dir: Path,
     docs_dir: Path,
+    state_evolution_validation_dir: Path | None = None,
 ) -> str:
     px4_summary = _load_study_summary(px4_baseline_dir)
     ap_summary = _load_study_summary(ardupilot_baseline_dir)
@@ -292,6 +338,8 @@ def render_milestone_appendix(
     ap_diag = _diagnostic_section(ardupilot_diagnostic_dir)
     compare_payload = read_yaml(compare_dir / "summary" / "backend_compare.json")
     state_audit = _state_evolution_audit(ardupilot_baseline_dir)
+    validation_payload = _state_evolution_validation(state_evolution_validation_dir)
+    targeted_input_lines = _targeted_input_lines(validation_payload, docs_dir) if validation_payload else []
     px4_supported = _first_supported_combo(px4_summary)
     ap_supported = _first_supported_combo(ap_summary)
     px4_supported_dir = _combo_fit_dir(px4_baseline_dir, px4_supported) if px4_supported else px4_baseline_dir / "fits"
@@ -312,13 +360,12 @@ def render_milestone_appendix(
             f"- PX4 diagnostic study: `{_relative_from_docs(px4_diagnostic_dir, docs_dir)}`",
             f"- ArduPilot diagnostic study: `{_relative_from_docs(ardupilot_diagnostic_dir, docs_dir)}`",
             f"- final compare: `{_relative_from_docs(compare_dir, docs_dir)}`",
-            "",
-            "## 2. 支持性 artifact",
-            "",
-            f"- GUIDED_NOGPS smoke: `{_relative_from_docs(guided_smoke_dir, docs_dir)}`",
-            f"- STABILIZE partial baseline: `{_relative_from_docs(partial_baseline_dir, docs_dir)}`",
-            f"- STABILIZE throttle diagnostic: `{_relative_from_docs(throttle_diagnostic_dir, docs_dir)}`",
-            f"- cross-backend contract audit: `{_relative_from_docs(contract_audit_dir, docs_dir)}`",
+            (
+                f"- ArduPilot targeted validation: `{_relative_from_docs(state_evolution_validation_dir, docs_dir)}`"
+                if validation_payload and state_evolution_validation_dir is not None
+                else "- ArduPilot targeted validation: `unavailable`"
+            ),
+            *targeted_input_lines,
             "",
             "## 3. baseline 关键数字",
             "",
@@ -348,12 +395,19 @@ def render_milestone_appendix(
             f"- conclusion: `{state_audit.get('conclusion', '')}`",
             f"- report: `{_relative_from_docs(ardupilot_baseline_dir / 'reports' / 'state_evolution_audit.md', docs_dir)}`",
             "",
-            "## 6. diagnostic gate 摘要",
+            "## 6. Formal V2 targeted line 摘要",
+            "",
+            f"- targeted_overall_status: `{validation_payload.get('overall_status', 'not_refreshed')}`",
+            f"- STABILIZE: `{validation_payload.get('modes', {}).get('stabilize', {}).get('status', 'not_refreshed')}`",
+            f"- GUIDED_NOGPS: `{validation_payload.get('modes', {}).get('guided_nogps', {}).get('status', 'not_refreshed')}`",
+            f"- targeted_conclusion: `{validation_payload.get('conclusion', 'n/a')}`",
+            "",
+            "## 7. diagnostic gate 摘要",
             "",
             f"- PX4 throttle_boundary: `{px4_diag.get('throttle_boundary', 'none')}`; nonzero_gate_blocked=`{str(bool(px4_diag.get('throttle_blocked_by_nonzero_gate'))).lower()}`",
             f"- ArduPilot throttle_boundary: `{ap_diag.get('throttle_boundary', 'none')}`; nonzero_gate_blocked=`{str(bool(ap_diag.get('throttle_blocked_by_nonzero_gate'))).lower()}`",
             "",
-            "## 7. 代表性组合与矩阵图",
+            "## 8. 代表性组合与矩阵图",
             "",
             f"- PX4 baseline supported combo: `{_combo_key(px4_supported)}`",
             f"  - matrix: `{_relative_from_docs(px4_supported_dir / 'matrix_f.csv', docs_dir)}`",
@@ -362,18 +416,18 @@ def render_milestone_appendix(
             f"  - matrix: `{_relative_from_docs(ap_supported_dir / 'matrix_f.csv', docs_dir)}`",
             f"  - abs heatmap: `{_relative_from_docs(ap_supported_dir / 'matrix_heatmap_abs.png', docs_dir)}`",
             "",
-            "## 8. compare 摘要",
+            "## 9. compare 摘要",
             "",
             f"- compare_dir: `{_relative_from_docs(compare_dir, docs_dir)}`",
             f"- difference_driver: `{compare_payload.get('comparison', {}).get('difference_driver', '')}`",
             f"- both_baselines_stable: `{str(bool(compare_payload.get('comparison', {}).get('both_baselines_stable'))).lower()}`",
             f"- throttle_boundary_consistent: `{str(bool(compare_payload.get('comparison', {}).get('throttle_boundary_consistent'))).lower()}`",
             "",
-            "## 9. 历史阶段 artifact",
+            "## 10. 历史阶段 artifact",
             "",
-            "- 20260409 broad baseline / diagnostic 仍保留为历史路径，不再作为当前正式 compare 主输入。",
+            "- 20260409 broad baseline / diagnostic 与准备性 artifact 已移出 Formal V2 正式文档引用集。",
             "",
-            "## 10. 当前稳妥的技术结论",
+            "## 11. 当前稳妥的技术结论",
             "",
             "- 两个 backend 的正式 baseline 和 diagnostic 都已经形成完整 artifact。",
             "- 两个 backend 都已经给出跨 scenario generalized-supported 证据。",
@@ -391,11 +445,8 @@ def write_milestone_docs(
     px4_diagnostic_dir: Path,
     ardupilot_diagnostic_dir: Path,
     compare_dir: Path,
-    guided_smoke_dir: Path,
-    partial_baseline_dir: Path,
-    throttle_diagnostic_dir: Path,
-    contract_audit_dir: Path,
     docs_dir: Path | None = None,
+    state_evolution_validation_dir: Path | None = None,
 ) -> dict[str, str]:
     docs_root = _docs_root(docs_dir)
     docs_root.mkdir(parents=True, exist_ok=True)
@@ -408,11 +459,8 @@ def write_milestone_docs(
             px4_diagnostic_dir=px4_diagnostic_dir,
             ardupilot_diagnostic_dir=ardupilot_diagnostic_dir,
             compare_dir=compare_dir,
-            guided_smoke_dir=guided_smoke_dir,
-            partial_baseline_dir=partial_baseline_dir,
-            throttle_diagnostic_dir=throttle_diagnostic_dir,
-            contract_audit_dir=contract_audit_dir,
             docs_dir=docs_root,
+            state_evolution_validation_dir=state_evolution_validation_dir,
         ),
         encoding="utf-8",
     )
@@ -423,11 +471,8 @@ def write_milestone_docs(
             px4_diagnostic_dir=px4_diagnostic_dir,
             ardupilot_diagnostic_dir=ardupilot_diagnostic_dir,
             compare_dir=compare_dir,
-            guided_smoke_dir=guided_smoke_dir,
-            partial_baseline_dir=partial_baseline_dir,
-            throttle_diagnostic_dir=throttle_diagnostic_dir,
-            contract_audit_dir=contract_audit_dir,
             docs_dir=docs_root,
+            state_evolution_validation_dir=state_evolution_validation_dir,
         ),
         encoding="utf-8",
     )
@@ -443,11 +488,8 @@ def refresh_generalization_milestone(
     ardupilot_baseline_dir: Path,
     px4_diagnostic_dir: Path,
     ardupilot_diagnostic_dir: Path,
-    guided_smoke_dir: Path,
-    partial_baseline_dir: Path,
-    throttle_diagnostic_dir: Path,
-    contract_audit_dir: Path,
     docs_dir: Path | None = None,
+    state_evolution_validation_dir: Path | None = None,
 ) -> dict[str, Any]:
     compare_dir = run_backend_compare(
         px4_baseline_dir=px4_baseline_dir,
@@ -461,11 +503,8 @@ def refresh_generalization_milestone(
         px4_diagnostic_dir=px4_diagnostic_dir,
         ardupilot_diagnostic_dir=ardupilot_diagnostic_dir,
         compare_dir=compare_dir,
-        guided_smoke_dir=guided_smoke_dir,
-        partial_baseline_dir=partial_baseline_dir,
-        throttle_diagnostic_dir=throttle_diagnostic_dir,
-        contract_audit_dir=contract_audit_dir,
         docs_dir=docs_dir,
+        state_evolution_validation_dir=state_evolution_validation_dir,
     )
     payload: dict[str, Any] = {
         "mode": "generalization_full",
@@ -476,10 +515,7 @@ def refresh_generalization_milestone(
             "ardupilot_baseline_dir": str(ardupilot_baseline_dir),
             "px4_diagnostic_dir": str(px4_diagnostic_dir),
             "ardupilot_diagnostic_dir": str(ardupilot_diagnostic_dir),
-            "guided_smoke_dir": str(guided_smoke_dir),
-            "partial_baseline_dir": str(partial_baseline_dir),
-            "throttle_diagnostic_dir": str(throttle_diagnostic_dir),
-            "contract_audit_dir": str(contract_audit_dir),
+            "state_evolution_validation_dir": str(state_evolution_validation_dir) if state_evolution_validation_dir else "",
         },
         **docs_written,
     }
@@ -493,10 +529,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--ardupilot-baseline", type=Path, required=True)
     parser.add_argument("--px4-diagnostic", type=Path, required=True)
     parser.add_argument("--ardupilot-diagnostic", type=Path, required=True)
-    parser.add_argument("--guided-smoke", type=Path, required=True)
-    parser.add_argument("--partial-baseline", type=Path, required=True)
-    parser.add_argument("--throttle-diagnostic", type=Path, required=True)
-    parser.add_argument("--contract-audit", type=Path, required=True)
+    parser.add_argument("--state-evolution-validation", type=Path, default=None)
     parser.add_argument("--docs-dir", type=Path, default=None)
     args = parser.parse_args(argv)
 
@@ -505,10 +538,7 @@ def main(argv: list[str] | None = None) -> None:
         ardupilot_baseline_dir=args.ardupilot_baseline.expanduser().resolve(),
         px4_diagnostic_dir=args.px4_diagnostic.expanduser().resolve(),
         ardupilot_diagnostic_dir=args.ardupilot_diagnostic.expanduser().resolve(),
-        guided_smoke_dir=args.guided_smoke.expanduser().resolve(),
-        partial_baseline_dir=args.partial_baseline.expanduser().resolve(),
-        throttle_diagnostic_dir=args.throttle_diagnostic.expanduser().resolve(),
-        contract_audit_dir=args.contract_audit.expanduser().resolve(),
+        state_evolution_validation_dir=args.state_evolution_validation.expanduser().resolve() if args.state_evolution_validation else None,
         docs_dir=args.docs_dir.expanduser().resolve() if args.docs_dir else None,
     )
     print(f"refreshed={str(bool(payload.get('refreshed'))).lower()}")
