@@ -1,0 +1,2349 @@
+study_name: ardupilot_state_evolution_guided_nogps_baseline
+study_id: 20260413_124654_ardupilot_state_evolution_guided_nogps_baseline
+source_run_dirs:
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_122922_ardupilot_attitude_multi_broad_composite_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_122956_ardupilot_attitude_multi_broad_composite_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123030_ardupilot_attitude_multi_broad_composite_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123105_ardupilot_attitude_multi_broad_composite_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123139_ardupilot_attitude_multi_broad_composite_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123213_ardupilot_attitude_multi_broad_composite_r6
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123247_ardupilot_attitude_multi_broad_composite_r7
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123321_ardupilot_attitude_multi_broad_composite_r8
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123356_ardupilot_attitude_multi_broad_composite_r9
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123430_ardupilot_attitude_multi_broad_composite_r10
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123504_ardupilot_attitude_multi_broad_composite_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123538_ardupilot_attitude_multi_broad_composite_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123612_ardupilot_attitude_multi_broad_composite_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123647_ardupilot_attitude_multi_broad_composite_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123721_ardupilot_attitude_multi_broad_composite_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123755_ardupilot_attitude_multi_broad_composite_r6
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123853_ardupilot_attitude_multi_broad_composite_r8
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_123927_ardupilot_attitude_multi_broad_composite_r9
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124001_ardupilot_attitude_multi_broad_composite_r10
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124036_ardupilot_attitude_multi_broad_composite_r11
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124110_ardupilot_attitude_multi_broad_composite_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124144_ardupilot_attitude_multi_broad_composite_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124218_ardupilot_attitude_multi_broad_composite_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124252_ardupilot_attitude_multi_broad_composite_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124326_ardupilot_attitude_multi_broad_composite_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124401_ardupilot_attitude_multi_broad_composite_r6
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124435_ardupilot_attitude_multi_broad_composite_r7
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124509_ardupilot_attitude_multi_broad_composite_r8
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124543_ardupilot_attitude_multi_broad_composite_r9
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_124617_ardupilot_attitude_multi_broad_composite_r10
+source_backends:
+- ardupilot
+source_modes:
+- GUIDED_NOGPS
+source_scenarios:
+- dynamic
+- nominal
+- throttle_biased
+source_config_profiles:
+- ardupilot_state_evolution_guided_nogps_dynamic_baseline
+- ardupilot_state_evolution_guided_nogps_nominal_baseline
+- ardupilot_state_evolution_guided_nogps_throttle_biased_baseline
+source_seeds:
+- 203
+- 303
+- 403
+report_matrix:
+  x_schemas:
+  - commands_plus_state_history
+  - full_augmented
+  y_schemas:
+  - next_raw_state
+  - selected_state_subset
+  models:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+  pooling_modes:
+  - pooled
+  stratify_by:
+  - mode
+  repeat_count: 1
+  appendix_x_schemas: []
+summary:
+  best_result: &id007
+    x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    pooling_mode: pooled
+    model_name: ols_affine
+    appendix: false
+    summary:
+      x_schema: commands_plus_state_history
+      y_schema: selected_state_subset
+      pooling_mode: pooled
+      model_name: ols_affine
+      feature_names:
+      - command_roll
+      - command_pitch
+      - command_yaw
+      - command_throttle
+      - roll
+      - pitch
+      - yaw
+      - roll_rate
+      - pitch_rate
+      - yaw_rate
+      - position_x
+      - position_y
+      - position_z
+      - velocity_x
+      - velocity_y
+      - velocity_z
+      - altitude
+      - vertical_speed
+      - heading
+      - command_roll__lag_1
+      - command_pitch__lag_1
+      - command_yaw__lag_1
+      - command_throttle__lag_1
+      - roll__lag_1
+      - pitch__lag_1
+      - yaw__lag_1
+      - roll_rate__lag_1
+      - pitch_rate__lag_1
+      - yaw_rate__lag_1
+      - position_x__lag_1
+      - position_y__lag_1
+      - position_z__lag_1
+      - velocity_x__lag_1
+      - velocity_y__lag_1
+      - velocity_z__lag_1
+      - altitude__lag_1
+      - vertical_speed__lag_1
+      - heading__lag_1
+      - command_roll__lag_2
+      - command_pitch__lag_2
+      - command_yaw__lag_2
+      - command_throttle__lag_2
+      - roll__lag_2
+      - pitch__lag_2
+      - yaw__lag_2
+      - roll_rate__lag_2
+      - pitch_rate__lag_2
+      - yaw_rate__lag_2
+      - position_x__lag_2
+      - position_y__lag_2
+      - position_z__lag_2
+      - velocity_x__lag_2
+      - velocity_y__lag_2
+      - velocity_z__lag_2
+      - altitude__lag_2
+      - vertical_speed__lag_2
+      - heading__lag_2
+      - command_roll__lag_3
+      - command_pitch__lag_3
+      - command_yaw__lag_3
+      - command_throttle__lag_3
+      - roll__lag_3
+      - pitch__lag_3
+      - yaw__lag_3
+      - roll_rate__lag_3
+      - pitch_rate__lag_3
+      - yaw_rate__lag_3
+      - position_x__lag_3
+      - position_y__lag_3
+      - position_z__lag_3
+      - velocity_x__lag_3
+      - velocity_y__lag_3
+      - velocity_z__lag_3
+      - altitude__lag_3
+      - vertical_speed__lag_3
+      - heading__lag_3
+      response_names:
+      - future_state_roll
+      - future_state_pitch
+      - future_state_yaw
+      - future_state_roll_rate
+      - future_state_pitch_rate
+      - future_state_yaw_rate
+      schema_metadata:
+        x_schema: commands_plus_state_history
+        y_schema: selected_state_subset
+        feature_count: 76
+        response_count: 6
+        strict_raw_linear: true
+        requested_feature_columns:
+        - command_roll
+        - command_pitch
+        - command_yaw
+        - command_throttle
+        - roll
+        - pitch
+        - yaw
+        - roll_rate
+        - pitch_rate
+        - yaw_rate
+        - position_x
+        - position_y
+        - position_z
+        - velocity_x
+        - velocity_y
+        - velocity_z
+        - altitude
+        - vertical_speed
+        - heading
+        requested_response_columns:
+        - future_state_roll
+        - future_state_pitch
+        - future_state_yaw
+        - future_state_roll_rate
+        - future_state_pitch_rate
+        - future_state_yaw_rate
+        dropped_unavailable_features: []
+        dropped_unavailable_responses: []
+        partial_feature_columns: {}
+        partial_response_columns:
+          future_state_roll: 0.9894105188845747
+          future_state_pitch: 0.9894105188845747
+          future_state_yaw: 0.9894105188845747
+          future_state_roll_rate: 0.9894105188845747
+          future_state_pitch_rate: 0.9894105188845747
+          future_state_yaw_rate: 0.9894105188845747
+        dropped_response_leakage_features: []
+        dropped_zero_variance_features: []
+      repeat_metrics:
+      - repeat_index: 1
+        train:
+          r2: 1.0
+          mse: 3.89804191453675e-28
+          mae: 6.943275797583249e-15
+          residual_mean_abs: 6.943275797583249e-15
+          residual_std: 1.9392255840173405e-14
+          residual_max_abs: 5.684341886080802e-14
+        val:
+          r2: 1.0
+          mse: 5.385763992975353e-28
+          mae: 9.596605549697998e-15
+          residual_mean_abs: 9.596605549697998e-15
+          residual_std: 2.298904095028293e-14
+          residual_max_abs: 5.684341886080802e-14
+        test:
+          r2: 1.0
+          mse: 5.385612979407287e-28
+          mae: 9.555372931018045e-15
+          residual_mean_abs: 9.555372931018045e-15
+          residual_std: 2.2337513611113197e-14
+          residual_max_abs: 5.684341886080802e-14
+        condition_number: 1583845606.819235
+        raw_condition_number: .inf
+        raw_singular_values: &id003
+        - 251.5405638234182
+        - 196.08341793319087
+        - 157.4407724910462
+        - 153.02153776762162
+        - 131.19335347139975
+        - 126.48686481129214
+        - 114.41474028668304
+        - 111.89415081519422
+        - 94.4386633291302
+        - 91.4659378486649
+        effective_condition_number: 1583845606.819235
+        singular_values: &id001
+        - 210.85659925467013
+        - 161.1195608158115
+        - 123.99300490448528
+        - 118.77488299746784
+        - 103.22755549668622
+        - 90.59408514036518
+        - 86.15239871183715
+        - 77.71563037504812
+        - 68.83397406116546
+        - 55.79740407705713
+        effective_singular_values: *id001
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      - repeat_index: 2
+        train:
+          r2: 1.0
+          mse: 7.152990272972437e-28
+          mae: 7.442000650749003e-15
+          residual_mean_abs: 7.442000650749003e-15
+          residual_std: 2.5707345282676346e-14
+          residual_max_abs: 1.1368683772161603e-13
+        val:
+          r2: 1.0
+          mse: 1.793510683361203e-27
+          mae: 1.5887154640700026e-14
+          residual_mean_abs: 1.5887154640700026e-14
+          residual_std: 3.926952443528999e-14
+          residual_max_abs: 1.1368683772161603e-13
+        test:
+          r2: 1.0
+          mse: 8.044488303238116e-28
+          mae: 7.989728743395282e-15
+          residual_mean_abs: 7.989728743395282e-15
+          residual_std: 2.7242388648220633e-14
+          residual_max_abs: 1.1368683772161603e-13
+        condition_number: 1619948861.4619365
+        raw_condition_number: .inf
+        raw_singular_values:
+        - 254.28216055084496
+        - 177.4378809730204
+        - 159.09571983254645
+        - 153.42439801979873
+        - 135.00264897502274
+        - 127.53970844359587
+        - 125.40483180771926
+        - 112.83018545468958
+        - 105.27922938525356
+        - 90.81400329726198
+        effective_condition_number: 1619948861.4619365
+        singular_values: &id002
+        - 214.77613904118374
+        - 158.76664570700882
+        - 123.0252728113674
+        - 117.79686558346138
+        - 103.5850462683762
+        - 87.35557215739506
+        - 81.92926569101017
+        - 76.04555137747428
+        - 68.58894092988072
+        - 61.66604698186841
+        effective_singular_values: *id002
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      split_records:
+      - repeat_index: 1
+        train_count: 3309
+        val_count: 1101
+        test_count: 1106
+      - repeat_index: 2
+        train_count: 3303
+        val_count: 1105
+        test_count: 1108
+      median_test_r2: 1.0
+      median_test_mse: 6.715050641322702e-28
+      median_test_mae: 8.772550837206664e-15
+      coefficient_stability: 1.0
+      nonzero_count: 0
+      sparsity_ratio: 1.0
+      block_sparsity_summary:
+        feature_blocks:
+          commands: 16
+          state: 6
+          history: 57
+          controller_params: 0
+      raw_condition_number: .inf
+      effective_condition_number: 1601897234.140586
+      condition_number: 1601897234.140586
+      raw_singular_values: *id003
+      singular_values: *id001
+      effective_singular_values: *id001
+      conditioning_pruned_features:
+      - altitude
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      conditioning_baseline_drops: []
+      conditioning_extra_pruned_features:
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      selection_frequency:
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      backend_consistency:
+        ardupilot:
+          r2: 1.0
+          mse: 4.8518848810998875e-28
+          mae: 8.677360694679898e-15
+          residual_mean_abs: 8.677360694679898e-15
+          residual_std: 2.2009179001720918e-14
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 5516.0
+      mode_consistency:
+        GUIDED_NOGPS:
+          r2: 1.0
+          mse: 4.8518848810998875e-28
+          mae: 8.677360694679898e-15
+          residual_mean_abs: 8.677360694679898e-15
+          residual_std: 2.2009179001720918e-14
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 5516.0
+      scenario_consistency: 1.0
+      scenario_subgroup_metrics:
+        dynamic:
+          r2: 1.0
+          mse: 4.316028161729417e-28
+          mae: 7.747297802932834e-15
+          residual_mean_abs: 7.747297802932834e-15
+          residual_std: 2.0437377313788214e-14
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 1842.0
+        nominal:
+          r2: 1.0
+          mse: 4.851717807090488e-28
+          mae: 8.667866335900025e-15
+          residual_mean_abs: 8.667866335900025e-15
+          residual_std: 2.1827398372394433e-14
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 1825.0
+        throttle_biased:
+          r2: 1.0
+          mse: 5.385877843321392e-28
+          mae: 9.61327364836911e-15
+          residual_mean_abs: 9.61327364836911e-15
+          residual_std: 2.3134167124159265e-14
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 1849.0
+      top_influential:
+        future_state_roll:
+        - feature: roll__lag_2
+          weight: 0.250000000000001
+          selection_frequency: 0.0
+        - feature: roll__lag_1
+          weight: 0.250000000000001
+          selection_frequency: 0.0
+        - feature: roll__lag_3
+          weight: 0.250000000000001
+          selection_frequency: 0.0
+        - feature: roll
+          weight: 0.24999999999999872
+          selection_frequency: 0.0
+        - feature: command_yaw__lag_2
+          weight: -4.3149793036822014e-16
+          selection_frequency: 0.0
+        future_state_pitch:
+        - feature: pitch__lag_1
+          weight: 0.25000000000000105
+          selection_frequency: 0.0
+        - feature: pitch__lag_2
+          weight: 0.250000000000001
+          selection_frequency: 0.0
+        - feature: pitch__lag_3
+          weight: 0.250000000000001
+          selection_frequency: 0.0
+        - feature: pitch
+          weight: 0.25000000000000033
+          selection_frequency: 0.0
+        - feature: roll
+          weight: 1.1469656566060867e-15
+          selection_frequency: 0.0
+        future_state_yaw:
+        - feature: yaw
+          weight: 0.12500000000000044
+          selection_frequency: 0.0
+        - feature: heading
+          weight: 0.12500000000000003
+          selection_frequency: 0.0
+        - feature: heading__lag_3
+          weight: 0.125
+          selection_frequency: 0.0
+        - feature: yaw__lag_3
+          weight: 0.125
+          selection_frequency: 0.0
+        - feature: yaw__lag_2
+          weight: 0.125
+          selection_frequency: 0.0
+        future_state_roll_rate:
+        - feature: roll_rate
+          weight: 0.25000000000000033
+          selection_frequency: 0.0
+        - feature: roll_rate__lag_3
+          weight: 0.24999999999999872
+          selection_frequency: 0.0
+        - feature: roll_rate__lag_2
+          weight: 0.24999999999999872
+          selection_frequency: 0.0
+        - feature: roll_rate__lag_1
+          weight: 0.2499999999999987
+          selection_frequency: 0.0
+        - feature: command_throttle__lag_2
+          weight: 1.2619577770473841e-14
+          selection_frequency: 0.0
+        future_state_pitch_rate:
+        - feature: pitch_rate
+          weight: 0.25000000000000044
+          selection_frequency: 0.0
+        - feature: pitch_rate__lag_2
+          weight: 0.24999999999999944
+          selection_frequency: 0.0
+        - feature: pitch_rate__lag_1
+          weight: 0.24999999999999944
+          selection_frequency: 0.0
+        - feature: pitch_rate__lag_3
+          weight: 0.24999999999999944
+          selection_frequency: 0.0
+        - feature: command_throttle__lag_1
+          weight: 1.1778893361441448e-14
+          selection_frequency: 0.0
+        future_state_yaw_rate:
+        - feature: yaw_rate
+          weight: 0.25000000000000056
+          selection_frequency: 0.0
+        - feature: yaw_rate__lag_1
+          weight: 0.2499999999999998
+          selection_frequency: 0.0
+        - feature: yaw_rate__lag_3
+          weight: 0.24999999999999975
+          selection_frequency: 0.0
+        - feature: yaw_rate__lag_2
+          weight: 0.24999999999999975
+          selection_frequency: 0.0
+        - feature: command_throttle__lag_1
+          weight: -8.383491905087841e-15
+          selection_frequency: 0.0
+  best_sparse_result:
+    x_schema: full_augmented
+    y_schema: selected_state_subset
+    pooling_mode: pooled
+    model_name: lasso_affine
+    appendix: false
+    summary:
+      x_schema: full_augmented
+      y_schema: selected_state_subset
+      pooling_mode: pooled
+      model_name: lasso_affine
+      feature_names:
+      - command_roll
+      - command_pitch
+      - command_yaw
+      - command_throttle
+      - roll
+      - pitch
+      - yaw
+      - roll_rate
+      - pitch_rate
+      - yaw_rate
+      - position_x
+      - position_y
+      - position_z
+      - velocity_x
+      - velocity_y
+      - velocity_z
+      - altitude
+      - vertical_speed
+      - heading
+      - integrator_yaw
+      - control_output_roll
+      - control_output_pitch
+      - control_output_yaw
+      - actuator_1
+      - actuator_2
+      - actuator_3
+      - actuator_4
+      - command_roll__lag_1
+      - command_pitch__lag_1
+      - command_yaw__lag_1
+      - command_throttle__lag_1
+      - roll__lag_1
+      - pitch__lag_1
+      - yaw__lag_1
+      - roll_rate__lag_1
+      - pitch_rate__lag_1
+      - yaw_rate__lag_1
+      - position_x__lag_1
+      - position_y__lag_1
+      - position_z__lag_1
+      - velocity_x__lag_1
+      - velocity_y__lag_1
+      - velocity_z__lag_1
+      - altitude__lag_1
+      - vertical_speed__lag_1
+      - heading__lag_1
+      - command_roll__lag_2
+      - command_pitch__lag_2
+      - command_yaw__lag_2
+      - command_throttle__lag_2
+      - roll__lag_2
+      - pitch__lag_2
+      - yaw__lag_2
+      - roll_rate__lag_2
+      - pitch_rate__lag_2
+      - yaw_rate__lag_2
+      - position_x__lag_2
+      - position_y__lag_2
+      - position_z__lag_2
+      - velocity_x__lag_2
+      - velocity_y__lag_2
+      - velocity_z__lag_2
+      - altitude__lag_2
+      - vertical_speed__lag_2
+      - heading__lag_2
+      - command_roll__lag_3
+      - command_pitch__lag_3
+      - command_yaw__lag_3
+      - command_throttle__lag_3
+      - roll__lag_3
+      - pitch__lag_3
+      - yaw__lag_3
+      - roll_rate__lag_3
+      - pitch_rate__lag_3
+      - yaw_rate__lag_3
+      - position_x__lag_3
+      - position_y__lag_3
+      - position_z__lag_3
+      - velocity_x__lag_3
+      - velocity_y__lag_3
+      - velocity_z__lag_3
+      - altitude__lag_3
+      - vertical_speed__lag_3
+      - heading__lag_3
+      response_names:
+      - future_state_roll
+      - future_state_pitch
+      - future_state_yaw
+      - future_state_roll_rate
+      - future_state_pitch_rate
+      - future_state_yaw_rate
+      schema_metadata:
+        x_schema: full_augmented
+        y_schema: selected_state_subset
+        feature_count: 90
+        response_count: 6
+        strict_raw_linear: true
+        requested_feature_columns:
+        - command_roll
+        - command_pitch
+        - command_yaw
+        - command_throttle
+        - roll
+        - pitch
+        - yaw
+        - roll_rate
+        - pitch_rate
+        - yaw_rate
+        - position_x
+        - position_y
+        - position_z
+        - velocity_x
+        - velocity_y
+        - velocity_z
+        - altitude
+        - vertical_speed
+        - heading
+        - param_ARMING_CHECK
+        - backend_ardupilot
+        - mode_guided_nogps
+        - integrator_roll
+        - integrator_pitch
+        - integrator_yaw
+        - control_output_roll
+        - control_output_pitch
+        - control_output_yaw
+        - torque_achieved
+        - thrust_achieved
+        - saturation_ratio
+        - actuator_1
+        - actuator_2
+        - actuator_3
+        - actuator_4
+        requested_response_columns:
+        - future_state_roll
+        - future_state_pitch
+        - future_state_yaw
+        - future_state_roll_rate
+        - future_state_pitch_rate
+        - future_state_yaw_rate
+        dropped_unavailable_features:
+        - torque_achieved
+        - thrust_achieved
+        dropped_unavailable_responses: []
+        partial_feature_columns: {}
+        partial_response_columns:
+          future_state_roll: 0.9894105188845747
+          future_state_pitch: 0.9894105188845747
+          future_state_yaw: 0.9894105188845747
+          future_state_roll_rate: 0.9894105188845747
+          future_state_pitch_rate: 0.9894105188845747
+          future_state_yaw_rate: 0.9894105188845747
+        dropped_response_leakage_features: []
+        dropped_zero_variance_features:
+        - param_ARMING_CHECK
+        - backend_ardupilot
+        - mode_guided_nogps
+        - integrator_roll
+        - integrator_pitch
+        - saturation_ratio
+      repeat_metrics:
+      - repeat_index: 1
+        train:
+          r2: 0.9999887831690522
+          mse: 1.859096762089439e-08
+          mae: 4.914101700733062e-05
+          residual_mean_abs: 4.914101700733062e-05
+          residual_std: 0.00013634869864026717
+          residual_max_abs: 0.002739553138223272
+        val:
+          r2: 0.9999902704359184
+          mse: 2.1434549441440404e-08
+          mae: 5.712967176299383e-05
+          residual_mean_abs: 5.712967176299383e-05
+          residual_std: 0.00014624710107285962
+          residual_max_abs: 0.0027650648832957536
+        test:
+          r2: 0.9999871167318453
+          mse: 1.6625273114175346e-08
+          mae: 4.695064089865129e-05
+          residual_mean_abs: 4.695064089865129e-05
+          residual_std: 0.00012886395203665215
+          residual_max_abs: 0.0026398456916232327
+        condition_number: 1590230560.8913224
+        raw_condition_number: .inf
+        raw_singular_values: &id006
+        - 252.27277625312675
+        - 210.5177553084039
+        - 166.369536372294
+        - 158.04112886114154
+        - 138.4072349868264
+        - 129.68983224101586
+        - 126.64949009028442
+        - 113.08081035220434
+        - 94.64977062786004
+        - 92.77937324008302
+        effective_condition_number: 1590230560.8913224
+        singular_values: &id004
+        - 211.40543197067322
+        - 165.50549283566545
+        - 137.0027689627856
+        - 120.05781032526615
+        - 106.7655624319426
+        - 103.94934087331004
+        - 96.1122997738037
+        - 90.59356939762006
+        - 85.24677174802773
+        - 74.07287253627722
+        effective_singular_values: *id004
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      - repeat_index: 2
+        train:
+          r2: 0.9999955139652932
+          mse: 7.651279467906467e-09
+          mae: 3.9400847086079546e-05
+          residual_mean_abs: 3.9400847086079546e-05
+          residual_std: 8.747159234806731e-05
+          residual_max_abs: 0.0016606335012501194
+        val:
+          r2: 0.9999950617730686
+          mse: 1.1172341066212556e-08
+          mae: 5.1873870679220815e-05
+          residual_mean_abs: 5.1873870679220815e-05
+          residual_std: 0.00010117060296862567
+          residual_max_abs: 0.001603901334188862
+        test:
+          r2: 0.9999937805382121
+          mse: 1.1343740668917574e-08
+          mae: 5.252266556580321e-05
+          residual_mean_abs: 5.252266556580321e-05
+          residual_std: 0.00010650587264872913
+          residual_max_abs: 0.00159171162568561
+        condition_number: 1625017196.9742212
+        raw_condition_number: .inf
+        raw_singular_values:
+        - 254.57416456366514
+        - 189.039069645051
+        - 168.0283082902156
+        - 158.55635883135218
+        - 144.09822199868475
+        - 136.1765400089248
+        - 125.76648904865075
+        - 123.60120270229106
+        - 112.63235686727876
+        - 90.82550967882135
+        effective_condition_number: 1625017196.9742212
+        singular_values: &id005
+        - 215.08481240994806
+        - 160.45846134743243
+        - 134.55559398859762
+        - 121.0301980232785
+        - 107.99296644458359
+        - 104.02877912983753
+        - 94.44171493296767
+        - 87.37466068901279
+        - 83.23126379987565
+        - 75.01157760540576
+        effective_singular_values: *id005
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      split_records:
+      - repeat_index: 1
+        train_count: 3309
+        val_count: 1101
+        test_count: 1106
+      - repeat_index: 2
+        train_count: 3303
+        val_count: 1105
+        test_count: 1108
+      median_test_r2: 0.9999904486350286
+      median_test_mse: 1.398450689154646e-08
+      median_test_mae: 4.973665323222725e-05
+      coefficient_stability: 0.9523809523809523
+      nonzero_count: 54
+      sparsity_ratio: 0.8928571428571429
+      block_sparsity_summary:
+        feature_blocks:
+          commands: 16
+          state: 6
+          history: 57
+          controller_params: 0
+      raw_condition_number: .inf
+      effective_condition_number: 1607623878.9327717
+      condition_number: 1607623878.9327717
+      raw_singular_values: *id006
+      singular_values: *id004
+      effective_singular_values: *id004
+      conditioning_pruned_features:
+      - altitude
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      conditioning_baseline_drops: []
+      conditioning_extra_pruned_features:
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      selection_frequency:
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.5
+        - 1.0
+      - - 1.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 1.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.6666666666666666
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.5
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.6666666666666666
+        - 0.5
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.8333333333333334
+        - 0.0
+        - 0.8333333333333334
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.6666666666666666
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.3333333333333333
+        - 0.0
+        - 0.3333333333333333
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+        - 0.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.0
+        - 1.0
+      - - 1.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.16666666666666666
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.3333333333333333
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.3333333333333333
+        - 0.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 1.0
+        - 0.5
+        - 1.0
+        - 0.6666666666666666
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.8333333333333334
+        - 0.0
+        - 0.0
+      - - 0.6666666666666666
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.8333333333333334
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.16666666666666666
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.6666666666666666
+        - 0.3333333333333333
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+        - 0.0
+        - 0.16666666666666666
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.8333333333333334
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.5
+        - 0.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.3333333333333333
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.0
+        - 1.0
+      - - 0.8333333333333334
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.5
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.16666666666666666
+        - 0.3333333333333333
+        - 0.6666666666666666
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 0.6666666666666666
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.6666666666666666
+        - 1.0
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.5
+        - 1.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.8333333333333334
+      backend_consistency:
+        ardupilot:
+          r2: 0.9999946762802964
+          mse: 1.0488064428624848e-08
+          mae: 4.1252673519283454e-05
+          residual_mean_abs: 4.1252673519283454e-05
+          residual_std: 0.0001023563389339023
+          residual_max_abs: 0.0022089384117176536
+          sample_count: 5516.0
+      mode_consistency:
+        GUIDED_NOGPS:
+          r2: 0.9999946762802964
+          mse: 1.0488064428624848e-08
+          mae: 4.1252673519283454e-05
+          residual_mean_abs: 4.1252673519283454e-05
+          residual_std: 0.0001023563389339023
+          residual_max_abs: 0.0022089384117176536
+          sample_count: 5516.0
+      scenario_consistency: 0.9999971331040302
+      scenario_subgroup_metrics:
+        dynamic:
+          r2: 0.9999944246107709
+          mse: 1.2357645868561272e-08
+          mae: 5.221932706886469e-05
+          residual_mean_abs: 5.221932706886469e-05
+          residual_std: 0.0001108917327792321
+          residual_max_abs: 0.001956260823053446
+          sample_count: 1842.0
+        nominal:
+          r2: 0.999995065355115
+          mse: 8.00824686459736e-09
+          mae: 3.398161182607594e-05
+          residual_mean_abs: 3.398161182607594e-05
+          residual_std: 8.939725149645624e-05
+          residual_max_abs: 0.0018889377908615224
+          sample_count: 1825.0
+        throttle_biased:
+          r2: 0.9999921984732922
+          mse: 1.1073190465394602e-08
+          mae: 3.750422124874538e-05
+          residual_mean_abs: 3.750422124874538e-05
+          residual_std: 0.00010504414425037727
+          residual_max_abs: 0.0022089384117176536
+          sample_count: 1849.0
+      top_influential:
+        future_state_roll:
+        - feature: roll
+          weight: 0.9880482129835638
+          selection_frequency: 1.0
+        - feature: roll__lag_1
+          weight: 0.00809570774802255
+          selection_frequency: 1.0
+        - feature: roll__lag_2
+          weight: 3.3747657905036922e-15
+          selection_frequency: 0.6666666666666666
+        future_state_pitch:
+        - feature: pitch
+          weight: 0.9950307254432803
+          selection_frequency: 1.0
+        - feature: pitch__lag_1
+          weight: 0.002640906720067199
+          selection_frequency: 0.0
+        - feature: pitch__lag_2
+          weight: 1.1169029777335964e-13
+          selection_frequency: 0.0
+        - feature: pitch__lag_3
+          weight: 3.496299683809875e-14
+          selection_frequency: 0.0
+        future_state_yaw:
+        - feature: yaw
+          weight: 0.9876773343389771
+          selection_frequency: 1.0
+        - feature: heading__lag_1
+          weight: 0.010708891883431524
+          selection_frequency: 1.0
+        - feature: heading
+          weight: 0.00039231553800302333
+          selection_frequency: 1.0
+        - feature: yaw__lag_2
+          weight: 1.0250941611762264e-15
+          selection_frequency: 0.0
+        - feature: heading__lag_2
+          weight: 1.0141079912707928e-17
+          selection_frequency: 0.0
+        future_state_roll_rate:
+        - feature: roll
+          weight: 3.200387048467118
+          selection_frequency: 1.0
+        - feature: roll__lag_1
+          weight: -2.474891203293186
+          selection_frequency: 1.0
+        - feature: yaw
+          weight: 1.2359274672610971
+          selection_frequency: 1.0
+        - feature: heading
+          weight: -1.1468649473234394
+          selection_frequency: 1.0
+        - feature: roll_rate
+          weight: 0.8563670625650951
+          selection_frequency: 1.0
+        future_state_pitch_rate:
+        - feature: pitch
+          weight: 4.2543210149119055
+          selection_frequency: 1.0
+        - feature: pitch__lag_1
+          weight: -2.683071043850042
+          selection_frequency: 1.0
+        - feature: roll__lag_1
+          weight: 2.2718207672214987
+          selection_frequency: 1.0
+        - feature: roll
+          weight: -1.4514247020818845
+          selection_frequency: 1.0
+        - feature: pitch__lag_2
+          weight: -1.052361355590894
+          selection_frequency: 1.0
+        future_state_yaw_rate:
+        - feature: roll
+          weight: -1.5914401144689911
+          selection_frequency: 1.0
+        - feature: roll__lag_1
+          weight: 1.5121483280462598
+          selection_frequency: 1.0
+        - feature: yaw_rate
+          weight: 0.8247392321921827
+          selection_frequency: 1.0
+        - feature: pitch
+          weight: 0.46631764170279677
+          selection_frequency: 1.0
+        - feature: yaw
+          weight: -0.3371328242654908
+          selection_frequency: 1.0
+  best_y_result: *id007
+  schema_stepups: {}
+  ranking:
+  - x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 1.0
+    median_test_mse: 6.715050641322702e-28
+    median_test_mae: 8.772550837206664e-15
+    support: partial
+  - x_schema: full_augmented
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 1.0
+    median_test_mse: 6.2575287706108775e-28
+    median_test_mae: 7.995019533352963e-15
+    support: partial
+  - x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9999999891738415
+    median_test_mse: 1.73202119640124e-11
+    median_test_mae: 2.24672730354172e-06
+    support: partial
+  - x_schema: full_augmented
+    y_schema: selected_state_subset
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9999974201976888
+    median_test_mse: 3.414721111064984e-09
+    median_test_mae: 2.3956036244744225e-05
+    support: partial
+  - x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9999906995070551
+    median_test_mse: 1.3638819451186311e-08
+    median_test_mae: 4.8345562921455135e-05
+    support: partial
+  - x_schema: full_augmented
+    y_schema: selected_state_subset
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9999904486350286
+    median_test_mse: 1.398450689154646e-08
+    median_test_mae: 4.973665323222725e-05
+    support: partial
+  - x_schema: commands_plus_state_history
+    y_schema: next_raw_state
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.91683086972868
+    median_test_mse: 185946435552.13098
+    median_test_mae: 39127.09026414537
+    support: partial
+  - x_schema: commands_plus_state_history
+    y_schema: next_raw_state
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9168049825504443
+    median_test_mse: 186003964617.35095
+    median_test_mae: 39661.67874481897
+    support: partial
+  - x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9167558733957919
+    median_test_mse: 186114033984.90057
+    median_test_mae: 39783.19316189793
+    support: partial
+  - x_schema: commands_plus_state_history
+    y_schema: next_raw_state
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9166926696818978
+    median_test_mse: 186255544185.17603
+    median_test_mae: 37918.47052607637
+    support: partial
+  - x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9165628542564717
+    median_test_mse: 186545220849.07104
+    median_test_mae: 41692.60617070593
+    support: partial
+  - x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9165333008322738
+    median_test_mse: 186611619884.7977
+    median_test_mae: 39141.747727785565
+    support: partial
+  diagnostics:
+  - raw feature matrix 含有精确别名或 one-hot 依赖；报告已同时输出 effective conditioning 以避免把可解释 schema
+    误判为病态。
+  failure_attribution: []
+  data_quality:
+    alignment_failure_ratio: 0.0
+    missing_attitude_ratio: 0.0
+    missing_local_position_ratio: 0.0
+    missing_actuator_ratio: 0.0
+    future_horizon_available_ratio: 0.9894105188845747
+    delta_state_available_ratio: 0.9894105188845747
+    window_summary_available_ratio: 0.9894105188845747
+    actuator_response_available_ratio: 1.0
+    tracking_error_available_ratio: 1.0
+    median_alignment_attitude_ms: 0.241536
+    median_alignment_position_ms: 0.37888
+    accepted_row_ratio: 1.0
+    accepted_run_count: 30
+    rejected_run_count: 0
+    research_tiers:
+    - authoritative_research
+  skipped: []

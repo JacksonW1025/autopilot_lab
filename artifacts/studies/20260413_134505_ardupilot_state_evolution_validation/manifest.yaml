@@ -1,0 +1,34 @@
+study_name: ardupilot_state_evolution_validation
+study_id: 20260413_134505_ardupilot_state_evolution_validation
+stabilize_baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_115811_ardupilot_state_evolution_stabilize_baseline
+stabilize_diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_122521_ardupilot_state_evolution_stabilize_diagnostic
+guided_nogps_baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_124654_ardupilot_state_evolution_guided_nogps_baseline
+guided_nogps_diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic
+summary:
+  status: validation_available
+  overall_status: mode_isolated_state_evolution_still_inconclusive
+  modes:
+    stabilize:
+      mode: STABILIZE
+      status: inconclusive
+      baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_115811_ardupilot_state_evolution_stabilize_baseline
+      diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_122521_ardupilot_state_evolution_stabilize_diagnostic
+      positive_combo: ''
+      representative_combo: commands_plus_state_history | selected_state_subset |
+        ols_affine | pooled
+      conclusion: 该 mode 当前还没有成熟正结论，也还没满足成熟负结论的稳定性条件。
+    guided_nogps:
+      mode: GUIDED_NOGPS
+      status: inconclusive
+      baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_124654_ardupilot_state_evolution_guided_nogps_baseline
+      diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic
+      positive_combo: ''
+      representative_combo: commands_plus_state_history | selected_state_subset |
+        ols_affine | pooled
+      conclusion: 该 mode 当前还没有成熟正结论，也还没满足成熟负结论的稳定性条件。
+  reporting_targets:
+    baseline_vs_diagnostic_jaccard_target: 0.55
+    holdout_median_jaccard_target: 0.55
+    holdout_min_jaccard_target: 0.5
+    high_frequency_overlap_nonempty: true
+  conclusion: Formal V2 targeted line 已经形成正式 artifact，但 state-evolution 还没有完全收敛到成熟正/负结论。

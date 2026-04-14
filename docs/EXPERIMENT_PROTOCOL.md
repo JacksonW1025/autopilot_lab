@@ -26,6 +26,12 @@
 6. GUIDED_NOGPS targeted diagnostic：`../artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic`
 7. targeted validation aggregate：`../artifacts/studies/20260413_134505_ardupilot_state_evolution_validation`
 
+## Artifact 保留口径
+
+- current remote Git 只保留 latest Formal V2 studies 与正式文档。
+- `../artifacts/raw/**` 是本地实验运行输出；它用于追溯 study 输入，但不再作为远端仓库的长期跟踪对象。
+- `../artifacts/px4_matrix/**` 与 `../artifacts/ardupilot_matrix/**` 视为临时 matrix 目录，不进入 current canonical remote 集合。
+
 ## 历史完成项
 
 以下内容已移出 Formal V2 正式文档引用集，不再作为当前正式 compare 主输入：

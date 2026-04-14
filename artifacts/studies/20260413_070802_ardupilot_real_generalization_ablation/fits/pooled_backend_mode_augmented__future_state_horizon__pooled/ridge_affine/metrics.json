@@ -1,0 +1,1033 @@
+{
+  "x_schema": "pooled_backend_mode_augmented",
+  "y_schema": "future_state_horizon",
+  "pooling_mode": "pooled",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize"
+  ],
+  "response_names": [
+    "roll__h1",
+    "pitch__h1",
+    "yaw__h1",
+    "roll_rate__h1",
+    "pitch_rate__h1",
+    "yaw_rate__h1",
+    "roll__h2",
+    "pitch__h2",
+    "yaw__h2",
+    "roll_rate__h2",
+    "pitch_rate__h2",
+    "yaw_rate__h2"
+  ],
+  "schema_metadata": {
+    "x_schema": "pooled_backend_mode_augmented",
+    "y_schema": "future_state_horizon",
+    "feature_count": 22,
+    "response_count": 12,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_ardupilot",
+      "mode_guided_nogps",
+      "mode_stabilize"
+    ],
+    "requested_response_columns": [
+      "roll__h1",
+      "pitch__h1",
+      "yaw__h1",
+      "roll_rate__h1",
+      "pitch_rate__h1",
+      "yaw_rate__h1",
+      "roll__h2",
+      "pitch__h2",
+      "yaw__h2",
+      "roll_rate__h2",
+      "pitch_rate__h2",
+      "yaw_rate__h2"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "roll__h1": 0.994748818484159,
+      "pitch__h1": 0.994748818484159,
+      "yaw__h1": 0.994748818484159,
+      "roll_rate__h1": 0.994748818484159,
+      "pitch_rate__h1": 0.994748818484159,
+      "yaw_rate__h1": 0.994748818484159,
+      "roll__h2": 0.9894976369683178,
+      "pitch__h2": 0.9894976369683178,
+      "yaw__h2": 0.9894976369683178,
+      "roll_rate__h2": 0.9894976369683178,
+      "pitch_rate__h2": 0.9894976369683178,
+      "yaw_rate__h2": 0.9894976369683178
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "backend_ardupilot"
+    ]
+  },
+  "repeat_metrics": [
+    {
+      "repeat_index": 1,
+      "train": {
+        "r2": 0.9999946672468829,
+        "mse": 4.321822042944127e-06,
+        "mae": 0.0009631437171439196,
+        "residual_mean_abs": 0.0009631437171439196,
+        "residual_std": 0.0020788992382855228,
+        "residual_max_abs": 0.012456691908880657
+      },
+      "val": {
+        "r2": 0.9999922708773591,
+        "mse": 5.933507105623015e-06,
+        "mae": 0.001187095449455887,
+        "residual_mean_abs": 0.001187095449455887,
+        "residual_std": 0.002433212967725863,
+        "residual_max_abs": 0.009004985122146536
+      },
+      "test": {
+        "r2": 0.9996971021535033,
+        "mse": 0.00022877944719276678,
+        "mae": 0.0040573053033498285,
+        "residual_mean_abs": 0.0040573053033498285,
+        "residual_std": 0.014884491147589173,
+        "residual_max_abs": 0.09254024333432653
+      },
+      "condition_number": 170337181.43384114,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        192.31696198523215,
+        101.13733231047914,
+        76.53231490225706,
+        65.64283558791928,
+        57.5117194834604,
+        51.908940126812304,
+        49.06512481711898,
+        46.47831196670942,
+        37.48802275712942,
+        33.84046842734724
+      ],
+      "effective_condition_number": 170337181.43384114,
+      "singular_values": [
+        153.6235880432494,
+        92.77689721504115,
+        75.51766057439843,
+        63.368420458908346,
+        56.43461819959581,
+        49.64147300157504,
+        46.557593370396276,
+        43.199750483628975,
+        34.41110581334847,
+        32.07506717183451
+      ],
+      "effective_singular_values": [
+        153.6235880432494,
+        92.77689721504115,
+        75.51766057439843,
+        63.368420458908346,
+        56.43461819959581,
+        49.64147300157504,
+        46.557593370396276,
+        43.199750483628975,
+        34.41110581334847,
+        32.07506717183451
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "mode_guided_nogps",
+        "heading",
+        "mode_stabilize"
+      ],
+      "conditioning_baseline_drops": [
+        "mode_guided_nogps"
+      ],
+      "conditioning_extra_pruned_features": [
+        "heading",
+        "mode_stabilize"
+      ]
+    },
+    {
+      "repeat_index": 2,
+      "train": {
+        "r2": 0.9999940337115804,
+        "mse": 5.0347239665511645e-06,
+        "mae": 0.0010301642802613242,
+        "residual_mean_abs": 0.0010301642802613242,
+        "residual_std": 0.0022438190583358468,
+        "residual_max_abs": 0.012049130485081605
+      },
+      "val": {
+        "r2": 0.999988865720539,
+        "mse": 8.540460373611731e-06,
+        "mae": 0.0011976990674327885,
+        "residual_mean_abs": 0.0011976990674327885,
+        "residual_std": 0.0028856199953602086,
+        "residual_max_abs": 0.015770817795612402
+      },
+      "test": {
+        "r2": 0.9999960145737291,
+        "mse": 3.3939285493146583e-06,
+        "mae": 0.0009738666050477046,
+        "residual_mean_abs": 0.0009738666050477046,
+        "residual_std": 0.0018299280008569748,
+        "residual_max_abs": 0.0075954006723009115
+      },
+      "condition_number": 190588222.27375346,
+      "raw_condition_number": Infinity,
+      "raw_singular_values": [
+        193.6107252995004,
+        98.54068363607037,
+        75.9310409333671,
+        66.04126438676938,
+        57.316309995565675,
+        53.259017511858886,
+        46.633597811344416,
+        43.577036788283074,
+        37.57194544062388,
+        36.46435172483292
+      ],
+      "effective_condition_number": 190588222.27375346,
+      "singular_values": [
+        164.83545697489689,
+        91.73814223880107,
+        75.44041213472319,
+        63.56769853198196,
+        56.230430848345726,
+        46.658232925257195,
+        45.27217277922709,
+        43.13958552221502,
+        36.48291167957103,
+        33.98211272672258
+      ],
+      "effective_singular_values": [
+        164.83545697489689,
+        91.73814223880107,
+        75.44041213472319,
+        63.56769853198196,
+        56.230430848345726,
+        46.658232925257195,
+        45.27217277922709,
+        43.13958552221502,
+        36.48291167957103,
+        33.98211272672258
+      ],
+      "conditioning_pruned_features": [
+        "altitude",
+        "vertical_speed",
+        "mode_guided_nogps",
+        "heading"
+      ],
+      "conditioning_baseline_drops": [
+        "mode_guided_nogps"
+      ],
+      "conditioning_extra_pruned_features": [
+        "heading"
+      ]
+    }
+  ],
+  "split_records": [
+    {
+      "repeat_index": 1,
+      "train_count": 3398,
+      "val_count": 1125,
+      "test_count": 1130
+    },
+    {
+      "repeat_index": 2,
+      "train_count": 3390,
+      "val_count": 1131,
+      "test_count": 1132
+    }
+  ],
+  "median_test_r2": 0.9998465583636162,
+  "median_test_mse": 0.00011608668787104073,
+  "median_test_mae": 0.0025155859541987667,
+  "coefficient_stability": 0.9761904761904762,
+  "nonzero_count": 16,
+  "sparsity_ratio": 0.9365079365079365,
+  "block_sparsity_summary": {
+    "feature_blocks": {
+      "commands": 4,
+      "state": 6,
+      "history": 0,
+      "controller_params": 0
+    }
+  },
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 180462701.85379732,
+  "condition_number": 180462701.85379732,
+  "raw_singular_values": [
+    192.31696198523215,
+    101.13733231047914,
+    76.53231490225706,
+    65.64283558791928,
+    57.5117194834604,
+    51.908940126812304,
+    49.06512481711898,
+    46.47831196670942,
+    37.48802275712942,
+    33.84046842734724
+  ],
+  "singular_values": [
+    153.6235880432494,
+    92.77689721504115,
+    75.51766057439843,
+    63.368420458908346,
+    56.43461819959581,
+    49.64147300157504,
+    46.557593370396276,
+    43.199750483628975,
+    34.41110581334847,
+    32.07506717183451
+  ],
+  "effective_singular_values": [
+    153.6235880432494,
+    92.77689721504115,
+    75.51766057439843,
+    63.368420458908346,
+    56.43461819959581,
+    49.64147300157504,
+    46.557593370396276,
+    43.199750483628975,
+    34.41110581334847,
+    32.07506717183451
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize",
+    "vertical_speed"
+  ],
+  "conditioning_baseline_drops": [
+    "mode_guided_nogps"
+  ],
+  "conditioning_extra_pruned_features": [
+    "heading",
+    "mode_stabilize"
+  ],
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "backend_consistency": {
+    "ardupilot": {
+      "r2": 0.9999794255405493,
+      "mse": 1.7584763576447476e-05,
+      "mae": 0.0013185154361001338,
+      "residual_mean_abs": 0.0013185154361001338,
+      "residual_std": 0.004185647983209361,
+      "residual_max_abs": 0.05138866688093913,
+      "sample_count": 5653.0
+    }
+  },
+  "mode_consistency": {
+    "GUIDED_NOGPS": {
+      "r2": 0.9858678481246639,
+      "mse": 3.011823308254984e-05,
+      "mae": 0.0016818120012935065,
+      "residual_mean_abs": 0.0016818120012935065,
+      "residual_std": 0.005466152990725929,
+      "residual_max_abs": 0.05138866688093913,
+      "sample_count": 2830.0
+    },
+    "STABILIZE": {
+      "r2": 0.258038874074617,
+      "mse": 5.020215683330336e-06,
+      "mae": 0.0009543180292644111,
+      "residual_mean_abs": 0.0009543180292644111,
+      "residual_std": 0.002240490175633349,
+      "residual_max_abs": 0.013535656596332046,
+      "sample_count": 2823.0
+    }
+  },
+  "scenario_consistency": 0.9999552963227509,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": 0.9999514432646084,
+      "mse": 4.1299708396615163e-05,
+      "mae": 0.0017209147069307256,
+      "residual_mean_abs": 0.0017209147069307256,
+      "residual_std": 0.006413401872030748,
+      "residual_max_abs": 0.05138866688093913,
+      "sample_count": 1884.0
+    },
+    "nominal": {
+      "r2": 0.9999961467696039,
+      "mse": 3.3087731005218784e-06,
+      "mae": 0.0009028775184814998,
+      "residual_mean_abs": 0.0009028775184814998,
+      "residual_std": 0.0018190020531753854,
+      "residual_max_abs": 0.0070895987645940295,
+      "sample_count": 1892.0
+    },
+    "throttle_biased": {
+      "r2": 0.99999043602744,
+      "mse": 8.17145400759042e-06,
+      "mae": 0.0013335749533561919,
+      "residual_mean_abs": 0.0013335749533561919,
+      "residual_std": 0.0028364515320481102,
+      "residual_max_abs": 0.01411375485224653,
+      "sample_count": 1877.0
+    }
+  },
+  "top_influential": {
+    "roll__h1": [
+      {
+        "feature": "roll",
+        "weight": 0.5169902935048661,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.016083354586428344,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": 0.010626850039190729,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -0.010626850039177368,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": 0.0026609189427922782,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch__h1": [
+      {
+        "feature": "pitch",
+        "weight": 0.9995390231184644,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.00023860175674596148,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate",
+        "weight": -1.1466745774539007e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": -1.1309184113685177e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -1.0202520278117428e-05,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw__h1": [
+      {
+        "feature": "roll",
+        "weight": 4.241843865222719,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": 0.8156615311848006,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -0.8156615311842388,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.2492505146968645,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.24422101423751907,
+        "selection_frequency": 1.0
+      }
+    ],
+    "roll_rate__h1": [
+      {
+        "feature": "roll_rate",
+        "weight": 0.988983132451456,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": -0.07312041176551563,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.023708753776656325,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": 0.007250314811018992,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": 0.004524451813363552,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch_rate__h1": [
+      {
+        "feature": "pitch_rate",
+        "weight": 0.9993724658203342,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.006399127482269108,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.0017482580335895373,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.0004959763820824622,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": -0.0002794991797993052,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw_rate__h1": [
+      {
+        "feature": "yaw_rate",
+        "weight": 0.8976099065861711,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.6132624053214559,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.12634675526153555,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -0.05112572944650781,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": 0.051125729446220854,
+        "selection_frequency": 0.0
+      }
+    ],
+    "roll__h2": [
+      {
+        "feature": "roll",
+        "weight": 0.5169902935048661,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.016083354586428344,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": 0.010626850039190729,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -0.010626850039177368,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": 0.0026609189427922782,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch__h2": [
+      {
+        "feature": "pitch",
+        "weight": 0.9995390231184644,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.00023860175674596148,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch_rate",
+        "weight": -1.1466745774539007e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": -1.1309184113685177e-05,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -1.0202520278117428e-05,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw__h2": [
+      {
+        "feature": "roll",
+        "weight": 4.241843865222719,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": 0.8156615311848006,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -0.8156615311842388,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.2492505146968645,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.24422101423751907,
+        "selection_frequency": 1.0
+      }
+    ],
+    "roll_rate__h2": [
+      {
+        "feature": "roll_rate",
+        "weight": 0.988983132451456,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": -0.07312041176551563,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": 0.023708753776656325,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": 0.007250314811018992,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "yaw_rate",
+        "weight": 0.004524451813363552,
+        "selection_frequency": 0.0
+      }
+    ],
+    "pitch_rate__h2": [
+      {
+        "feature": "pitch_rate",
+        "weight": 0.9993724658203342,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.006399127482269108,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.0017482580335895373,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "command_throttle",
+        "weight": -0.0004959763820824622,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": -0.0002794991797993052,
+        "selection_frequency": 0.0
+      }
+    ],
+    "yaw_rate__h2": [
+      {
+        "feature": "yaw_rate",
+        "weight": 0.8976099065861711,
+        "selection_frequency": 1.0
+      },
+      {
+        "feature": "roll",
+        "weight": 0.6132624053214559,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "pitch",
+        "weight": -0.12634675526153555,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_stabilize",
+        "weight": -0.05112572944650781,
+        "selection_frequency": 0.0
+      },
+      {
+        "feature": "mode_guided_nogps",
+        "weight": 0.051125729446220854,
+        "selection_frequency": 0.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,3248 @@
+{
+  "x_schema": "feature_mapped_linear",
+  "y_schema": "window_summary_response",
+  "pooling_mode": "stratified",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "mode_offboard_attitude",
+    "mode_posctl",
+    "clip__command_roll",
+    "sq__command_roll",
+    "clip__command_pitch",
+    "sq__command_pitch",
+    "clip__command_yaw",
+    "sq__command_yaw",
+    "clip__command_throttle",
+    "sq__command_throttle",
+    "sq__roll",
+    "sq__pitch",
+    "sq__yaw",
+    "sq__roll_rate",
+    "sq__pitch_rate",
+    "sq__yaw_rate",
+    "backend_px4__command_roll",
+    "backend_px4__command_pitch",
+    "backend_px4__command_yaw",
+    "backend_px4__command_throttle"
+  ],
+  "response_names": [
+    "window_mean_roll",
+    "window_mean_pitch",
+    "window_mean_yaw",
+    "window_mean_roll_rate",
+    "window_mean_pitch_rate",
+    "window_mean_yaw_rate",
+    "window_peak_roll",
+    "window_peak_pitch",
+    "window_peak_yaw",
+    "window_peak_roll_rate",
+    "window_peak_pitch_rate",
+    "window_peak_yaw_rate"
+  ],
+  "schema_metadata": {
+    "x_schema": "feature_mapped_linear",
+    "y_schema": "window_summary_response",
+    "feature_count": 40,
+    "response_count": 12,
+    "strict_raw_linear": false,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_px4",
+      "mode_offboard_attitude",
+      "mode_posctl"
+    ],
+    "requested_response_columns": [
+      "window_mean_roll",
+      "window_mean_pitch",
+      "window_mean_yaw",
+      "window_mean_roll_rate",
+      "window_mean_pitch_rate",
+      "window_mean_yaw_rate",
+      "window_peak_roll",
+      "window_peak_pitch",
+      "window_peak_yaw",
+      "window_peak_roll_rate",
+      "window_peak_pitch_rate",
+      "window_peak_yaw_rate"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "window_mean_roll": 0.9948780878194526,
+      "window_mean_pitch": 0.9948780878194526,
+      "window_mean_yaw": 0.9948780878194526,
+      "window_mean_roll_rate": 0.9948780878194526,
+      "window_mean_pitch_rate": 0.9948780878194526,
+      "window_mean_yaw_rate": 0.9948780878194526,
+      "window_peak_roll": 0.9948780878194526,
+      "window_peak_pitch": 0.9948780878194526,
+      "window_peak_yaw": 0.9948780878194526,
+      "window_peak_roll_rate": 0.9948780878194526,
+      "window_peak_pitch_rate": 0.9948780878194526,
+      "window_peak_yaw_rate": 0.9948780878194526
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "backend_px4"
+    ]
+  },
+  "group_results": [
+    {
+      "group_key": [
+        "OFFBOARD_ATTITUDE"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.9924238669203511,
+              "mse": 0.0008417788788289059,
+              "mae": 0.009164301458286778,
+              "residual_mean_abs": 0.009164301458286778,
+              "residual_std": 0.02901342583751367,
+              "residual_max_abs": 1.1394497514442885
+            },
+            "val": {
+              "r2": 0.9855030054884885,
+              "mse": 0.0016577094625829414,
+              "mae": 0.012695582613504803,
+              "residual_mean_abs": 0.012695582613504803,
+              "residual_std": 0.040713506982512894,
+              "residual_max_abs": 1.1102142755309556
+            },
+            "test": {
+              "r2": 0.9861172592015601,
+              "mse": 0.0016110372157887402,
+              "mae": 0.013163660213335829,
+              "residual_mean_abs": 0.013163660213335829,
+              "residual_std": 0.04012181272561393,
+              "residual_max_abs": 1.0233217909240984
+            },
+            "condition_number": 203.8758962508946,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              184.19257881868867,
+              141.67501817722854,
+              137.91829418911342,
+              129.5477531254768,
+              121.80412130203428,
+              109.8536249405528,
+              101.60792913452208,
+              92.70418905661798,
+              91.48387186286367,
+              88.88873189936876
+            ],
+            "effective_condition_number": 203.8758962508946,
+            "singular_values": [
+              169.4554611873526,
+              123.4928375635989,
+              111.02624170608544,
+              100.75761385233963,
+              99.1140599368522,
+              92.82106370255971,
+              86.57442271692155,
+              83.03050343725883,
+              77.28335914739102,
+              71.45189352905125
+            ],
+            "effective_singular_values": [
+              169.4554611873526,
+              123.4928375635989,
+              111.02624170608544,
+              100.75761385233963,
+              99.1140599368522,
+              92.82106370255971,
+              86.57442271692155,
+              83.03050343725883,
+              77.28335914739102,
+              71.45189352905125
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude",
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude"
+            ],
+            "conditioning_extra_pruned_features": [
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.9899659141869753,
+              "mse": 0.0011475807654657097,
+              "mae": 0.010174543492408494,
+              "residual_mean_abs": 0.010174543492408494,
+              "residual_std": 0.033875961469244084,
+              "residual_max_abs": 1.1372891291462668
+            },
+            "val": {
+              "r2": 0.9924102540120372,
+              "mse": 0.0008450119877815215,
+              "mae": 0.009658833370005594,
+              "residual_mean_abs": 0.009658833370005594,
+              "residual_std": 0.029054671806958268,
+              "residual_max_abs": 0.6700442657671266
+            },
+            "test": {
+              "r2": 0.9899599924143628,
+              "mse": 0.0011025145998161722,
+              "mae": 0.011103678168799737,
+              "residual_mean_abs": 0.011103678168799737,
+              "residual_std": 0.033201057573243,
+              "residual_max_abs": 0.8031972863342866
+            },
+            "condition_number": 1227.792063968206,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              193.19682249522396,
+              140.2438209475595,
+              136.88274765893522,
+              130.31275055696548,
+              118.10829544089476,
+              114.17312175137671,
+              103.07568314601492,
+              99.98254471117798,
+              93.12261000862487,
+              83.80851268526422
+            ],
+            "effective_condition_number": 1227.792063968206,
+            "singular_values": [
+              177.15268008298796,
+              119.72135515777353,
+              116.51133393607088,
+              100.02997870652692,
+              98.18893935374888,
+              93.62169907122681,
+              92.90034503148966,
+              77.23192137184658,
+              74.69470523376287,
+              70.74539561107149
+            ],
+            "effective_singular_values": [
+              177.15268008298796,
+              119.72135515777353,
+              116.51133393607088,
+              100.02997870652692,
+              98.18893935374888,
+              93.62169907122681,
+              92.90034503148966,
+              77.23192137184658,
+              74.69470523376287,
+              70.74539561107149
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude",
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude"
+            ],
+            "conditioning_extra_pruned_features": [
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 5331,
+            "val_count": 1909,
+            "test_count": 1871
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 5348,
+            "val_count": 1891,
+            "test_count": 1872
+          }
+        ],
+        "median_test_r2": 0.9880386258079614,
+        "median_test_mse": 0.0013567759078024562,
+        "median_test_mae": 0.012133669191067783,
+        "coefficient_stability": 0.8824786324786325,
+        "nonzero_count": 7,
+        "sparsity_ratio": 0.9850427350427351,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 715.8339801095503,
+        "condition_number": 715.8339801095503,
+        "raw_singular_values": [
+          184.19257881868867,
+          141.67501817722854,
+          137.91829418911342,
+          129.5477531254768,
+          121.80412130203428,
+          109.8536249405528,
+          101.60792913452208,
+          92.70418905661798,
+          91.48387186286367,
+          88.88873189936876
+        ],
+        "singular_values": [
+          169.4554611873526,
+          123.4928375635989,
+          111.02624170608544,
+          100.75761385233963,
+          99.1140599368522,
+          92.82106370255971,
+          86.57442271692155,
+          83.03050343725883,
+          77.28335914739102,
+          71.45189352905125
+        ],
+        "effective_singular_values": [
+          169.4554611873526,
+          123.4928375635989,
+          111.02624170608544,
+          100.75761385233963,
+          99.1140599368522,
+          92.82106370255971,
+          86.57442271692155,
+          83.03050343725883,
+          77.28335914739102,
+          71.45189352905125
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "backend_px4__command_pitch",
+          "backend_px4__command_roll",
+          "backend_px4__command_throttle",
+          "backend_px4__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "mode_offboard_attitude",
+          "mode_posctl",
+          "vertical_speed"
+        ],
+        "conditioning_baseline_drops": [
+          "backend_px4__command_pitch",
+          "mode_offboard_attitude"
+        ],
+        "conditioning_extra_pruned_features": [
+          "backend_px4__command_roll",
+          "backend_px4__command_throttle",
+          "backend_px4__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "mode_posctl"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.6666666666666666,
+            0.0,
+            0.0,
+            0.3333333333333333,
+            0.0,
+            0.0,
+            0.8333333333333334,
+            0.0,
+            0.0,
+            0.3333333333333333
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.3333333333333333
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333333333333
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "px4": {
+            "r2": 0.9904387594767704,
+            "mse": 0.0010786806212382885,
+            "mae": 0.010159634892730168,
+            "residual_mean_abs": 0.010159634892730168,
+            "residual_std": 0.032843271809834214,
+            "residual_max_abs": 1.1383694402952778,
+            "sample_count": 9111.0
+          }
+        },
+        "mode_consistency": {
+          "OFFBOARD_ATTITUDE": {
+            "r2": 0.9904387594767704,
+            "mse": 0.0010786806212382885,
+            "mae": 0.010159634892730168,
+            "residual_mean_abs": 0.010159634892730168,
+            "residual_std": 0.032843271809834214,
+            "residual_max_abs": 1.1383694402952778,
+            "sample_count": 9111.0
+          }
+        },
+        "scenario_consistency": 0.9974745118865104,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": 0.9888801472949913,
+            "mse": 0.0012560467824339454,
+            "mae": 0.01085327242442548,
+            "residual_mean_abs": 0.01085327242442548,
+            "residual_std": 0.035440659105143754,
+            "residual_max_abs": 1.1383694402952778,
+            "sample_count": 3438.0
+          },
+          "nominal": {
+            "r2": 0.9913784452237127,
+            "mse": 0.000996413645037571,
+            "mae": 0.00997507413687171,
+            "residual_mean_abs": 0.00997507413687171,
+            "residual_std": 0.03156515920401461,
+            "residual_max_abs": 0.9135480875182443,
+            "sample_count": 4574.0
+          },
+          "throttle_biased": {
+            "r2": 0.9913838754884426,
+            "mse": 0.0008662186439420311,
+            "mae": 0.008757865159634734,
+            "residual_mean_abs": 0.008757865159634734,
+            "residual_std": 0.02942487363706683,
+            "residual_max_abs": 0.7964949634955697,
+            "sample_count": 1099.0
+          }
+        },
+        "top_influential": {
+          "window_mean_roll": [
+            {
+              "feature": "roll",
+              "weight": 0.8082573045200798,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": 0.19152910814207819,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": -0.12110112341637715,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.11179484075148699,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_roll",
+              "weight": -0.0843662040596202,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_pitch": [
+            {
+              "feature": "pitch",
+              "weight": 0.7613660936653531,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": 0.12083323300666321,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "backend_px4__command_pitch",
+              "weight": 0.09694690202856529,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "clip__command_pitch",
+              "weight": 0.09694690202846751,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "command_pitch",
+              "weight": 0.09694690202819367,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_yaw": [
+            {
+              "feature": "sq__roll",
+              "weight": -1.6990200035788423,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "clip__command_throttle",
+              "weight": -1.5107016288581367,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_roll",
+              "weight": 1.348616166856479,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": 0.5590997703521727,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.45957954622863645,
+              "selection_frequency": 1.0
+            }
+          ],
+          "window_mean_roll_rate": [
+            {
+              "feature": "sq__roll",
+              "weight": 0.8183966688313236,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.6732692947374088,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": -0.2735916293298958,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_roll",
+              "weight": -0.24906461227111462,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 0.2403186808655582,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_pitch_rate": [
+            {
+              "feature": "clip__command_throttle",
+              "weight": 1.640495839214941,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 0.7529758864213119,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": 0.15730190430371338,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": -0.14746689718831124,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.14023046097046898,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_yaw_rate": [
+            {
+              "feature": "yaw_rate",
+              "weight": 1.0829122047953572,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": -1.0327639691241752,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.9116311256167897,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "clip__command_throttle",
+              "weight": -0.6231493632491242,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": -0.5827429228596491,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_roll": [
+            {
+              "feature": "sq__roll",
+              "weight": 5.152205897817693,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_roll",
+              "weight": 2.2034116374854222,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": -0.379489516399905,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "clip__command_throttle",
+              "weight": 0.37932945960177955,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_throttle",
+              "weight": -0.3126188392406485,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_pitch": [
+            {
+              "feature": "sq__pitch",
+              "weight": 4.891543425240304,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": 2.662207108243808,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": -0.30895550987347087,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_throttle",
+              "weight": -0.22765064085269346,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.20428142385680034,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_yaw": [
+            {
+              "feature": "sq__roll",
+              "weight": 2.199191502087481,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "clip__command_throttle",
+              "weight": -1.6810353667544218,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_roll",
+              "weight": -1.4963778554320133,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": -1.3221612605317485,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": 1.233223732148362,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_roll_rate": [
+            {
+              "feature": "sq__roll_rate",
+              "weight": 1.4729999582577997,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": -0.5964408394912482,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_throttle",
+              "weight": -0.3660700817799447,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": -0.34814938279005453,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.3091177127998277,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_pitch_rate": [
+            {
+              "feature": "clip__command_throttle",
+              "weight": 1.9120987356312418,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.8743853565416133,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": 0.33704545116072016,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": -0.3175015185919784,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": -0.20547145970629377,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_yaw_rate": [
+            {
+              "feature": "sq__roll_rate",
+              "weight": 1.8354514913830213,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_throttle",
+              "weight": -1.4522995720427156,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": -1.4286950842079014,
+              "selection_frequency": 0.5
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": -1.179144286368573,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "backend_px4__command_throttle",
+              "weight": -1.0883506790055308,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group_key": [
+        "POSCTL"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.7002364597988999,
+              "mse": 5.879165228977003e-05,
+              "mae": 0.0025199398868426116,
+              "residual_mean_abs": 0.0025199398868426116,
+              "residual_std": 0.007667571472752635,
+              "residual_max_abs": 0.3110282132595592
+            },
+            "val": {
+              "r2": 0.5822223805694062,
+              "mse": 5.425714494616674e-05,
+              "mae": 0.0025860605817318518,
+              "residual_mean_abs": 0.0025860605817318518,
+              "residual_std": 0.00735508328546435,
+              "residual_max_abs": 0.21462189121788122
+            },
+            "test": {
+              "r2": 0.7373869277299676,
+              "mse": 0.00017456829760665804,
+              "mae": 0.0037201881527975443,
+              "residual_mean_abs": 0.0037201881527975443,
+              "residual_std": 0.013192817523230725,
+              "residual_max_abs": 0.7618059091694929
+            },
+            "condition_number": 150.25698121340258,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              141.6316532307082,
+              136.72785588756165,
+              135.77981857838014,
+              133.49446867400493,
+              124.09888500792675,
+              116.3639548812992,
+              101.51093068952645,
+              95.26493676937582,
+              88.729258435535,
+              86.49557180525728
+            ],
+            "effective_condition_number": 150.25698121340258,
+            "singular_values": [
+              133.73507119160865,
+              105.00661427848844,
+              99.33143869182722,
+              94.60225743480888,
+              90.2086035579167,
+              88.19584562511065,
+              83.01353430354644,
+              81.51318859702955,
+              78.4090312025609,
+              77.4864799400056
+            ],
+            "effective_singular_values": [
+              133.73507119160865,
+              105.00661427848844,
+              99.33143869182722,
+              94.60225743480888,
+              90.2086035579167,
+              88.19584562511065,
+              83.01353430354644,
+              81.51318859702955,
+              78.4090312025609,
+              77.4864799400056
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude",
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude"
+            ],
+            "conditioning_extra_pruned_features": [
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.7678617314647105,
+              "mse": 8.54930292978693e-05,
+              "mae": 0.0027868241903282976,
+              "residual_mean_abs": 0.0027868241903282976,
+              "residual_std": 0.009246244064368477,
+              "residual_max_abs": 0.5068048633617883
+            },
+            "val": {
+              "r2": 0.5637452786796242,
+              "mse": 7.055247824098029e-05,
+              "mae": 0.0027365000874680634,
+              "residual_mean_abs": 0.0027365000874680634,
+              "residual_std": 0.00837377837466394,
+              "residual_max_abs": 0.26057310390331123
+            },
+            "test": {
+              "r2": 0.6830050277352782,
+              "mse": 4.29563012081053e-05,
+              "mae": 0.0027753561473192515,
+              "residual_mean_abs": 0.0027753561473192515,
+              "residual_std": 0.006518299062149868,
+              "residual_max_abs": 0.17692544768974244
+            },
+            "condition_number": 848.9314285714432,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              143.81372315232608,
+              134.45120434786682,
+              131.46164641476662,
+              131.1307507855559,
+              130.8474376379109,
+              111.34070485388499,
+              105.26399797771046,
+              96.29028893944252,
+              93.43559672243563,
+              91.5144972866583
+            ],
+            "effective_condition_number": 848.9314285714432,
+            "singular_values": [
+              139.16860906467005,
+              101.23708306053118,
+              98.78842148605666,
+              94.78082686555658,
+              92.46916300325475,
+              88.3201117265856,
+              84.07076481999604,
+              83.58456345305383,
+              81.78513348002178,
+              81.26220888192876
+            ],
+            "effective_singular_values": [
+              139.16860906467005,
+              101.23708306053118,
+              98.78842148605666,
+              94.78082686555658,
+              92.46916300325475,
+              88.3201117265856,
+              84.07076481999604,
+              83.58456345305383,
+              81.78513348002178,
+              81.26220888192876
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude",
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_px4__command_pitch",
+              "mode_offboard_attitude"
+            ],
+            "conditioning_extra_pruned_features": [
+              "mode_posctl",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "backend_px4__command_roll",
+              "backend_px4__command_yaw",
+              "backend_px4__command_throttle"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 5607,
+            "val_count": 1935,
+            "test_count": 1994
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 5545,
+            "val_count": 1995,
+            "test_count": 1996
+          }
+        ],
+        "median_test_r2": 0.7101959777326229,
+        "median_test_mse": 0.00010876229940738167,
+        "median_test_mae": 0.003247772150058398,
+        "coefficient_stability": 0.9423076923076923,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 499.5942048924229,
+        "condition_number": 499.5942048924229,
+        "raw_singular_values": [
+          141.6316532307082,
+          136.72785588756165,
+          135.77981857838014,
+          133.49446867400493,
+          124.09888500792675,
+          116.3639548812992,
+          101.51093068952645,
+          95.26493676937582,
+          88.729258435535,
+          86.49557180525728
+        ],
+        "singular_values": [
+          133.73507119160865,
+          105.00661427848844,
+          99.33143869182722,
+          94.60225743480888,
+          90.2086035579167,
+          88.19584562511065,
+          83.01353430354644,
+          81.51318859702955,
+          78.4090312025609,
+          77.4864799400056
+        ],
+        "effective_singular_values": [
+          133.73507119160865,
+          105.00661427848844,
+          99.33143869182722,
+          94.60225743480888,
+          90.2086035579167,
+          88.19584562511065,
+          83.01353430354644,
+          81.51318859702955,
+          78.4090312025609,
+          77.4864799400056
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "backend_px4__command_pitch",
+          "backend_px4__command_roll",
+          "backend_px4__command_throttle",
+          "backend_px4__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "mode_offboard_attitude",
+          "mode_posctl",
+          "vertical_speed"
+        ],
+        "conditioning_baseline_drops": [
+          "backend_px4__command_pitch",
+          "mode_offboard_attitude"
+        ],
+        "conditioning_extra_pruned_features": [
+          "backend_px4__command_roll",
+          "backend_px4__command_throttle",
+          "backend_px4__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "mode_posctl"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "px4": {
+            "r2": 0.7385398351422838,
+            "mse": 7.437527964615274e-05,
+            "mae": 0.0027240477541835926,
+            "residual_mean_abs": 0.0027240477541835926,
+            "residual_std": 0.008623462460900679,
+            "residual_max_abs": 0.49681118112149414,
+            "sample_count": 9536.0
+          }
+        },
+        "mode_consistency": {
+          "POSCTL": {
+            "r2": 0.7385398351422838,
+            "mse": 7.437527964615274e-05,
+            "mae": 0.0027240477541835926,
+            "residual_mean_abs": 0.0027240477541835926,
+            "residual_std": 0.008623462460900679,
+            "residual_max_abs": 0.49681118112149414,
+            "sample_count": 9536.0
+          }
+        },
+        "scenario_consistency": 0.70116050711806,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": 0.6610048389706596,
+            "mse": 0.00010692414355173926,
+            "mae": 0.0031356060053100597,
+            "residual_mean_abs": 0.0031356060053100597,
+            "residual_std": 0.010340316644853097,
+            "residual_max_abs": 0.49681118112149414,
+            "sample_count": 3644.0
+          },
+          "nominal": {
+            "r2": 0.8224139243642747,
+            "mse": 5.118688847441659e-05,
+            "mae": 0.0024006877430636517,
+            "residual_mean_abs": 0.0024006877430636517,
+            "residual_std": 0.007154470241301742,
+            "residual_max_abs": 0.3195533581278395,
+            "sample_count": 4731.0
+          },
+          "throttle_biased": {
+            "r2": 0.5766441642682087,
+            "mse": 6.670621725298015e-05,
+            "mae": 0.0027499719105174474,
+            "residual_mean_abs": 0.0027499719105174474,
+            "residual_std": 0.00811511102485979,
+            "residual_max_abs": 0.20719794938920438,
+            "sample_count": 1161.0
+          }
+        },
+        "top_influential": {
+          "window_mean_roll": [
+            {
+              "feature": "roll",
+              "weight": 0.9231892643096196,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 0.3016147149479091,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.25957433676688546,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": 0.06616647529618583,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": -0.034948487011856086,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_pitch": [
+            {
+              "feature": "pitch",
+              "weight": 0.8995619723912964,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": -0.517148022324193,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": -0.1935635718223337,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": 0.05036785017003871,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": -0.03788495186935608,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_yaw": [
+            {
+              "feature": "yaw",
+              "weight": 0.674418909780677,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.16671493123790262,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 0.10795650121544684,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw",
+              "weight": 0.049574189015823146,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": -0.04191507695202045,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_roll_rate": [
+            {
+              "feature": "sq__yaw_rate",
+              "weight": -0.8474809090074378,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 0.8038506669094654,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": 0.5398257383248725,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": -0.4540977799929387,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.26075499446148653,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_pitch_rate": [
+            {
+              "feature": "pitch_rate",
+              "weight": 0.7763081071590963,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": -0.48421969825559175,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": -0.21029556652842465,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": -0.16506130130328353,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 0.1170383812846636,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_mean_yaw_rate": [
+            {
+              "feature": "yaw_rate",
+              "weight": 0.9609500349644238,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": -0.2879599054168827,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": -0.22284091836141035,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.08951763595474942,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": 0.07184236876581578,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_roll": [
+            {
+              "feature": "sq__roll",
+              "weight": 20.44247511357321,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 0.6558205191934935,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_roll",
+              "weight": 0.12564999097486773,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": -0.10935874730859121,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": 0.10221599476272236,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_pitch": [
+            {
+              "feature": "sq__pitch",
+              "weight": 16.509360096741545,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 1.2728622388292778,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": -0.21294093113237397,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_pitch",
+              "weight": 0.1438197321102261,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": -0.06862793287305698,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_yaw": [
+            {
+              "feature": "yaw",
+              "weight": 0.6187555600963464,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.15336682728923814,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 0.07611665188093623,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.07576286678865576,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw",
+              "weight": 0.0714142567341283,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_roll_rate": [
+            {
+              "feature": "sq__roll_rate",
+              "weight": 3.0653677314206202,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 2.6235658603086724,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 2.145908156584627,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 1.2624630006468922,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": -0.5752290377512874,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_pitch_rate": [
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 5.199002483465586,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 1.485439617405253,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 1.256602588881102,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll_rate",
+              "weight": 0.2144378318789923,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.18872746967616139,
+              "selection_frequency": 0.0
+            }
+          ],
+          "window_peak_yaw_rate": [
+            {
+              "feature": "sq__yaw_rate",
+              "weight": 17.185465019105504,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch",
+              "weight": 0.9285185722632675,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.18099234522907914,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.13585208692763434,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate",
+              "weight": -0.09428515532683568,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "median_test_r2": 0.8491173017702922,
+  "median_test_mse": 0.0007327691036049189,
+  "median_test_mae": 0.00769072067056309,
+  "coefficient_stability": 0.9123931623931624,
+  "nonzero_count": 0,
+  "sparsity_ratio": 1.0,
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 607.7140925009867,
+  "condition_number": 607.7140925009867,
+  "raw_singular_values": [
+    184.19257881868867,
+    141.67501817722854,
+    137.91829418911342,
+    129.5477531254768,
+    121.80412130203428,
+    109.8536249405528,
+    101.60792913452208,
+    92.70418905661798,
+    91.48387186286367,
+    88.88873189936876
+  ],
+  "singular_values": [
+    169.4554611873526,
+    123.4928375635989,
+    111.02624170608544,
+    100.75761385233963,
+    99.1140599368522,
+    92.82106370255971,
+    86.57442271692155,
+    83.03050343725883,
+    77.28335914739102,
+    71.45189352905125
+  ],
+  "effective_singular_values": [
+    169.4554611873526,
+    123.4928375635989,
+    111.02624170608544,
+    100.75761385233963,
+    99.1140599368522,
+    92.82106370255971,
+    86.57442271692155,
+    83.03050343725883,
+    77.28335914739102,
+    71.45189352905125
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "backend_px4__command_pitch",
+    "backend_px4__command_roll",
+    "backend_px4__command_throttle",
+    "backend_px4__command_yaw",
+    "clip__command_pitch",
+    "clip__command_roll",
+    "clip__command_throttle",
+    "clip__command_yaw",
+    "mode_offboard_attitude",
+    "mode_posctl",
+    "vertical_speed"
+  ],
+  "conditioning_baseline_drops": [
+    "backend_px4__command_pitch",
+    "mode_offboard_attitude"
+  ],
+  "conditioning_extra_pruned_features": [
+    "backend_px4__command_roll",
+    "backend_px4__command_throttle",
+    "backend_px4__command_yaw",
+    "clip__command_pitch",
+    "clip__command_roll",
+    "clip__command_throttle",
+    "clip__command_yaw",
+    "mode_posctl"
+  ],
+  "backend_consistency": {
+    "px4": {
+      "r2": -20.251293878820782,
+      "mse": 1.4764043816497248,
+      "mae": 0.155602292138575,
+      "residual_mean_abs": 0.155602292138575,
+      "residual_std": 1.214342554525938,
+      "residual_max_abs": 45.71094337336309,
+      "sample_count": 18647.0
+    }
+  },
+  "mode_consistency": {
+    "OFFBOARD_ATTITUDE": {
+      "r2": -25.190359441590175,
+      "mse": 2.9547455818385724,
+      "mae": 0.1420874972003465,
+      "residual_mean_abs": 0.1420874972003465,
+      "residual_std": 1.7158238576791807,
+      "residual_max_abs": 45.71094337336309,
+      "sample_count": 9111.0
+    },
+    "POSCTL": {
+      "r2": -223.8103300456173,
+      "mse": 0.06394982261862224,
+      "mae": 0.16851476033091972,
+      "residual_mean_abs": 0.16851476033091972,
+      "residual_std": 0.25235173375530273,
+      "residual_max_abs": 0.9932778140833222,
+      "sample_count": 9536.0
+    }
+  },
+  "scenario_consistency": 0.0,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": -19.782966570993317,
+      "mse": 1.426161778547178,
+      "mae": 0.15475933264084088,
+      "residual_mean_abs": 0.15475933264084088,
+      "residual_std": 1.1934967944832446,
+      "residual_max_abs": 44.65344810505873,
+      "sample_count": 7082.0
+    },
+    "nominal": {
+      "r2": -23.132934358033726,
+      "mse": 1.727879347713818,
+      "mae": 0.16393534133398546,
+      "residual_mean_abs": 0.16393534133398546,
+      "residual_std": 1.3135216046609772,
+      "residual_max_abs": 45.71094337336309,
+      "sample_count": 9305.0
+    },
+    "throttle_biased": {
+      "r2": -8.45525710027313,
+      "mse": 0.5984590524222265,
+      "mae": 0.12393451178444159,
+      "residual_mean_abs": 0.12393451178444159,
+      "residual_std": 0.7735364817159551,
+      "residual_max_abs": 44.64410872256829,
+      "sample_count": 2260.0
+    }
+  },
+  "top_influential": {},
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

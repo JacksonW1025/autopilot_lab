@@ -1,0 +1,3063 @@
+{
+  "x_schema": "commands_plus_state_history",
+  "y_schema": "selected_state_subset",
+  "pooling_mode": "stratified",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "command_roll__lag_1",
+    "command_pitch__lag_1",
+    "command_yaw__lag_1",
+    "command_throttle__lag_1",
+    "roll__lag_1",
+    "pitch__lag_1",
+    "yaw__lag_1",
+    "roll_rate__lag_1",
+    "pitch_rate__lag_1",
+    "yaw_rate__lag_1",
+    "position_x__lag_1",
+    "position_y__lag_1",
+    "position_z__lag_1",
+    "velocity_x__lag_1",
+    "velocity_y__lag_1",
+    "velocity_z__lag_1",
+    "altitude__lag_1",
+    "vertical_speed__lag_1",
+    "heading__lag_1",
+    "command_roll__lag_2",
+    "command_pitch__lag_2",
+    "command_yaw__lag_2",
+    "command_throttle__lag_2",
+    "roll__lag_2",
+    "pitch__lag_2",
+    "yaw__lag_2",
+    "roll_rate__lag_2",
+    "pitch_rate__lag_2",
+    "yaw_rate__lag_2",
+    "position_x__lag_2",
+    "position_y__lag_2",
+    "position_z__lag_2",
+    "velocity_x__lag_2",
+    "velocity_y__lag_2",
+    "velocity_z__lag_2",
+    "altitude__lag_2",
+    "vertical_speed__lag_2",
+    "heading__lag_2",
+    "command_roll__lag_3",
+    "command_pitch__lag_3",
+    "command_yaw__lag_3",
+    "command_throttle__lag_3",
+    "roll__lag_3",
+    "pitch__lag_3",
+    "yaw__lag_3",
+    "roll_rate__lag_3",
+    "pitch_rate__lag_3",
+    "yaw_rate__lag_3",
+    "position_x__lag_3",
+    "position_y__lag_3",
+    "position_z__lag_3",
+    "velocity_x__lag_3",
+    "velocity_y__lag_3",
+    "velocity_z__lag_3",
+    "altitude__lag_3",
+    "vertical_speed__lag_3",
+    "heading__lag_3"
+  ],
+  "response_names": [
+    "future_state_roll",
+    "future_state_pitch",
+    "future_state_yaw",
+    "future_state_roll_rate",
+    "future_state_pitch_rate",
+    "future_state_yaw_rate"
+  ],
+  "schema_metadata": {
+    "x_schema": "commands_plus_state_history",
+    "y_schema": "selected_state_subset",
+    "feature_count": 76,
+    "response_count": 6,
+    "strict_raw_linear": true,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading"
+    ],
+    "requested_response_columns": [
+      "future_state_roll",
+      "future_state_pitch",
+      "future_state_yaw",
+      "future_state_roll_rate",
+      "future_state_pitch_rate",
+      "future_state_yaw_rate"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {
+      "future_state_roll": 0.9948780878194526,
+      "future_state_pitch": 0.9948780878194526,
+      "future_state_yaw": 0.9948780878194526,
+      "future_state_roll_rate": 0.9948780878194526,
+      "future_state_pitch_rate": 0.9948780878194526,
+      "future_state_yaw_rate": 0.9948780878194526
+    },
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": []
+  },
+  "group_results": [
+    {
+      "group_key": [
+        "OFFBOARD_ATTITUDE"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.9960741924763555,
+              "mse": 0.0004489175965771642,
+              "mae": 0.005526430183130663,
+              "residual_mean_abs": 0.005526430183130663,
+              "residual_std": 0.021187675582214398,
+              "residual_max_abs": 0.8528272276206841
+            },
+            "val": {
+              "r2": 0.9913837620215141,
+              "mse": 0.0010068431738742443,
+              "mae": 0.007772274907414667,
+              "residual_mean_abs": 0.007772274907414667,
+              "residual_std": 0.03172880300953029,
+              "residual_max_abs": 0.8568621273969221
+            },
+            "test": {
+              "r2": 0.9955459997304936,
+              "mse": 0.0005301463004648883,
+              "mae": 0.007595452523830198,
+              "residual_mean_abs": 0.007595452523830198,
+              "residual_std": 0.023023515247714735,
+              "residual_max_abs": 0.5989196454684969
+            },
+            "condition_number": 2543.5886431101612,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              290.15822441470596,
+              199.54099110680016,
+              191.5456256285201,
+              177.92356186905022,
+              175.24938861811435,
+              169.19819390754648,
+              146.87106809664067,
+              137.71391237333754,
+              132.71364473393643,
+              128.50924269277058
+            ],
+            "effective_condition_number": 2543.5886431101612,
+            "singular_values": [
+              269.55733614143645,
+              197.89833985772808,
+              175.3716712714956,
+              169.2641768157327,
+              153.8944529243163,
+              147.78175794585442,
+              139.05045357570572,
+              132.13769718388727,
+              129.46940354354135,
+              125.60888027473955
+            ],
+            "effective_singular_values": [
+              269.55733614143645,
+              197.89833985772808,
+              175.3716712714956,
+              169.2641768157327,
+              153.8944529243163,
+              147.78175794585442,
+              139.05045357570572,
+              132.13769718388727,
+              129.46940354354135,
+              125.60888027473955
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.9962702988191868,
+              "mse": 0.00043809257549410013,
+              "mae": 0.005503746145494015,
+              "residual_mean_abs": 0.005503746145494015,
+              "residual_std": 0.020930661133707652,
+              "residual_max_abs": 0.8442520661366688
+            },
+            "val": {
+              "r2": 0.9955899521953788,
+              "mse": 0.0005037416109502799,
+              "mae": 0.0052917717445768965,
+              "residual_mean_abs": 0.0052917717445768965,
+              "residual_std": 0.022444121978880693,
+              "residual_max_abs": 0.841525334350621
+            },
+            "test": {
+              "r2": 0.9908711669962041,
+              "mse": 0.00102989729435716,
+              "mae": 0.006517347731447092,
+              "residual_mean_abs": 0.006517347731447092,
+              "residual_std": 0.03209100856558004,
+              "residual_max_abs": 0.8699007940004864
+            },
+            "condition_number": 2971.2007927204468,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              296.9505675288897,
+              201.52622388155905,
+              198.32974844197528,
+              183.1523764470214,
+              178.87254765933417,
+              171.387272184365,
+              163.60348914168074,
+              139.17612246135346,
+              125.05248924526299,
+              115.61692606130912
+            ],
+            "effective_condition_number": 2971.2007927204468,
+            "singular_values": [
+              280.53898677604565,
+              193.71762352374668,
+              182.8437147409416,
+              175.59831786133427,
+              163.77312891380703,
+              156.29934151558973,
+              141.12704434487725,
+              135.87787630861177,
+              119.04184264379674,
+              110.03722831102228
+            ],
+            "effective_singular_values": [
+              280.53898677604565,
+              193.71762352374668,
+              182.8437147409416,
+              175.59831786133427,
+              163.77312891380703,
+              156.29934151558973,
+              141.12704434487725,
+              135.87787630861177,
+              119.04184264379674,
+              110.03722831102228
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 5289,
+            "val_count": 1894,
+            "test_count": 1856
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 5306,
+            "val_count": 1876,
+            "test_count": 1857
+          }
+        ],
+        "median_test_r2": 0.9932085833633488,
+        "median_test_mse": 0.0007800217974110242,
+        "median_test_mae": 0.007056400127638645,
+        "coefficient_stability": 0.9649122807017544,
+        "nonzero_count": 13,
+        "sparsity_ratio": 0.9714912280701754,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 16,
+            "state": 6,
+            "history": 57,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 2757.3947179153038,
+        "condition_number": 2757.3947179153038,
+        "raw_singular_values": [
+          290.15822441470596,
+          199.54099110680016,
+          191.5456256285201,
+          177.92356186905022,
+          175.24938861811435,
+          169.19819390754648,
+          146.87106809664067,
+          137.71391237333754,
+          132.71364473393643,
+          128.50924269277058
+        ],
+        "singular_values": [
+          269.55733614143645,
+          197.89833985772808,
+          175.3716712714956,
+          169.2641768157327,
+          153.8944529243163,
+          147.78175794585442,
+          139.05045357570572,
+          132.13769718388727,
+          129.46940354354135,
+          125.60888027473955
+        ],
+        "effective_singular_values": [
+          269.55733614143645,
+          197.89833985772808,
+          175.3716712714956,
+          169.2641768157327,
+          153.8944529243163,
+          147.78175794585442,
+          139.05045357570572,
+          132.13769718388727,
+          129.46940354354135,
+          125.60888027473955
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "altitude__lag_1",
+          "altitude__lag_2",
+          "altitude__lag_3",
+          "vertical_speed",
+          "vertical_speed__lag_1",
+          "vertical_speed__lag_2",
+          "vertical_speed__lag_3"
+        ],
+        "conditioning_baseline_drops": [],
+        "conditioning_extra_pruned_features": [
+          "altitude__lag_1",
+          "altitude__lag_2",
+          "altitude__lag_3",
+          "vertical_speed__lag_1",
+          "vertical_speed__lag_2",
+          "vertical_speed__lag_3"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.16666666666666666,
+            0.0,
+            0.16666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.5,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.3333333333333333,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.6666666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.8333333333333334,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.3333333333333333,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.8333333333333334,
+            1.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.8333333333333334,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.6666666666666666,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.8333333333333334,
+            0.3333333333333333
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.16666666666666666,
+            0.16666666666666666,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "px4": {
+            "r2": 0.9951857234994542,
+            "mse": 0.0005577166920952228,
+            "mae": 0.005790203034377303,
+            "residual_mean_abs": 0.005790203034377303,
+            "residual_std": 0.02361598737178656,
+            "residual_max_abs": 0.8485396468786763,
+            "sample_count": 9039.0
+          }
+        },
+        "mode_consistency": {
+          "OFFBOARD_ATTITUDE": {
+            "r2": 0.9951857234994542,
+            "mse": 0.0005577166920952228,
+            "mae": 0.005790203034377303,
+            "residual_mean_abs": 0.005790203034377303,
+            "residual_std": 0.02361598737178656,
+            "residual_max_abs": 0.8485396468786763,
+            "sample_count": 9039.0
+          }
+        },
+        "scenario_consistency": 0.9924191533990144,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": 0.9945492630432462,
+            "mse": 0.0006308878737504786,
+            "mae": 0.006388125117904627,
+            "residual_mean_abs": 0.006388125117904627,
+            "residual_std": 0.025116341127037263,
+            "residual_max_abs": 0.8485396468786763,
+            "sample_count": 3411.0
+          },
+          "nominal": {
+            "r2": 0.9968868325354354,
+            "mse": 0.000369250277362699,
+            "mae": 0.005322436967574069,
+            "residual_mean_abs": 0.005322436967574069,
+            "residual_std": 0.01921397780131192,
+            "residual_max_abs": 0.8140882253202485,
+            "sample_count": 4538.0
+          },
+          "throttle_biased": {
+            "r2": 0.9893295863794419,
+            "mse": 0.0011133806273522092,
+            "mae": 0.005866542652947364,
+            "residual_mean_abs": 0.005866542652947364,
+            "residual_std": 0.03336735045646811,
+            "residual_max_abs": 0.8473188965008225,
+            "sample_count": 1090.0
+          }
+        },
+        "top_influential": {
+          "future_state_roll": [
+            {
+              "feature": "roll",
+              "weight": 1.8846038496298787,
+              "selection_frequency": 0.16666666666666666
+            },
+            {
+              "feature": "roll__lag_1",
+              "weight": -0.7631506822146995,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll__lag_2",
+              "weight": -0.6007751263051151,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll__lag_3",
+              "weight": 0.34336822832008596,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "command_roll__lag_1",
+              "weight": 0.19815341854091267,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_pitch": [
+            {
+              "feature": "pitch",
+              "weight": 1.5706584586692047,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": -0.5493323100391008,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": -0.3571317128149271,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_3",
+              "weight": 0.2170477273277423,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "command_pitch",
+              "weight": 0.2163197182307454,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_yaw": [
+            {
+              "feature": "roll",
+              "weight": 1.3682978973020121,
+              "selection_frequency": 0.16666666666666666
+            },
+            {
+              "feature": "roll__lag_1",
+              "weight": -0.7819341015417436,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.7644555350759705,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.721978181272104,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw",
+              "weight": 0.714147174440539,
+              "selection_frequency": 1.0
+            }
+          ],
+          "future_state_roll_rate": [
+            {
+              "feature": "roll_rate",
+              "weight": 1.2565341044188751,
+              "selection_frequency": 0.5
+            },
+            {
+              "feature": "roll_rate__lag_1",
+              "weight": -0.7975952002532524,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": -0.4809120395336761,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_3",
+              "weight": -0.29757179632083086,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.24842351004616564,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_pitch_rate": [
+            {
+              "feature": "pitch_rate",
+              "weight": 0.7158045574694683,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate__lag_3",
+              "weight": -0.5163424975062236,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_3",
+              "weight": -0.3349943254612293,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": -0.27314356095412573,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate__lag_1",
+              "weight": -0.2581690915594312,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_yaw_rate": [
+            {
+              "feature": "yaw_rate",
+              "weight": 2.5081324510986858,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "yaw_rate__lag_1",
+              "weight": -1.1369192030085422,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "roll_rate__lag_1",
+              "weight": -0.6225827745498856,
+              "selection_frequency": 0.16666666666666666
+            },
+            {
+              "feature": "yaw_rate__lag_2",
+              "weight": -0.5638732377466316,
+              "selection_frequency": 1.0
+            },
+            {
+              "feature": "roll_rate__lag_2",
+              "weight": 0.5205078823987476,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group_key": [
+        "POSCTL"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.7804407826772897,
+              "mse": 4.3666117193168125e-05,
+              "mae": 0.0015733313671012763,
+              "residual_mean_abs": 0.0015733313671012763,
+              "residual_std": 0.00660803429116164,
+              "residual_max_abs": 0.22634813931553643
+            },
+            "val": {
+              "r2": 0.6716431280878731,
+              "mse": 4.3731885885160136e-05,
+              "mae": 0.0015851259501517357,
+              "residual_mean_abs": 0.0015851259501517357,
+              "residual_std": 0.006613000856592305,
+              "residual_max_abs": 0.21674035789835785
+            },
+            "test": {
+              "r2": 0.8701177281522762,
+              "mse": 8.60827278449964e-05,
+              "mae": 0.0020774514156163115,
+              "residual_mean_abs": 0.0020774514156163115,
+              "residual_std": 0.009278073017692061,
+              "residual_max_abs": 0.31876763027723065
+            },
+            "condition_number": 1953.6191447697806,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              231.63505809124644,
+              223.71401969521193,
+              193.76947994627264,
+              170.1389059098329,
+              168.73745865228844,
+              156.0991688162089,
+              152.23213574945876,
+              145.18698193095437,
+              141.4276036447517,
+              137.27835440553437
+            ],
+            "effective_condition_number": 1953.6191447697806,
+            "singular_values": [
+              221.02365658552068,
+              184.67813535552773,
+              169.4176812803312,
+              162.94555802728124,
+              154.27468942716254,
+              149.86772396553968,
+              145.33119881159308,
+              141.0746258733223,
+              138.7894006832849,
+              135.2998489517706
+            ],
+            "effective_singular_values": [
+              221.02365658552068,
+              184.67813535552773,
+              169.4176812803312,
+              162.94555802728124,
+              154.27468942716254,
+              149.86772396553968,
+              145.33119881159308,
+              141.0746258733223,
+              138.7894006832849,
+              135.2998489517706
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.8373657581312524,
+              "mse": 5.989934511884824e-05,
+              "mae": 0.0018204111984478288,
+              "residual_mean_abs": 0.0018204111984478288,
+              "residual_std": 0.007739466720572435,
+              "residual_max_abs": 0.30231065074779084
+            },
+            "val": {
+              "r2": 0.6939429284630472,
+              "mse": 5.0269774808920185e-05,
+              "mae": 0.0018320062801452511,
+              "residual_mean_abs": 0.0018320062801452511,
+              "residual_std": 0.007089981213758823,
+              "residual_max_abs": 0.20586771092959974
+            },
+            "test": {
+              "r2": 0.7686333978525833,
+              "mse": 3.279574349937653e-05,
+              "mae": 0.0017023147185861642,
+              "residual_mean_abs": 0.0017023147185861642,
+              "residual_std": 0.0057260960674521445,
+              "residual_max_abs": 0.16412956773811066
+            },
+            "condition_number": 1673.0049560765,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              237.54877414683574,
+              205.24062488565232,
+              195.43064645034548,
+              178.54478168943695,
+              163.51388461516282,
+              159.93894808425165,
+              152.7928783332742,
+              148.95015080300712,
+              143.0260085847084,
+              138.73431722636238
+            ],
+            "effective_condition_number": 1673.0049560765,
+            "singular_values": [
+              216.60668559367025,
+              178.74661989354425,
+              171.96005773471498,
+              166.32329759676693,
+              159.05997489720153,
+              150.33053381211175,
+              146.53749881902698,
+              142.7952029046651,
+              139.6007418116512,
+              134.69755385483074
+            ],
+            "effective_singular_values": [
+              216.60668559367025,
+              178.74661989354425,
+              171.96005773471498,
+              166.32329759676693,
+              159.05997489720153,
+              150.33053381211175,
+              146.53749881902698,
+              142.7952029046651,
+              139.6007418116512,
+              134.69755385483074
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ],
+            "conditioning_baseline_drops": [],
+            "conditioning_extra_pruned_features": [
+              "altitude__lag_1",
+              "vertical_speed__lag_1",
+              "altitude__lag_2",
+              "vertical_speed__lag_2",
+              "altitude__lag_3",
+              "vertical_speed__lag_3"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 5565,
+            "val_count": 1920,
+            "test_count": 1979
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 5503,
+            "val_count": 1980,
+            "test_count": 1981
+          }
+        ],
+        "median_test_r2": 0.8193755630024298,
+        "median_test_mse": 5.943923567218646e-05,
+        "median_test_mae": 0.001889883067101238,
+        "coefficient_stability": 0.9627192982456141,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 16,
+            "state": 6,
+            "history": 57,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 1813.3120504231404,
+        "condition_number": 1813.3120504231404,
+        "raw_singular_values": [
+          231.63505809124644,
+          223.71401969521193,
+          193.76947994627264,
+          170.1389059098329,
+          168.73745865228844,
+          156.0991688162089,
+          152.23213574945876,
+          145.18698193095437,
+          141.4276036447517,
+          137.27835440553437
+        ],
+        "singular_values": [
+          221.02365658552068,
+          184.67813535552773,
+          169.4176812803312,
+          162.94555802728124,
+          154.27468942716254,
+          149.86772396553968,
+          145.33119881159308,
+          141.0746258733223,
+          138.7894006832849,
+          135.2998489517706
+        ],
+        "effective_singular_values": [
+          221.02365658552068,
+          184.67813535552773,
+          169.4176812803312,
+          162.94555802728124,
+          154.27468942716254,
+          149.86772396553968,
+          145.33119881159308,
+          141.0746258733223,
+          138.7894006832849,
+          135.2998489517706
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "altitude__lag_1",
+          "altitude__lag_2",
+          "altitude__lag_3",
+          "vertical_speed",
+          "vertical_speed__lag_1",
+          "vertical_speed__lag_2",
+          "vertical_speed__lag_3"
+        ],
+        "conditioning_baseline_drops": [],
+        "conditioning_extra_pruned_features": [
+          "altitude__lag_1",
+          "altitude__lag_2",
+          "altitude__lag_3",
+          "vertical_speed__lag_1",
+          "vertical_speed__lag_2",
+          "vertical_speed__lag_3"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "px4": {
+            "r2": 0.8201066438261434,
+            "mse": 5.149165173112853e-05,
+            "mae": 0.0016975898600258697,
+            "residual_mean_abs": 0.0016975898600258697,
+            "residual_std": 0.0071757588579888015,
+            "residual_max_abs": 0.31053914051251086,
+            "sample_count": 9464.0
+          }
+        },
+        "mode_consistency": {
+          "POSCTL": {
+            "r2": 0.8201066438261434,
+            "mse": 5.149165173112853e-05,
+            "mae": 0.0016975898600258697,
+            "residual_mean_abs": 0.0016975898600258697,
+            "residual_std": 0.0071757588579888015,
+            "residual_max_abs": 0.31053914051251086,
+            "sample_count": 9464.0
+          }
+        },
+        "scenario_consistency": 0.83824052895169,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": 0.7773032682469669,
+            "mse": 7.018299275030205e-05,
+            "mae": 0.001964982241854762,
+            "residual_mean_abs": 0.001964982241854762,
+            "residual_std": 0.008377525157635665,
+            "residual_max_abs": 0.31053914051251086,
+            "sample_count": 3617.0
+          },
+          "nominal": {
+            "r2": 0.8663469435145826,
+            "mse": 3.8951188491665256e-05,
+            "mae": 0.0015054665694566169,
+            "residual_mean_abs": 0.0015054665694566169,
+            "residual_std": 0.006241076309953477,
+            "residual_max_abs": 0.22656651961784482,
+            "sample_count": 4695.0
+          },
+          "throttle_biased": {
+            "r2": 0.7262071201873437,
+            "mse": 4.3914303157282535e-05,
+            "mae": 0.0016410452455706082,
+            "residual_mean_abs": 0.0016410452455706082,
+            "residual_std": 0.006626411023755766,
+            "residual_max_abs": 0.18669435674725116,
+            "sample_count": 1152.0
+          }
+        },
+        "top_influential": {
+          "future_state_roll": [
+            {
+              "feature": "roll",
+              "weight": 2.63281407628038,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll__lag_1",
+              "weight": -1.574742646928878,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll__lag_2",
+              "weight": -0.8122885088030622,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll__lag_3",
+              "weight": 0.699088423341564,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate__lag_2",
+              "weight": -0.051988844162574474,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_pitch": [
+            {
+              "feature": "pitch",
+              "weight": 2.578853760167555,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": -1.7158660756103303,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_3",
+              "weight": 0.4706167327419462,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": -0.393567715669201,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "velocity_y__lag_2",
+              "weight": 0.06477003996428365,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_yaw": [
+            {
+              "feature": "yaw",
+              "weight": 0.8412205950691694,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "heading",
+              "weight": 0.5897298367640622,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw__lag_3",
+              "weight": -0.17922455947967467,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw__lag_1",
+              "weight": -0.15996177630855762,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw__lag_2",
+              "weight": -0.12829267367923816,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_roll_rate": [
+            {
+              "feature": "yaw_rate__lag_2",
+              "weight": -2.739152811018649,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate",
+              "weight": 2.0993765669063498,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll_rate__lag_1",
+              "weight": -2.0577451436753313,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate__lag_3",
+              "weight": 1.8238329867458694,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate",
+              "weight": 0.8402832154011128,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_pitch_rate": [
+            {
+              "feature": "pitch_rate",
+              "weight": 1.6598044814608541,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate__lag_1",
+              "weight": -1.36458878101424,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate__lag_2",
+              "weight": -1.1419134107825313,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate__lag_3",
+              "weight": 0.6051830466585286,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate__lag_1",
+              "weight": 0.4322546339033486,
+              "selection_frequency": 0.0
+            }
+          ],
+          "future_state_yaw_rate": [
+            {
+              "feature": "yaw_rate",
+              "weight": 2.268104429339754,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "yaw_rate__lag_1",
+              "weight": -1.3705316549817856,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_1",
+              "weight": -0.08468942777695525,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": 0.0638714268338778,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch__lag_2",
+              "weight": 0.02692509354048478,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "median_test_r2": 0.9062920731828893,
+  "median_test_mse": 0.0004197305165416054,
+  "median_test_mae": 0.004473141597369942,
+  "coefficient_stability": 0.9638157894736843,
+  "nonzero_count": 0,
+  "sparsity_ratio": 1.0,
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 2285.353384169222,
+  "condition_number": 2285.353384169222,
+  "raw_singular_values": [
+    290.15822441470596,
+    199.54099110680016,
+    191.5456256285201,
+    177.92356186905022,
+    175.24938861811435,
+    169.19819390754648,
+    146.87106809664067,
+    137.71391237333754,
+    132.71364473393643,
+    128.50924269277058
+  ],
+  "singular_values": [
+    269.55733614143645,
+    197.89833985772808,
+    175.3716712714956,
+    169.2641768157327,
+    153.8944529243163,
+    147.78175794585442,
+    139.05045357570572,
+    132.13769718388727,
+    129.46940354354135,
+    125.60888027473955
+  ],
+  "effective_singular_values": [
+    269.55733614143645,
+    197.89833985772808,
+    175.3716712714956,
+    169.2641768157327,
+    153.8944529243163,
+    147.78175794585442,
+    139.05045357570572,
+    132.13769718388727,
+    129.46940354354135,
+    125.60888027473955
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "altitude__lag_1",
+    "altitude__lag_2",
+    "altitude__lag_3",
+    "vertical_speed",
+    "vertical_speed__lag_1",
+    "vertical_speed__lag_2",
+    "vertical_speed__lag_3"
+  ],
+  "conditioning_baseline_drops": [],
+  "conditioning_extra_pruned_features": [
+    "altitude__lag_1",
+    "altitude__lag_2",
+    "altitude__lag_3",
+    "vertical_speed__lag_1",
+    "vertical_speed__lag_2",
+    "vertical_speed__lag_3"
+  ],
+  "backend_consistency": {
+    "px4": {
+      "r2": 0.9841332927443003,
+      "mse": 0.0011379316021363948,
+      "mae": 0.014631092840964026,
+      "residual_mean_abs": 0.014631092840964026,
+      "residual_std": 0.032019043295846566,
+      "residual_max_abs": 1.0261230503847463,
+      "sample_count": 18503.0
+    }
+  },
+  "mode_consistency": {
+    "OFFBOARD_ATTITUDE": {
+      "r2": 0.9937174692518199,
+      "mse": 0.0007278086886917177,
+      "mae": 0.006278005672676177,
+      "residual_mean_abs": 0.006278005672676177,
+      "residual_std": 0.026976788933340514,
+      "residual_max_abs": 1.0261230503847463,
+      "sample_count": 9039.0
+    },
+    "POSCTL": {
+      "r2": -4.344003267936518,
+      "mse": 0.0015296371193200841,
+      "mae": 0.022609067789627787,
+      "residual_mean_abs": 0.022609067789627787,
+      "residual_std": 0.03329544237229324,
+      "residual_max_abs": 0.3070650902025259,
+      "sample_count": 9464.0
+    }
+  },
+  "scenario_consistency": 0.9924469456548998,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": 0.9824586289657418,
+      "mse": 0.0012398727803646877,
+      "mae": 0.015178661784417308,
+      "residual_mean_abs": 0.015178661784417308,
+      "residual_std": 0.03352208137609097,
+      "residual_max_abs": 1.0261230503847463,
+      "sample_count": 7028.0
+    },
+    "nominal": {
+      "r2": 0.9864597108315901,
+      "mse": 0.0010003588549864668,
+      "mae": 0.014181812258998967,
+      "residual_mean_abs": 0.014181812258998967,
+      "residual_std": 0.029878733124667756,
+      "residual_max_abs": 0.8082315309447334,
+      "sample_count": 9233.0
+    },
+    "throttle_biased": {
+      "r2": 0.9790089270264273,
+      "mse": 0.00138492828984685,
+      "mae": 0.014764854249837242,
+      "residual_mean_abs": 0.014764854249837242,
+      "residual_std": 0.0355165942670254,
+      "residual_max_abs": 0.8380364291116453,
+      "sample_count": 2242.0
+    }
+  },
+  "top_influential": {},
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

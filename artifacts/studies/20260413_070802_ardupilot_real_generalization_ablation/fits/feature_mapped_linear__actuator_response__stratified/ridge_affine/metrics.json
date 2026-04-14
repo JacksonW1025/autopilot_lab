@@ -1,0 +1,1877 @@
+{
+  "x_schema": "feature_mapped_linear",
+  "y_schema": "actuator_response",
+  "pooling_mode": "stratified",
+  "model_name": "ridge_affine",
+  "feature_names": [
+    "command_roll",
+    "command_pitch",
+    "command_yaw",
+    "command_throttle",
+    "roll",
+    "pitch",
+    "yaw",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate",
+    "position_x",
+    "position_y",
+    "position_z",
+    "velocity_x",
+    "velocity_y",
+    "velocity_z",
+    "altitude",
+    "vertical_speed",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize",
+    "clip__command_roll",
+    "sq__command_roll",
+    "clip__command_pitch",
+    "sq__command_pitch",
+    "clip__command_yaw",
+    "sq__command_yaw",
+    "clip__command_throttle",
+    "sq__command_throttle",
+    "sq__roll",
+    "sq__pitch",
+    "sq__yaw",
+    "sq__roll_rate",
+    "sq__pitch_rate",
+    "sq__yaw_rate",
+    "backend_ardupilot__command_roll",
+    "backend_ardupilot__command_pitch",
+    "backend_ardupilot__command_yaw",
+    "backend_ardupilot__command_throttle"
+  ],
+  "response_names": [
+    "actuator_1",
+    "actuator_2",
+    "actuator_3",
+    "actuator_4"
+  ],
+  "schema_metadata": {
+    "x_schema": "feature_mapped_linear",
+    "y_schema": "actuator_response",
+    "feature_count": 40,
+    "response_count": 4,
+    "strict_raw_linear": false,
+    "requested_feature_columns": [
+      "command_roll",
+      "command_pitch",
+      "command_yaw",
+      "command_throttle",
+      "roll",
+      "pitch",
+      "yaw",
+      "roll_rate",
+      "pitch_rate",
+      "yaw_rate",
+      "position_x",
+      "position_y",
+      "position_z",
+      "velocity_x",
+      "velocity_y",
+      "velocity_z",
+      "altitude",
+      "vertical_speed",
+      "heading",
+      "backend_ardupilot",
+      "mode_guided_nogps",
+      "mode_stabilize"
+    ],
+    "requested_response_columns": [
+      "actuator_1",
+      "actuator_2",
+      "actuator_3",
+      "actuator_4"
+    ],
+    "dropped_unavailable_features": [],
+    "dropped_unavailable_responses": [],
+    "partial_feature_columns": {},
+    "partial_response_columns": {},
+    "dropped_response_leakage_features": [],
+    "dropped_zero_variance_features": [
+      "backend_ardupilot"
+    ]
+  },
+  "group_results": [
+    {
+      "group_key": [
+        "GUIDED_NOGPS"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": 0.9961808906960595,
+              "mse": 7.292286172686757e-10,
+              "mae": 1.8266816669718926e-05,
+              "residual_mean_abs": 1.8266816669718926e-05,
+              "residual_std": 2.7004233321253093e-05,
+              "residual_max_abs": 0.0001577082590235035
+            },
+            "val": {
+              "r2": 0.028426238273770332,
+              "mse": 1.0785254327555284e-07,
+              "mae": 0.00026563341677308234,
+              "residual_mean_abs": 0.00026563341677308234,
+              "residual_std": 0.0003260114988423343,
+              "residual_max_abs": 0.000660864606178091
+            },
+            "test": {
+              "r2": -0.4770080950821811,
+              "mse": 2.4594648585183023e-07,
+              "mae": 0.00027594799795214737,
+              "residual_mean_abs": 0.00027594799795214737,
+              "residual_std": 0.00044712595402534856,
+              "residual_max_abs": 0.0013871676652054132
+            },
+            "condition_number": 22003611928.720966,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              106.98762165077224,
+              102.69772058723478,
+              83.99577700157619,
+              78.03373868580388,
+              69.24478852858488,
+              61.56413367838114,
+              61.23162436165452,
+              57.07980610660473,
+              55.870270618686895,
+              42.456860269303135
+            ],
+            "effective_condition_number": 22003611928.720966,
+            "singular_values": [
+              89.58363734778584,
+              79.16728880050492,
+              71.51352495995646,
+              60.32141156558136,
+              52.36868240838574,
+              50.0610514591069,
+              45.662207124686105,
+              42.77202682729928,
+              40.3487701669006,
+              34.76826891254325
+            ],
+            "effective_singular_values": [
+              89.58363734778584,
+              79.16728880050492,
+              71.51352495995646,
+              60.32141156558136,
+              52.36868240838574,
+              50.0610514591069,
+              45.662207124686105,
+              42.77202682729928,
+              40.3487701669006,
+              34.76826891254325
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps",
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": 0.9833168148833911,
+              "mse": 2.66604589725862e-09,
+              "mae": 2.5837588978500323e-05,
+              "residual_mean_abs": 2.5837588978500323e-05,
+              "residual_std": 5.1633767025645335e-05,
+              "residual_max_abs": 0.00033497332278265013
+            },
+            "val": {
+              "r2": -0.43544100080550585,
+              "mse": 3.1891620224403987e-07,
+              "mae": 0.000380440762436135,
+              "residual_mean_abs": 0.000380440762436135,
+              "residual_std": 0.0005609001129250527,
+              "residual_max_abs": 0.0013630076892352516
+            },
+            "test": {
+              "r2": -3.3789151366200914,
+              "mse": 7.30459379730758e-07,
+              "mae": 0.0005700540681166314,
+              "residual_mean_abs": 0.0005700540681166314,
+              "residual_std": 0.0007360314673847092,
+              "residual_max_abs": 0.002307445231661598
+            },
+            "condition_number": 4232969270.4452143,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              105.9264882839755,
+              98.15461258036103,
+              87.74949984720787,
+              78.91360312311264,
+              70.01728685916676,
+              69.77996804883563,
+              61.01923239458304,
+              55.67897850356806,
+              50.764184544065394,
+              44.50765643005574
+            ],
+            "effective_condition_number": 4232969270.4452143,
+            "singular_values": [
+              84.52398300779515,
+              76.30786050506056,
+              73.36984400490384,
+              61.3879220729836,
+              57.52103892908209,
+              49.07664671693258,
+              46.81879340518359,
+              45.43657351973204,
+              40.084422259317876,
+              36.79938690088414
+            ],
+            "effective_singular_values": [
+              84.52398300779515,
+              76.30786050506056,
+              73.36984400490384,
+              61.3879220729836,
+              57.52103892908209,
+              49.07664671693258,
+              46.81879340518359,
+              45.43657351973204,
+              40.084422259317876,
+              36.79938690088414
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps",
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch_rate",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch_rate",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 1712,
+            "val_count": 574,
+            "test_count": 574
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 1720,
+            "val_count": 571,
+            "test_count": 569
+          }
+        ],
+        "median_test_r2": -1.9279616158511361,
+        "median_test_mse": 4.882029327912941e-07,
+        "median_test_mae": 0.0004230010330343894,
+        "coefficient_stability": 0.967948717948718,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 13118290599.58309,
+        "condition_number": 13118290599.58309,
+        "raw_singular_values": [
+          106.98762165077224,
+          102.69772058723478,
+          83.99577700157619,
+          78.03373868580388,
+          69.24478852858488,
+          61.56413367838114,
+          61.23162436165452,
+          57.07980610660473,
+          55.870270618686895,
+          42.456860269303135
+        ],
+        "singular_values": [
+          89.58363734778584,
+          79.16728880050492,
+          71.51352495995646,
+          60.32141156558136,
+          52.36868240838574,
+          50.0610514591069,
+          45.662207124686105,
+          42.77202682729928,
+          40.3487701669006,
+          34.76826891254325
+        ],
+        "effective_singular_values": [
+          89.58363734778584,
+          79.16728880050492,
+          71.51352495995646,
+          60.32141156558136,
+          52.36868240838574,
+          50.0610514591069,
+          45.662207124686105,
+          42.77202682729928,
+          40.3487701669006,
+          34.76826891254325
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "backend_ardupilot__command_pitch",
+          "backend_ardupilot__command_roll",
+          "backend_ardupilot__command_throttle",
+          "backend_ardupilot__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "heading",
+          "mode_guided_nogps",
+          "mode_stabilize",
+          "sq__pitch",
+          "sq__pitch_rate",
+          "sq__roll",
+          "sq__yaw_rate",
+          "vertical_speed"
+        ],
+        "conditioning_baseline_drops": [
+          "backend_ardupilot__command_pitch",
+          "mode_guided_nogps"
+        ],
+        "conditioning_extra_pruned_features": [
+          "backend_ardupilot__command_roll",
+          "backend_ardupilot__command_throttle",
+          "backend_ardupilot__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "heading",
+          "mode_stabilize",
+          "sq__pitch",
+          "sq__pitch_rate",
+          "sq__roll",
+          "sq__yaw_rate"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "ardupilot": {
+            "r2": 0.5518716812021178,
+            "mse": 8.545809943138508e-08,
+            "mae": 0.00015428525197395225,
+            "residual_mean_abs": 0.00015428525197395225,
+            "residual_std": 0.00028247607573790015,
+            "residual_max_abs": 0.0011985413418579283,
+            "sample_count": 2860.0
+          }
+        },
+        "mode_consistency": {
+          "GUIDED_NOGPS": {
+            "r2": 0.5518716812021178,
+            "mse": 8.545809943138508e-08,
+            "mae": 0.00015428525197395225,
+            "residual_mean_abs": 0.00015428525197395225,
+            "residual_std": 0.00028247607573790015,
+            "residual_max_abs": 0.0011985413418579283,
+            "sample_count": 2860.0
+          }
+        },
+        "scenario_consistency": 0.2091099579878462,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": 0.4614025975861231,
+            "mse": 4.2797423958810434e-08,
+            "mae": 0.00011055027358180268,
+            "residual_mean_abs": 0.00011055027358180268,
+            "residual_std": 0.00019070155504927785,
+            "residual_max_abs": 0.0006078085019617374,
+            "sample_count": 951.0
+          },
+          "nominal": {
+            "r2": 0.13791766057982613,
+            "mse": 1.7223357463574926e-07,
+            "mae": 0.00023642945945097412,
+            "residual_mean_abs": 0.00023642945945097412,
+            "residual_std": 0.0004046227848681178,
+            "residual_max_abs": 0.0011985413418579283,
+            "sample_count": 957.0
+          },
+          "throttle_biased": {
+            "r2": 0.6595461158661899,
+            "mse": 4.0842734519454395e-08,
+            "mae": 0.00011539865312460803,
+            "residual_mean_abs": 0.00011539865312460803,
+            "residual_std": 0.0001949512416423089,
+            "residual_max_abs": 0.0005904028807750539,
+            "sample_count": 952.0
+          }
+        },
+        "top_influential": {
+          "actuator_1": [
+            {
+              "feature": "sq__pitch",
+              "weight": 2.9295800035578607,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.18870916982496938,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": -0.16904208560000675,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll",
+              "weight": 0.04717729245320272,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.04207631071195431,
+              "selection_frequency": 0.0
+            }
+          ],
+          "actuator_2": [
+            {
+              "feature": "sq__pitch",
+              "weight": -0.4519448036269669,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.057731749043402183,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll",
+              "weight": 0.014432937260745146,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.013155526450223729,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__command_yaw",
+              "weight": -0.011065429646335199,
+              "selection_frequency": 0.0
+            }
+          ],
+          "actuator_3": [
+            {
+              "feature": "sq__pitch",
+              "weight": -0.0853508527294584,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": -0.05988297355480672,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.03233834029019982,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "roll",
+              "weight": -0.01497074338818353,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 0.005973296684232853,
+              "selection_frequency": 0.0
+            }
+          ],
+          "actuator_4": [
+            {
+              "feature": "sq__pitch",
+              "weight": 0.8865877446962003,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch",
+              "weight": -0.06020899642112347,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__pitch_rate",
+              "weight": 0.030882513458127092,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "sq__roll",
+              "weight": 0.023369687915532074,
+              "selection_frequency": 0.0
+            },
+            {
+              "feature": "pitch_rate",
+              "weight": 0.012794080094000716,
+              "selection_frequency": 0.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "group_key": [
+        "STABILIZE"
+      ],
+      "summary": {
+        "model_name": "ridge_affine",
+        "repeat_metrics": [
+          {
+            "repeat_index": 1,
+            "train": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "val": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "test": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "condition_number": 3101592.1414367426,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              121.36593750246844,
+              101.38047149229475,
+              92.85099114137799,
+              77.20137812690197,
+              69.11986574901485,
+              63.39240747217557,
+              59.17548891682188,
+              48.44330630761453,
+              39.96984006157275,
+              33.49465195217289
+            ],
+            "effective_condition_number": 3101592.1414367426,
+            "singular_values": [
+              83.91912405498871,
+              60.18807153141631,
+              59.386549989593576,
+              49.3113129006873,
+              42.795527525600725,
+              41.388404173149894,
+              40.854176974362744,
+              37.716655063204996,
+              31.429472415314468,
+              24.59417498323526
+            ],
+            "effective_singular_values": [
+              83.91912405498871,
+              60.18807153141631,
+              59.386549989593576,
+              49.3113129006873,
+              42.795527525600725,
+              41.388404173149894,
+              40.854176974362744,
+              37.716655063204996,
+              31.429472415314468,
+              24.59417498323526
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps",
+              "pitch",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch",
+              "sq__yaw",
+              "sq__roll_rate",
+              "sq__pitch_rate",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "pitch",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch",
+              "sq__yaw",
+              "sq__roll_rate",
+              "sq__pitch_rate",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ]
+          },
+          {
+            "repeat_index": 2,
+            "train": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "val": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "test": {
+              "r2": NaN,
+              "mse": 0.0,
+              "mae": 0.0,
+              "residual_mean_abs": 0.0,
+              "residual_std": 0.0,
+              "residual_max_abs": 0.0
+            },
+            "condition_number": 2491.8918776828523,
+            "raw_condition_number": Infinity,
+            "raw_singular_values": [
+              117.29692289738641,
+              101.23240587874974,
+              93.73405561301982,
+              77.43442994519,
+              72.47567782092307,
+              66.7127463554264,
+              58.646609720235126,
+              47.28436845351674,
+              37.529893548040974,
+              34.76152302114971
+            ],
+            "effective_condition_number": 2491.8918776828523,
+            "singular_values": [
+              68.06658387696729,
+              61.346030917184365,
+              60.35268441564583,
+              53.281073317671776,
+              43.07935654745031,
+              41.32795663954389,
+              41.100140815060826,
+              38.11831294819259,
+              31.839522704338652,
+              23.495633200483805
+            ],
+            "effective_singular_values": [
+              68.06658387696729,
+              61.346030917184365,
+              60.35268441564583,
+              53.281073317671776,
+              43.07935654745031,
+              41.32795663954389,
+              41.100140815060826,
+              38.11831294819259,
+              31.839522704338652,
+              23.495633200483805
+            ],
+            "conditioning_pruned_features": [
+              "altitude",
+              "vertical_speed",
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps",
+              "pitch",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch",
+              "sq__yaw",
+              "sq__roll_rate",
+              "sq__pitch_rate",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ],
+            "conditioning_baseline_drops": [
+              "backend_ardupilot__command_pitch",
+              "mode_guided_nogps"
+            ],
+            "conditioning_extra_pruned_features": [
+              "pitch",
+              "yaw_rate",
+              "position_y",
+              "position_z",
+              "velocity_x",
+              "velocity_y",
+              "heading",
+              "mode_stabilize",
+              "clip__command_roll",
+              "clip__command_pitch",
+              "clip__command_yaw",
+              "clip__command_throttle",
+              "sq__roll",
+              "sq__pitch",
+              "sq__yaw",
+              "sq__roll_rate",
+              "sq__pitch_rate",
+              "sq__yaw_rate",
+              "backend_ardupilot__command_roll",
+              "backend_ardupilot__command_yaw",
+              "backend_ardupilot__command_throttle"
+            ]
+          }
+        ],
+        "split_records": [
+          {
+            "repeat_index": 1,
+            "train_count": 1713,
+            "val_count": 569,
+            "test_count": 571
+          },
+          {
+            "repeat_index": 2,
+            "train_count": 1708,
+            "val_count": 572,
+            "test_count": 573
+          }
+        ],
+        "median_test_r2": NaN,
+        "median_test_mse": 0.0,
+        "median_test_mae": 0.0,
+        "coefficient_stability": 1.0,
+        "nonzero_count": 0,
+        "sparsity_ratio": 1.0,
+        "block_sparsity_summary": {
+          "feature_blocks": {
+            "commands": 4,
+            "state": 6,
+            "history": 0,
+            "controller_params": 0
+          }
+        },
+        "raw_condition_number": Infinity,
+        "effective_condition_number": 1552042.0166572127,
+        "condition_number": 1552042.0166572127,
+        "raw_singular_values": [
+          121.36593750246844,
+          101.38047149229475,
+          92.85099114137799,
+          77.20137812690197,
+          69.11986574901485,
+          63.39240747217557,
+          59.17548891682188,
+          48.44330630761453,
+          39.96984006157275,
+          33.49465195217289
+        ],
+        "singular_values": [
+          83.91912405498871,
+          60.18807153141631,
+          59.386549989593576,
+          49.3113129006873,
+          42.795527525600725,
+          41.388404173149894,
+          40.854176974362744,
+          37.716655063204996,
+          31.429472415314468,
+          24.59417498323526
+        ],
+        "effective_singular_values": [
+          83.91912405498871,
+          60.18807153141631,
+          59.386549989593576,
+          49.3113129006873,
+          42.795527525600725,
+          41.388404173149894,
+          40.854176974362744,
+          37.716655063204996,
+          31.429472415314468,
+          24.59417498323526
+        ],
+        "conditioning_pruned_features": [
+          "altitude",
+          "backend_ardupilot__command_pitch",
+          "backend_ardupilot__command_roll",
+          "backend_ardupilot__command_throttle",
+          "backend_ardupilot__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "heading",
+          "mode_guided_nogps",
+          "mode_stabilize",
+          "pitch",
+          "position_y",
+          "position_z",
+          "sq__pitch",
+          "sq__pitch_rate",
+          "sq__roll",
+          "sq__roll_rate",
+          "sq__yaw",
+          "sq__yaw_rate",
+          "velocity_x",
+          "velocity_y",
+          "vertical_speed",
+          "yaw_rate"
+        ],
+        "conditioning_baseline_drops": [
+          "backend_ardupilot__command_pitch",
+          "mode_guided_nogps"
+        ],
+        "conditioning_extra_pruned_features": [
+          "backend_ardupilot__command_roll",
+          "backend_ardupilot__command_throttle",
+          "backend_ardupilot__command_yaw",
+          "clip__command_pitch",
+          "clip__command_roll",
+          "clip__command_throttle",
+          "clip__command_yaw",
+          "heading",
+          "mode_stabilize",
+          "pitch",
+          "position_y",
+          "position_z",
+          "sq__pitch",
+          "sq__pitch_rate",
+          "sq__roll",
+          "sq__roll_rate",
+          "sq__yaw",
+          "sq__yaw_rate",
+          "velocity_x",
+          "velocity_y",
+          "yaw_rate"
+        ],
+        "selection_frequency": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "backend_consistency": {
+          "ardupilot": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 2853.0
+          }
+        },
+        "mode_consistency": {
+          "STABILIZE": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 2853.0
+          }
+        },
+        "scenario_consistency": NaN,
+        "scenario_subgroup_metrics": {
+          "dynamic": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 953.0
+          },
+          "nominal": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 955.0
+          },
+          "throttle_biased": {
+            "r2": NaN,
+            "mse": 0.0,
+            "mae": 0.0,
+            "residual_mean_abs": 0.0,
+            "residual_std": 0.0,
+            "residual_max_abs": 0.0,
+            "sample_count": 945.0
+          }
+        },
+        "top_influential": {
+          "actuator_1": [],
+          "actuator_2": [],
+          "actuator_3": [],
+          "actuator_4": []
+        }
+      }
+    }
+  ],
+  "median_test_r2": NaN,
+  "median_test_mse": 2.4410146639564707e-07,
+  "median_test_mae": 0.0002115005165171947,
+  "coefficient_stability": 0.983974358974359,
+  "nonzero_count": 0,
+  "sparsity_ratio": 1.0,
+  "raw_condition_number": Infinity,
+  "effective_condition_number": 6559921320.799873,
+  "condition_number": 6559921320.799873,
+  "raw_singular_values": [
+    106.98762165077224,
+    102.69772058723478,
+    83.99577700157619,
+    78.03373868580388,
+    69.24478852858488,
+    61.56413367838114,
+    61.23162436165452,
+    57.07980610660473,
+    55.870270618686895,
+    42.456860269303135
+  ],
+  "singular_values": [
+    89.58363734778584,
+    79.16728880050492,
+    71.51352495995646,
+    60.32141156558136,
+    52.36868240838574,
+    50.0610514591069,
+    45.662207124686105,
+    42.77202682729928,
+    40.3487701669006,
+    34.76826891254325
+  ],
+  "effective_singular_values": [
+    89.58363734778584,
+    79.16728880050492,
+    71.51352495995646,
+    60.32141156558136,
+    52.36868240838574,
+    50.0610514591069,
+    45.662207124686105,
+    42.77202682729928,
+    40.3487701669006,
+    34.76826891254325
+  ],
+  "conditioning_pruned_features": [
+    "altitude",
+    "backend_ardupilot__command_pitch",
+    "backend_ardupilot__command_roll",
+    "backend_ardupilot__command_throttle",
+    "backend_ardupilot__command_yaw",
+    "clip__command_pitch",
+    "clip__command_roll",
+    "clip__command_throttle",
+    "clip__command_yaw",
+    "heading",
+    "mode_guided_nogps",
+    "mode_stabilize",
+    "pitch",
+    "position_y",
+    "position_z",
+    "sq__pitch",
+    "sq__pitch_rate",
+    "sq__roll",
+    "sq__roll_rate",
+    "sq__yaw",
+    "sq__yaw_rate",
+    "velocity_x",
+    "velocity_y",
+    "vertical_speed",
+    "yaw_rate"
+  ],
+  "conditioning_baseline_drops": [
+    "backend_ardupilot__command_pitch",
+    "mode_guided_nogps"
+  ],
+  "conditioning_extra_pruned_features": [
+    "backend_ardupilot__command_roll",
+    "backend_ardupilot__command_throttle",
+    "backend_ardupilot__command_yaw",
+    "clip__command_pitch",
+    "clip__command_roll",
+    "clip__command_throttle",
+    "clip__command_yaw",
+    "heading",
+    "mode_stabilize",
+    "pitch",
+    "position_y",
+    "position_z",
+    "sq__pitch",
+    "sq__pitch_rate",
+    "sq__roll",
+    "sq__roll_rate",
+    "sq__yaw",
+    "sq__yaw_rate",
+    "velocity_x",
+    "velocity_y",
+    "yaw_rate"
+  ],
+  "backend_consistency": {
+    "ardupilot": {
+      "r2": -0.13255085740370598,
+      "mse": 0.09766563079152067,
+      "mae": 0.3104100030964231,
+      "residual_mean_abs": 0.3104100030964231,
+      "residual_std": 0.31208679312102955,
+      "residual_max_abs": 0.38437726289114327,
+      "sample_count": 5713.0
+    }
+  },
+  "mode_consistency": {
+    "GUIDED_NOGPS": {
+      "r2": -452318.3007797882,
+      "mse": 0.08625731996689068,
+      "mae": 0.29369580738994683,
+      "residual_mean_abs": 0.29369580738994683,
+      "residual_std": 0.0003044477917351742,
+      "residual_max_abs": 0.29459927067092895,
+      "sample_count": 2860.0
+    },
+    "STABILIZE": {
+      "r2": NaN,
+      "mse": 0.10910193256454616,
+      "mae": 0.3271652080457822,
+      "residual_mean_abs": 0.3271652080457822,
+      "residual_std": 0.04544072192325079,
+      "residual_max_abs": 0.38437726289114327,
+      "sample_count": 2853.0
+    }
+  },
+  "scenario_consistency": 0.0,
+  "scenario_subgroup_metrics": {
+    "dynamic": {
+      "r2": -0.13273513802875092,
+      "mse": 0.0976924300352769,
+      "mae": 0.3104499916305439,
+      "residual_mean_abs": 0.3104499916305439,
+      "residual_std": 0.3120928333236655,
+      "residual_max_abs": 0.38436914661789157,
+      "sample_count": 1904.0
+    },
+    "nominal": {
+      "r2": -0.13260796541074904,
+      "mse": 0.09766495082053062,
+      "mae": 0.3104087679685268,
+      "residual_mean_abs": 0.3104087679685268,
+      "residual_std": 0.3120830061972434,
+      "residual_max_abs": 0.38437726289114327,
+      "sample_count": 1912.0
+    },
+    "throttle_biased": {
+      "r2": -0.1323212522618895,
+      "mse": 0.09763941800523761,
+      "mae": 0.3103711118974622,
+      "residual_mean_abs": 0.3103711118974622,
+      "residual_std": 0.3120828920495575,
+      "residual_max_abs": 0.38431665555446504,
+      "sample_count": 1897.0
+    }
+  },
+  "top_influential": {},
+  "selection_frequency": [
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ]
+}

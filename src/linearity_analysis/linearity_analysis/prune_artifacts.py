@@ -113,9 +113,12 @@ def build_prune_payload(
     *,
     workspace_root: Path = WORKSPACE_ROOT,
     doc_paths: list[Path] | None = None,
+    include_source_runs: bool = True,
 ) -> dict[str, Any]:
     docs = doc_paths or CANONICAL_DOCS
-    keep_reasons = _extend_keep_with_study_sources(_collect_doc_references(docs))
+    keep_reasons = _collect_doc_references(docs)
+    if include_source_runs:
+        keep_reasons = _extend_keep_with_study_sources(keep_reasons)
     keep_dirs = sorted(keep_reasons)
     managed_dirs = [path.resolve() for path in _managed_directories()]
     keep_set = {path.resolve() for path in keep_dirs}
@@ -140,6 +143,7 @@ def build_prune_payload(
     return {
         "workspace_root": str(workspace_root.resolve()),
         "docs": [str(path.resolve()) for path in docs if path.exists()],
+        "include_source_runs": include_source_runs,
         "keep_count": len(keep_entries),
         "drop_count": len(drop_entries),
         "keep_bytes": sum(item["size_bytes"] for item in keep_entries),
@@ -192,10 +196,15 @@ def main(argv: list[str] | None = None) -> None:
         default=WORKSPACE_ROOT / "metadata" / "artifact_prune",
         help="Directory for keep/drop manifests.",
     )
+    parser.add_argument(
+        "--exclude-source-runs",
+        action="store_true",
+        help="Do not keep transitive raw source runs referenced by study manifests.",
+    )
     parser.add_argument("--apply", action="store_true", help="Delete drop candidates after writing manifests.")
     args = parser.parse_args(argv)
 
-    payload = build_prune_payload()
+    payload = build_prune_payload(include_source_runs=not args.exclude_source_runs)
     output_dir = args.output_dir.expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     keep_path = output_dir / "keep_manifest.json"
@@ -205,6 +214,7 @@ def main(argv: list[str] | None = None) -> None:
         {
             "workspace_root": payload["workspace_root"],
             "docs": payload["docs"],
+            "include_source_runs": payload["include_source_runs"],
             "keep_count": payload["keep_count"],
             "keep_bytes": payload["keep_bytes"],
             "keep": payload["keep"],
@@ -214,6 +224,7 @@ def main(argv: list[str] | None = None) -> None:
         drop_path,
         {
             "workspace_root": payload["workspace_root"],
+            "include_source_runs": payload["include_source_runs"],
             "drop_count": payload["drop_count"],
             "drop_bytes": payload["drop_bytes"],
             "drop": payload["drop"],

@@ -1,0 +1,3179 @@
+study_name: ardupilot_state_evolution_stabilize_baseline
+study_id: 20260413_115811_ardupilot_state_evolution_stabilize_baseline
+source_run_dirs:
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114104_ardupilot_manual_multi_broad_composite_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114138_ardupilot_manual_multi_broad_composite_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114212_ardupilot_manual_multi_broad_composite_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114247_ardupilot_manual_multi_broad_composite_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114321_ardupilot_manual_multi_broad_composite_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114355_ardupilot_manual_multi_broad_composite_r6
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114429_ardupilot_manual_multi_broad_composite_r7
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114503_ardupilot_manual_multi_broad_composite_r8
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114537_ardupilot_manual_multi_broad_composite_r9
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114612_ardupilot_manual_multi_broad_composite_r10
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114646_ardupilot_manual_multi_broad_composite_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114720_ardupilot_manual_multi_broad_composite_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114754_ardupilot_manual_multi_broad_composite_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114828_ardupilot_manual_multi_broad_composite_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114902_ardupilot_manual_multi_broad_composite_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_114937_ardupilot_manual_multi_broad_composite_r6
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115011_ardupilot_manual_multi_broad_composite_r7
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115045_ardupilot_manual_multi_broad_composite_r8
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115119_ardupilot_manual_multi_broad_composite_r9
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115154_ardupilot_manual_multi_broad_composite_r10
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115228_ardupilot_manual_multi_broad_composite_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115302_ardupilot_manual_multi_broad_composite_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115336_ardupilot_manual_multi_broad_composite_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115410_ardupilot_manual_multi_broad_composite_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115444_ardupilot_manual_multi_broad_composite_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115519_ardupilot_manual_multi_broad_composite_r6
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115553_ardupilot_manual_multi_broad_composite_r7
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115627_ardupilot_manual_multi_broad_composite_r8
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115701_ardupilot_manual_multi_broad_composite_r9
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260413_115735_ardupilot_manual_multi_broad_composite_r10
+source_backends:
+- ardupilot
+source_modes:
+- STABILIZE
+source_scenarios:
+- dynamic
+- nominal
+- throttle_biased
+source_config_profiles:
+- ardupilot_state_evolution_stabilize_dynamic_baseline
+- ardupilot_state_evolution_stabilize_nominal_baseline
+- ardupilot_state_evolution_stabilize_throttle_biased_baseline
+source_seeds:
+- 201
+- 301
+- 401
+report_matrix:
+  x_schemas:
+  - commands_plus_state_history
+  - full_augmented
+  y_schemas:
+  - next_raw_state
+  - selected_state_subset
+  models:
+  - ols_affine
+  - ridge_affine
+  - lasso_affine
+  pooling_modes:
+  - pooled
+  stratify_by:
+  - mode
+  repeat_count: 1
+  appendix_x_schemas: []
+summary:
+  best_result: &id007
+    x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    pooling_mode: pooled
+    model_name: ols_affine
+    appendix: false
+    summary:
+      x_schema: commands_plus_state_history
+      y_schema: selected_state_subset
+      pooling_mode: pooled
+      model_name: ols_affine
+      feature_names:
+      - command_roll
+      - command_pitch
+      - command_yaw
+      - command_throttle
+      - roll
+      - pitch
+      - yaw
+      - roll_rate
+      - pitch_rate
+      - yaw_rate
+      - position_x
+      - position_y
+      - position_z
+      - velocity_z
+      - altitude
+      - vertical_speed
+      - heading
+      - command_roll__lag_1
+      - command_pitch__lag_1
+      - command_yaw__lag_1
+      - command_throttle__lag_1
+      - roll__lag_1
+      - pitch__lag_1
+      - yaw__lag_1
+      - roll_rate__lag_1
+      - pitch_rate__lag_1
+      - yaw_rate__lag_1
+      - position_x__lag_1
+      - position_y__lag_1
+      - position_z__lag_1
+      - velocity_z__lag_1
+      - altitude__lag_1
+      - vertical_speed__lag_1
+      - heading__lag_1
+      - command_roll__lag_2
+      - command_pitch__lag_2
+      - command_yaw__lag_2
+      - command_throttle__lag_2
+      - roll__lag_2
+      - pitch__lag_2
+      - yaw__lag_2
+      - roll_rate__lag_2
+      - pitch_rate__lag_2
+      - yaw_rate__lag_2
+      - position_x__lag_2
+      - position_y__lag_2
+      - position_z__lag_2
+      - velocity_z__lag_2
+      - altitude__lag_2
+      - vertical_speed__lag_2
+      - heading__lag_2
+      - command_roll__lag_3
+      - command_pitch__lag_3
+      - command_yaw__lag_3
+      - command_throttle__lag_3
+      - roll__lag_3
+      - pitch__lag_3
+      - yaw__lag_3
+      - roll_rate__lag_3
+      - pitch_rate__lag_3
+      - yaw_rate__lag_3
+      - position_x__lag_3
+      - position_y__lag_3
+      - position_z__lag_3
+      - velocity_z__lag_3
+      - altitude__lag_3
+      - vertical_speed__lag_3
+      - heading__lag_3
+      response_names:
+      - future_state_roll
+      - future_state_pitch
+      - future_state_yaw
+      - future_state_roll_rate
+      - future_state_pitch_rate
+      - future_state_yaw_rate
+      schema_metadata:
+        x_schema: commands_plus_state_history
+        y_schema: selected_state_subset
+        feature_count: 76
+        response_count: 6
+        strict_raw_linear: true
+        requested_feature_columns:
+        - command_roll
+        - command_pitch
+        - command_yaw
+        - command_throttle
+        - roll
+        - pitch
+        - yaw
+        - roll_rate
+        - pitch_rate
+        - yaw_rate
+        - position_x
+        - position_y
+        - position_z
+        - velocity_x
+        - velocity_y
+        - velocity_z
+        - altitude
+        - vertical_speed
+        - heading
+        requested_response_columns:
+        - future_state_roll
+        - future_state_pitch
+        - future_state_yaw
+        - future_state_roll_rate
+        - future_state_pitch_rate
+        - future_state_yaw_rate
+        dropped_unavailable_features: []
+        dropped_unavailable_responses: []
+        partial_feature_columns: {}
+        partial_response_columns:
+          future_state_roll: 0.9893352292925702
+          future_state_pitch: 0.9893352292925702
+          future_state_yaw: 0.9893352292925702
+          future_state_roll_rate: 0.9893352292925702
+          future_state_pitch_rate: 0.9893352292925702
+          future_state_yaw_rate: 0.9893352292925702
+        dropped_response_leakage_features: []
+        dropped_zero_variance_features:
+        - velocity_x
+        - velocity_y
+        - velocity_x__lag_1
+        - velocity_y__lag_1
+        - velocity_x__lag_2
+        - velocity_y__lag_2
+        - velocity_x__lag_3
+        - velocity_y__lag_3
+      repeat_metrics:
+      - repeat_index: 1
+        train:
+          r2: 1.0
+          mse: 5.645323043679887e-29
+          mae: 3.1125175009170607e-15
+          residual_mean_abs: 3.1125175009170607e-15
+          residual_std: 6.8395802633851084e-15
+          residual_max_abs: 2.842170943040401e-14
+        val:
+          r2: 1.0
+          mse: 5.070187142641371e-29
+          mae: 2.9854222379656424e-15
+          residual_mean_abs: 2.9854222379656424e-15
+          residual_std: 6.465518578565857e-15
+          residual_max_abs: 2.842170943040401e-14
+        test:
+          r2: 0.999998040907917
+          mse: 2.640955415679555e-16
+          mae: 4.789233368416094e-09
+          residual_mean_abs: 4.789233368416094e-09
+          residual_std: 1.6231240977211196e-08
+          residual_max_abs: 6.476329872384667e-08
+        condition_number: 870.7074637220213
+        raw_condition_number: .inf
+        raw_singular_values: &id003
+        - 256.5871452446742
+        - 229.0502128355253
+        - 222.30373044244567
+        - 126.66427316589632
+        - 113.07533527289456
+        - 106.51715162540003
+        - 87.48914532594883
+        - 64.03328973093642
+        - 32.314930584037604
+        - 25.815829839105938
+        effective_condition_number: 870.7074637220213
+        singular_values: &id001
+        - 164.63312474050701
+        - 122.81554571093069
+        - 114.67039607907142
+        - 104.73509674548627
+        - 87.14018183544401
+        - 79.74498468597177
+        - 57.26255320888185
+        - 45.75137474735714
+        - 32.25514044160423
+        - 25.76315444877731
+        effective_singular_values: *id001
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - pitch
+        - pitch_rate
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - pitch
+        - pitch_rate
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      - repeat_index: 2
+        train:
+          r2: 1.0
+          mse: 4.373358668838141e-28
+          mae: 9.54276559261193e-15
+          residual_mean_abs: 9.54276559261193e-15
+          residual_std: 1.999543236466986e-14
+          residual_max_abs: 5.684341886080802e-14
+        val:
+          r2: 1.0
+          mse: 5.538943760174872e-28
+          mae: 1.1446210007272747e-14
+          residual_mean_abs: 1.1446210007272747e-14
+          residual_std: 2.1794825152987588e-14
+          residual_max_abs: 5.684341886080802e-14
+        test:
+          r2: 1.0
+          mse: 3.6756349776629923e-28
+          mae: 7.877585630167202e-15
+          residual_mean_abs: 7.877585630167202e-15
+          residual_std: 1.8583412389299795e-14
+          residual_max_abs: 5.684341886080802e-14
+        condition_number: 1098238.5633532002
+        raw_condition_number: .inf
+        raw_singular_values:
+        - 257.2898808004073
+        - 229.25967809451538
+        - 223.566314706127
+        - 127.9251143334738
+        - 111.79981364015296
+        - 107.30024487271066
+        - 85.05369835852197
+        - 62.67492525933805
+        - 31.27528931338627
+        - 24.76857476555867
+        effective_condition_number: 1098238.5633532002
+        singular_values: &id002
+        - 166.79616630089768
+        - 123.88299896471284
+        - 117.15913104058869
+        - 105.1745824687955
+        - 94.28251059611345
+        - 84.53765849925549
+        - 57.31491952362799
+        - 44.98036463355936
+        - 31.220609735596604
+        - 24.596728498337285
+        effective_singular_values: *id002
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - pitch
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - pitch
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      split_records:
+      - repeat_index: 1
+        train_count: 3279
+        val_count: 1098
+        test_count: 1099
+      - repeat_index: 2
+        train_count: 3285
+        val_count: 1098
+        test_count: 1093
+      median_test_r2: 0.9999990204539585
+      median_test_mse: 1.3204777078416154e-16
+      median_test_mae: 2.3946206230008624e-09
+      coefficient_stability: 0.8431372549019608
+      nonzero_count: 0
+      sparsity_ratio: 1.0
+      block_sparsity_summary:
+        feature_blocks:
+          commands: 16
+          state: 6
+          history: 51
+          controller_params: 0
+      raw_condition_number: .inf
+      effective_condition_number: 549554.6354084611
+      condition_number: 549554.6354084611
+      raw_singular_values: *id003
+      singular_values: *id001
+      effective_singular_values: *id001
+      conditioning_pruned_features:
+      - altitude
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - pitch
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - position_y
+      - position_y__lag_1
+      - position_y__lag_2
+      - position_y__lag_3
+      - position_z
+      - position_z__lag_1
+      - position_z__lag_2
+      - position_z__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      conditioning_baseline_drops: []
+      conditioning_extra_pruned_features:
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - pitch
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - position_y
+      - position_y__lag_1
+      - position_y__lag_2
+      - position_y__lag_3
+      - position_z
+      - position_z__lag_1
+      - position_z__lag_2
+      - position_z__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      selection_frequency:
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      backend_consistency:
+        ardupilot:
+          r2: 0.99999999999605
+          mse: 1.3250592044715958e-17
+          mae: 4.805897493505754e-10
+          residual_mean_abs: 4.805897493505754e-10
+          residual_std: 3.6392476544996887e-09
+          residual_max_abs: 3.238164936192334e-08
+          sample_count: 5476.0
+      mode_consistency:
+        STABILIZE:
+          r2: 0.99999999999605
+          mse: 1.3250592044715958e-17
+          mae: 4.805897493505754e-10
+          residual_mean_abs: 4.805897493505754e-10
+          residual_std: 3.6392476544996887e-09
+          residual_max_abs: 3.238164936192334e-08
+          sample_count: 5476.0
+      scenario_consistency: 0.9999999999880764
+      scenario_subgroup_metrics:
+        dynamic:
+          r2: 1.0
+          mse: 6.141074676620554e-29
+          mae: 2.489139790246902e-15
+          residual_mean_abs: 2.489139790246902e-15
+          residual_std: 7.804017377683617e-15
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 1817.0
+        nominal:
+          r2: 0.9999999999880764
+          mse: 3.984637124453011e-17
+          mae: 1.4451910624841127e-09
+          residual_mean_abs: 1.4451910624841127e-09
+          residual_std: 6.307763360456254e-09
+          residual_max_abs: 3.238164936192334e-08
+          sample_count: 1821.0
+        throttle_biased:
+          r2: 1.0
+          mse: 2.522735419952341e-28
+          mae: 6.5396589676995156e-15
+          residual_mean_abs: 6.5396589676995156e-15
+          residual_std: 1.561852506221701e-14
+          residual_max_abs: 5.684341886080802e-14
+          sample_count: 1838.0
+      top_influential:
+        future_state_roll:
+        - feature: position_z
+          weight: 0.19977678571428623
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: 0.1997767857142861
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: -0.1997767857142861
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -0.1997767857142861
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: -0.1997767857142861
+          selection_frequency: 0.0
+        future_state_pitch:
+        - feature: position_z__lag_2
+          weight: 0.0728236607142859
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -0.0728236607142859
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: -0.0728236607142859
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 0.0728236607142859
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -0.0728236607142859
+          selection_frequency: 0.0
+        future_state_yaw:
+        - feature: position_z__lag_2
+          weight: -231.18922464243
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: 231.18922464243
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: -231.18922464243
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: 231.18922464243
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: -231.18922464243
+          selection_frequency: 0.0
+        future_state_roll_rate:
+        - feature: altitude
+          weight: -20.187180995941162
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: 20.162467317921774
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -20.016192042742794
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 20.016192042742794
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 20.016192042742794
+          selection_frequency: 0.0
+        future_state_pitch_rate:
+        - feature: position_z__lag_1
+          weight: 24.51972684996168
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -24.51972684996168
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -24.51972684996168
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: 24.51972684996168
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 24.51972684996168
+          selection_frequency: 0.0
+        future_state_yaw_rate:
+        - feature: position_z__lag_1
+          weight: 243.4457932706046
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -243.4457932706046
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -243.4457932706046
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: 243.4457932706046
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 243.4457932706046
+          selection_frequency: 0.0
+  best_sparse_result:
+    x_schema: full_augmented
+    y_schema: next_raw_state
+    pooling_mode: pooled
+    model_name: ridge_affine
+    appendix: false
+    summary:
+      x_schema: full_augmented
+      y_schema: next_raw_state
+      pooling_mode: pooled
+      model_name: ridge_affine
+      feature_names:
+      - command_roll
+      - command_pitch
+      - command_yaw
+      - command_throttle
+      - roll
+      - pitch
+      - yaw
+      - roll_rate
+      - pitch_rate
+      - yaw_rate
+      - position_x
+      - position_y
+      - position_z
+      - velocity_z
+      - altitude
+      - vertical_speed
+      - heading
+      - integrator_yaw
+      - control_output_roll
+      - control_output_pitch
+      - control_output_yaw
+      - command_roll__lag_1
+      - command_pitch__lag_1
+      - command_yaw__lag_1
+      - command_throttle__lag_1
+      - roll__lag_1
+      - pitch__lag_1
+      - yaw__lag_1
+      - roll_rate__lag_1
+      - pitch_rate__lag_1
+      - yaw_rate__lag_1
+      - position_x__lag_1
+      - position_y__lag_1
+      - position_z__lag_1
+      - velocity_z__lag_1
+      - altitude__lag_1
+      - vertical_speed__lag_1
+      - heading__lag_1
+      - command_roll__lag_2
+      - command_pitch__lag_2
+      - command_yaw__lag_2
+      - command_throttle__lag_2
+      - roll__lag_2
+      - pitch__lag_2
+      - yaw__lag_2
+      - roll_rate__lag_2
+      - pitch_rate__lag_2
+      - yaw_rate__lag_2
+      - position_x__lag_2
+      - position_y__lag_2
+      - position_z__lag_2
+      - velocity_z__lag_2
+      - altitude__lag_2
+      - vertical_speed__lag_2
+      - heading__lag_2
+      - command_roll__lag_3
+      - command_pitch__lag_3
+      - command_yaw__lag_3
+      - command_throttle__lag_3
+      - roll__lag_3
+      - pitch__lag_3
+      - yaw__lag_3
+      - roll_rate__lag_3
+      - pitch_rate__lag_3
+      - yaw_rate__lag_3
+      - position_x__lag_3
+      - position_y__lag_3
+      - position_z__lag_3
+      - velocity_z__lag_3
+      - altitude__lag_3
+      - vertical_speed__lag_3
+      - heading__lag_3
+      response_names:
+      - future_state_roll
+      - future_state_pitch
+      - future_state_yaw
+      - future_state_roll_rate
+      - future_state_pitch_rate
+      - future_state_yaw_rate
+      - future_state_position_x
+      - future_state_position_y
+      - future_state_position_z
+      - future_state_velocity_x
+      - future_state_velocity_y
+      - future_state_velocity_z
+      - future_state_altitude
+      - future_state_vertical_speed
+      - future_state_heading
+      schema_metadata:
+        x_schema: full_augmented
+        y_schema: next_raw_state
+        feature_count: 90
+        response_count: 15
+        strict_raw_linear: true
+        requested_feature_columns:
+        - command_roll
+        - command_pitch
+        - command_yaw
+        - command_throttle
+        - roll
+        - pitch
+        - yaw
+        - roll_rate
+        - pitch_rate
+        - yaw_rate
+        - position_x
+        - position_y
+        - position_z
+        - velocity_x
+        - velocity_y
+        - velocity_z
+        - altitude
+        - vertical_speed
+        - heading
+        - param_ARMING_CHECK
+        - backend_ardupilot
+        - mode_stabilize
+        - integrator_roll
+        - integrator_pitch
+        - integrator_yaw
+        - control_output_roll
+        - control_output_pitch
+        - control_output_yaw
+        - torque_achieved
+        - thrust_achieved
+        - saturation_ratio
+        - actuator_1
+        - actuator_2
+        - actuator_3
+        - actuator_4
+        requested_response_columns:
+        - future_state_roll
+        - future_state_pitch
+        - future_state_yaw
+        - future_state_roll_rate
+        - future_state_pitch_rate
+        - future_state_yaw_rate
+        - future_state_position_x
+        - future_state_position_y
+        - future_state_position_z
+        - future_state_velocity_x
+        - future_state_velocity_y
+        - future_state_velocity_z
+        - future_state_altitude
+        - future_state_vertical_speed
+        - future_state_heading
+        dropped_unavailable_features:
+        - torque_achieved
+        - thrust_achieved
+        dropped_unavailable_responses: []
+        partial_feature_columns: {}
+        partial_response_columns:
+          future_state_roll: 0.9893352292925702
+          future_state_pitch: 0.9893352292925702
+          future_state_yaw: 0.9893352292925702
+          future_state_roll_rate: 0.9893352292925702
+          future_state_pitch_rate: 0.9893352292925702
+          future_state_yaw_rate: 0.9893352292925702
+          future_state_position_x: 0.9893352292925702
+          future_state_position_y: 0.9893352292925702
+          future_state_position_z: 0.9893352292925702
+          future_state_velocity_x: 0.9893352292925702
+          future_state_velocity_y: 0.9893352292925702
+          future_state_velocity_z: 0.9893352292925702
+          future_state_altitude: 0.9893352292925702
+          future_state_vertical_speed: 0.9893352292925702
+          future_state_heading: 0.9893352292925702
+        dropped_response_leakage_features: []
+        dropped_zero_variance_features:
+        - velocity_x
+        - velocity_y
+        - param_ARMING_CHECK
+        - backend_ardupilot
+        - mode_stabilize
+        - integrator_roll
+        - integrator_pitch
+        - saturation_ratio
+        - actuator_1
+        - actuator_2
+        - actuator_3
+        - actuator_4
+        - velocity_x__lag_1
+        - velocity_y__lag_1
+        - velocity_x__lag_2
+        - velocity_y__lag_2
+        - velocity_x__lag_3
+        - velocity_y__lag_3
+      repeat_metrics:
+      - repeat_index: 1
+        train:
+          r2: 0.9165266403724761
+          mse: 185747161446.44513
+          mae: 44287.37247343584
+          residual_mean_abs: 44287.37247343584
+          residual_std: 430983.9456945528
+          residual_max_abs: 14633364.917899411
+        val:
+          r2: 0.9178653507039249
+          mse: 182775071877.5616
+          mae: 41824.06615393731
+          residual_mean_abs: 41824.06615393731
+          residual_std: 427522.00878727715
+          residual_max_abs: 14629948.88556273
+        test:
+          r2: 0.918368290381715
+          mse: 183633589697.56628
+          mae: 41767.41608818238
+          residual_mean_abs: 41767.41608818238
+          residual_std: 428524.79124538094
+          residual_max_abs: 14740999.267451715
+        condition_number: 870.7074637220213
+        raw_condition_number: .inf
+        raw_singular_values: &id006
+        - 265.8309581813896
+        - 236.09955527276918
+        - 222.30380414618733
+        - 126.78883356959274
+        - 114.5616987069392
+        - 106.7008492168179
+        - 87.49160707461871
+        - 67.81380076648385
+        - 64.03273302802201
+        - 32.31470472886093
+        effective_condition_number: 870.7074637220213
+        singular_values: &id004
+        - 164.63312474050701
+        - 122.81554571093069
+        - 114.67039607907142
+        - 104.73509674548627
+        - 87.14018183544401
+        - 79.74498468597177
+        - 57.26255320888185
+        - 45.75137474735714
+        - 32.25514044160423
+        - 25.76315444877731
+        effective_singular_values: *id004
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - pitch
+        - pitch_rate
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - integrator_yaw
+        - control_output_roll
+        - control_output_pitch
+        - control_output_yaw
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - pitch
+        - pitch_rate
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - integrator_yaw
+        - control_output_roll
+        - control_output_pitch
+        - control_output_yaw
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      - repeat_index: 2
+        train:
+          r2: 0.9175991915488437
+          mse: 183793088353.7693
+          mae: 44925.150590926205
+          residual_mean_abs: 44925.150590926205
+          residual_std: 428710.96131749335
+          residual_max_abs: 14672105.239061873
+        val:
+          r2: 0.9174811515284214
+          mse: 184702433085.36255
+          mae: 45846.06512015201
+          residual_mean_abs: 45846.06512015201
+          residual_std: 429770.08012201206
+          residual_max_abs: 14536291.20035414
+        test:
+          r2: 0.9157378657613154
+          mse: 187135063645.51294
+          mae: 47831.11341454517
+          residual_mean_abs: 47831.11341454517
+          residual_std: 432590.987907646
+          residual_max_abs: 14539011.115412276
+        condition_number: 1098238.5633532002
+        raw_condition_number: .inf
+        raw_singular_values:
+        - 266.7164884113269
+        - 236.31546711969742
+        - 223.56634841564474
+        - 127.92765821156635
+        - 111.85123086122535
+        - 107.31363965713207
+        - 85.05529279327175
+        - 70.0044610762918
+        - 62.670576137059314
+        - 31.27527850626905
+        effective_condition_number: 1098238.5633532002
+        singular_values: &id005
+        - 166.79616630089768
+        - 123.88299896471284
+        - 117.15913104058869
+        - 105.1745824687955
+        - 94.28251059611345
+        - 84.53765849925549
+        - 57.31491952362799
+        - 44.98036463355936
+        - 31.220609735596604
+        - 24.596728498337285
+        effective_singular_values: *id005
+        conditioning_pruned_features:
+        - altitude
+        - vertical_speed
+        - pitch
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - integrator_yaw
+        - control_output_roll
+        - control_output_pitch
+        - control_output_yaw
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+        conditioning_baseline_drops: []
+        conditioning_extra_pruned_features:
+        - pitch
+        - yaw_rate
+        - position_y
+        - position_z
+        - heading
+        - integrator_yaw
+        - control_output_roll
+        - control_output_pitch
+        - control_output_yaw
+        - roll__lag_1
+        - pitch__lag_1
+        - yaw__lag_1
+        - roll_rate__lag_1
+        - pitch_rate__lag_1
+        - yaw_rate__lag_1
+        - position_y__lag_1
+        - position_z__lag_1
+        - altitude__lag_1
+        - vertical_speed__lag_1
+        - heading__lag_1
+        - roll__lag_2
+        - pitch__lag_2
+        - yaw__lag_2
+        - roll_rate__lag_2
+        - pitch_rate__lag_2
+        - yaw_rate__lag_2
+        - position_y__lag_2
+        - position_z__lag_2
+        - altitude__lag_2
+        - vertical_speed__lag_2
+        - heading__lag_2
+        - roll__lag_3
+        - pitch__lag_3
+        - yaw__lag_3
+        - roll_rate__lag_3
+        - pitch_rate__lag_3
+        - yaw_rate__lag_3
+        - position_y__lag_3
+        - position_z__lag_3
+        - altitude__lag_3
+        - vertical_speed__lag_3
+        - heading__lag_3
+      split_records:
+      - repeat_index: 1
+        train_count: 3279
+        val_count: 1098
+        test_count: 1099
+      - repeat_index: 2
+        train_count: 3285
+        val_count: 1098
+        test_count: 1093
+      median_test_r2: 0.9170530780715151
+      median_test_mse: 185384326671.5396
+      median_test_mae: 44799.26475136378
+      coefficient_stability: 0.7518518518518519
+      nonzero_count: 110
+      sparsity_ratio: 0.8981481481481481
+      block_sparsity_summary:
+        feature_blocks:
+          commands: 16
+          state: 6
+          history: 51
+          controller_params: 0
+      raw_condition_number: .inf
+      effective_condition_number: 549554.6354084611
+      condition_number: 549554.6354084611
+      raw_singular_values: *id006
+      singular_values: *id004
+      effective_singular_values: *id004
+      conditioning_pruned_features:
+      - altitude
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - control_output_pitch
+      - control_output_roll
+      - control_output_yaw
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - integrator_yaw
+      - pitch
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - position_y
+      - position_y__lag_1
+      - position_y__lag_2
+      - position_y__lag_3
+      - position_z
+      - position_z__lag_1
+      - position_z__lag_2
+      - position_z__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      conditioning_baseline_drops: []
+      conditioning_extra_pruned_features:
+      - altitude__lag_1
+      - altitude__lag_2
+      - altitude__lag_3
+      - control_output_pitch
+      - control_output_roll
+      - control_output_yaw
+      - heading
+      - heading__lag_1
+      - heading__lag_2
+      - heading__lag_3
+      - integrator_yaw
+      - pitch
+      - pitch__lag_1
+      - pitch__lag_2
+      - pitch__lag_3
+      - pitch_rate
+      - pitch_rate__lag_1
+      - pitch_rate__lag_2
+      - pitch_rate__lag_3
+      - position_y
+      - position_y__lag_1
+      - position_y__lag_2
+      - position_y__lag_3
+      - position_z
+      - position_z__lag_1
+      - position_z__lag_2
+      - position_z__lag_3
+      - roll__lag_1
+      - roll__lag_2
+      - roll__lag_3
+      - roll_rate__lag_1
+      - roll_rate__lag_2
+      - roll_rate__lag_3
+      - vertical_speed__lag_1
+      - vertical_speed__lag_2
+      - vertical_speed__lag_3
+      - yaw__lag_1
+      - yaw__lag_2
+      - yaw__lag_3
+      - yaw_rate
+      - yaw_rate__lag_1
+      - yaw_rate__lag_2
+      - yaw_rate__lag_3
+      selection_frequency:
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      - - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 1.0
+        - 1.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+        - 0.0
+      backend_consistency:
+        ardupilot:
+          r2: 0.9172326073841522
+          mse: 184582177797.00333
+          mae: 44467.141207339635
+          residual_mean_abs: 44467.141207339635
+          residual_std: 429630.2794222198
+          residual_max_abs: 14706552.253256362
+          sample_count: 5476.0
+      mode_consistency:
+        STABILIZE:
+          r2: 0.9172326073841522
+          mse: 184582177797.00333
+          mae: 44467.141207339635
+          residual_mean_abs: 44467.141207339635
+          residual_std: 429630.2794222198
+          residual_max_abs: 14706552.253256362
+          sample_count: 5476.0
+      scenario_consistency: 0.9931914814696033
+      scenario_subgroup_metrics:
+        dynamic:
+          r2: 0.9131400728385755
+          mse: 194006908647.06015
+          mae: 51868.80612982992
+          residual_mean_abs: 51868.80612982992
+          residual_std: 440461.97691455216
+          residual_max_abs: 14706552.253256362
+          sample_count: 1817.0
+        nominal:
+          r2: 0.919138547000414
+          mse: 180906211542.52087
+          mae: 40674.59382958197
+          residual_mean_abs: 40674.59382958197
+          residual_std: 425330.0355177554
+          residual_max_abs: 14533328.412067931
+          sample_count: 1821.0
+        throttle_biased:
+          r2: 0.919399823574224
+          mse: 178907095422.0629
+          mae: 40907.513139185045
+          residual_mean_abs: 40907.513139185045
+          residual_std: 422973.87422266655
+          residual_max_abs: 14475073.047466796
+          sample_count: 1838.0
+      top_influential:
+        future_state_roll:
+        - feature: integrator_yaw
+          weight: 0.23529158735565403
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: 0.18802318810588042
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: -0.18802318810588042
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -0.18802318810533247
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 0.18802318810533247
+          selection_frequency: 0.0
+        future_state_pitch:
+        - feature: integrator_yaw
+          weight: 0.08577036796886386
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -0.06853917890650521
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 0.06853917890650521
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -0.06853917890611888
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 0.06853917890611888
+          selection_frequency: 0.0
+        future_state_yaw:
+        - feature: integrator_yaw
+          weight: -744.0909312401676
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: -594.6647620608196
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: 594.6647620608196
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: -594.664762060013
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: 594.6647620600129
+          selection_frequency: 0.0
+        future_state_roll_rate:
+        - feature: integrator_yaw
+          weight: 171.9452473083464
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 137.4796682304982
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -137.47966823049816
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: 137.47966823048307
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 137.47966823048307
+          selection_frequency: 0.0
+        future_state_pitch_rate:
+        - feature: integrator_yaw
+          weight: 348.9468543847664
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 278.91133030968257
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -278.91133030968257
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: -278.91133030959793
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 278.91133030959793
+          selection_frequency: 0.0
+        future_state_yaw_rate:
+        - feature: integrator_yaw
+          weight: 333.5876162305813
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 266.4839602630293
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -266.4839602630293
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: 266.48396026285855
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: -266.4839602628585
+          selection_frequency: 0.0
+        future_state_position_x:
+        - feature: integrator_yaw
+          weight: -4640694268.630061
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: 3698323750.8304143
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: -3698323750.830396
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: 3698323750.807315
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: -3698323750.8073144
+          selection_frequency: 0.0
+        future_state_position_y:
+        - feature: integrator_yaw
+          weight: 19469967081.4241
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: 15516038083.652939
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: -15516038083.65292
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -15516038083.555063
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 15516038083.55506
+          selection_frequency: 0.0
+        future_state_position_z:
+        - feature: integrator_yaw
+          weight: 0.0736113502874601
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: -0.05882289683905863
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: 0.058822896839058614
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: -0.05882289683903348
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: 0.05882289683903347
+          selection_frequency: 0.0
+        future_state_velocity_x: []
+        future_state_velocity_y: []
+        future_state_velocity_z:
+        - feature: integrator_yaw
+          weight: 6.600116541284957
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: -5.259069734200387
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: 5.259069734199566
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: 5.259069734167259
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: -5.259069734167256
+          selection_frequency: 0.0
+        future_state_altitude:
+        - feature: integrator_yaw
+          weight: -0.0736113502874601
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: 0.05882289683905863
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: -0.058822896839058614
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: 0.05882289683903348
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: -0.05882289683903347
+          selection_frequency: 0.0
+        future_state_vertical_speed:
+        - feature: integrator_yaw
+          weight: -6.600116541284957
+          selection_frequency: 0.0
+        - feature: altitude
+          weight: 5.259069734200387
+          selection_frequency: 0.0
+        - feature: position_z
+          weight: -5.259069734199566
+          selection_frequency: 0.0
+        - feature: position_z__lag_1
+          weight: -5.259069734167259
+          selection_frequency: 0.0
+        - feature: altitude__lag_1
+          weight: 5.259069734167256
+          selection_frequency: 0.0
+        future_state_heading:
+        - feature: integrator_yaw
+          weight: -744.0909312401676
+          selection_frequency: 0.0
+        - feature: position_z__lag_2
+          weight: -594.6647620608196
+          selection_frequency: 0.0
+        - feature: altitude__lag_2
+          weight: 594.6647620608196
+          selection_frequency: 0.0
+        - feature: position_z__lag_3
+          weight: -594.664762060013
+          selection_frequency: 0.0
+        - feature: altitude__lag_3
+          weight: 594.6647620600129
+          selection_frequency: 0.0
+  best_y_result: *id007
+  schema_stepups: {}
+  ranking:
+  - x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9999990204539585
+    median_test_mse: 1.3204777078416154e-16
+    median_test_mae: 2.3946206230008624e-09
+    support: supported
+  - x_schema: commands_plus_state_history
+    y_schema: next_raw_state
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9171167043068301
+    median_test_mse: 185241921240.3637
+    median_test_mae: 44962.22179569767
+    support: supported
+  - x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9171162033068421
+    median_test_mse: 185243048258.76373
+    median_test_mae: 44949.077648215316
+    support: supported
+  - x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9170550044140124
+    median_test_mse: 185380428551.37164
+    median_test_mae: 44587.86421039175
+    support: supported
+  - x_schema: commands_plus_state_history
+    y_schema: next_raw_state
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9170539579011587
+    median_test_mse: 185382763771.39886
+    median_test_mae: 44581.77385954991
+    support: supported
+  - x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.9170530780715151
+    median_test_mse: 185384326671.5396
+    median_test_mae: 44799.26475136378
+    support: supported
+  - x_schema: commands_plus_state_history
+    y_schema: next_raw_state
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.917052791271503
+    median_test_mse: 185384964647.8376
+    median_test_mae: 44800.306824660234
+    support: supported
+  - x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.7422780820334047
+    median_test_mse: 2.8084874334890095e-11
+    median_test_mae: 2.5458122897011826e-06
+    support: supported
+  - x_schema: full_augmented
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+    median_test_r2: 0.7168061507321415
+    median_test_mse: 3.8175966122198644e-11
+    median_test_mae: 1.4510994666863431e-06
+    support: supported
+  - x_schema: full_augmented
+    y_schema: selected_state_subset
+    model_name: ridge_affine
+    pooling_mode: pooled
+    median_test_r2: 0.7084238380594579
+    median_test_mse: 3.8383341160409027e-11
+    median_test_mae: 1.6733165988570654e-06
+    support: supported
+  - x_schema: full_augmented
+    y_schema: selected_state_subset
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: 0.08159348662399235
+    median_test_mse: 9.284601002909467e-11
+    median_test_mae: 3.950234737232899e-06
+    support: unsupported
+  - x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: lasso_affine
+    pooling_mode: pooled
+    median_test_r2: -0.36179080425771093
+    median_test_mse: 1.0884468419931886e-10
+    median_test_mae: 4.712428929477196e-06
+    support: unsupported
+  diagnostics:
+  - raw feature matrix 含有精确别名或 one-hot 依赖；报告已同时输出 effective conditioning 以避免把可解释 schema
+    误判为病态。
+  failure_attribution: []
+  data_quality:
+    alignment_failure_ratio: 0.0
+    missing_attitude_ratio: 0.0
+    missing_local_position_ratio: 0.0
+    missing_actuator_ratio: 0.0
+    future_horizon_available_ratio: 0.9893352292925702
+    delta_state_available_ratio: 0.9893352292925702
+    window_summary_available_ratio: 0.9893352292925702
+    actuator_response_available_ratio: 1.0
+    tracking_error_available_ratio: 1.0
+    median_alignment_attitude_ms: 0.25728
+    median_alignment_position_ms: 0.406528
+    accepted_row_ratio: 1.0
+    accepted_run_count: 30
+    rejected_run_count: 0
+    research_tiers:
+    - authoritative_research
+  skipped: []
