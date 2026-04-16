@@ -1,0 +1,110 @@
+{
+  "study_scope": {
+    "backend": "ardupilot",
+    "mode_scope": [
+      "GUIDED_NOGPS"
+    ],
+    "x_schema": "commands_only",
+    "y_schema": "actuator_response",
+    "input_source": "telemetry/input_trace.csv",
+    "response_source": "telemetry/bin_rcou.csv",
+    "response_focus": [
+      "collective_floor_state",
+      "pair_imbalance_12_vs_34",
+      "single_actuator_floor_state"
+    ],
+    "floor_threshold": 0.02,
+    "pair_split_threshold": 0.1
+  },
+  "scenario_results": [
+    {
+      "flight_mode": "GUIDED_NOGPS",
+      "scenario": "nominal",
+      "accepted_count": 15,
+      "attempt_count": 15,
+      "recommended_target": "pair_imbalance_12_vs_34",
+      "recommended_path": "guided_nogps_pair_target_readiness",
+      "collective_floor": {
+        "median_active_rate": 0.6060606060606061,
+        "median_baseline_rate": 0.3870967741935484,
+        "median_specificity": 0.21538461538461534,
+        "tier_range_specificity": 0.019263569596544405
+      },
+      "pair_imbalance": {
+        "median_active_rate": 0.1875,
+        "median_baseline_rate": 0.01910828025477707,
+        "median_specificity": 0.17544875506658947,
+        "median_sign_consistency": 1.0,
+        "tier_range_specificity": 0.024310729577894985,
+        "dominant_direction": "12_gt_34"
+      },
+      "best_single_actuator": {
+        "actuator": "actuator_1",
+        "median_active_rate": 0.6060606060606061,
+        "median_baseline_rate": 0.3870967741935484,
+        "median_specificity": 0.21538461538461534,
+        "tier_range_specificity": 0.019263569596544405
+      },
+      "actuator_specificity_spread": 0.0,
+      "active_dominant_vector_state": "0.000|0.000|0.000|0.000",
+      "active_dominant_vector_purity": 1.0,
+      "baseline_dominant_vector_state": "0.000|0.000|0.000|0.000",
+      "baseline_dominant_vector_purity": 1.0,
+      "blocking_reasons": [
+        "single_actuator_symmetry_collapse"
+      ]
+    },
+    {
+      "flight_mode": "GUIDED_NOGPS",
+      "scenario": "throttle_biased",
+      "accepted_count": 15,
+      "attempt_count": 15,
+      "recommended_target": "pair_imbalance_12_vs_34",
+      "recommended_path": "guided_nogps_pair_target_readiness",
+      "collective_floor": {
+        "median_active_rate": 0.6,
+        "median_baseline_rate": 0.3885350318471338,
+        "median_specificity": 0.2114649681528662,
+        "tier_range_specificity": 0.015041102163782849
+      },
+      "pair_imbalance": {
+        "median_active_rate": 0.2,
+        "median_baseline_rate": 0.0189873417721519,
+        "median_specificity": 0.1751552795031056,
+        "median_sign_consistency": 1.0,
+        "tier_range_specificity": 0.024064171122994638,
+        "dominant_direction": "12_gt_34"
+      },
+      "best_single_actuator": {
+        "actuator": "actuator_1",
+        "median_active_rate": 0.6,
+        "median_baseline_rate": 0.3885350318471338,
+        "median_specificity": 0.2114649681528662,
+        "tier_range_specificity": 0.015041102163782849
+      },
+      "actuator_specificity_spread": 0.0,
+      "active_dominant_vector_state": "0.000|0.000|0.000|0.000",
+      "active_dominant_vector_purity": 1.0,
+      "baseline_dominant_vector_state": "0.000|0.000|0.000|0.000",
+      "baseline_dominant_vector_purity": 1.0,
+      "blocking_reasons": [
+        "single_actuator_symmetry_collapse"
+      ]
+    }
+  ],
+  "overall_decision": {
+    "recommended_next_target": "pair_imbalance_12_vs_34",
+    "recommended_next_step": "guided_nogps_pair_target_readiness",
+    "recommended_mode": "GUIDED_NOGPS",
+    "mode_status": {
+      "GUIDED_NOGPS": {
+        "nominal": "pair_imbalance_12_vs_34",
+        "throttle_biased": "pair_imbalance_12_vs_34"
+      }
+    }
+  },
+  "blocking_reasons": [
+    "single_actuator_symmetry_collapse",
+    "single_actuator_symmetry_collapse"
+  ]
+}

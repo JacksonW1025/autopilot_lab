@@ -83,7 +83,7 @@ one-hot / 参数前缀固定为：
 在当前 Formal V2 study 里，`scenario` 有两层作用：
 
 1. 它是 prepared sample table 的固定身份列，用来标识样本来自 `nominal / dynamic / throttle_biased` 哪一档状态。
-2. 它是 subgroup 和 holdout 报告维度，用来判断“同一个 `f` 是否跨 scenario 站得住”。
+2. 它是 subgroup 和 generalization 报告维度，用来判断“同一个 `f` 是否跨 scenario 站得住”。
 
 这意味着：
 
@@ -127,14 +127,12 @@ study 级别正式输出：
 - `reports/diagnostic_gate.md`
 - `reports/matrix_gallery.md`
 - `reports/scenario_generalization.md`
-- `reports/scenario_holdout.md`
 - `reports/sparsity_overlap.md`
 - `summary/study_summary.json`
 - `summary/baseline_stability.json`
 - `summary/diagnostic_gate.json`
 - `summary/matrix_gallery.json`
 - `summary/scenario_generalization.json`
-- `summary/scenario_holdout.json`
 - `summary/sparsity_overlap.json`
 - `prepared/schema_inventory.yaml`
 
@@ -163,24 +161,11 @@ ArduPilot targeted aggregate 输出：
 
 这份产物不会改写 `supported / partial / unsupported` 的原始门槛；它是在原有 support 判读之外，再补一层“跨 scenario 是否站得住”的解释。
 
-### `scenario_holdout`
-
-`reports/scenario_holdout.md` / `summary/scenario_holdout.json` 回答：
-
-- 用两个 scenario 训练、拿第三个 scenario 测试时，这个 `f` 还能不能过线
-- 当前组合在 holdout 口径下是：
-  - `all_holdouts_supported`
-  - `supported_but_holdout_local`
-  - `holdout_failed`
-
-它是 Formal V2 用来替代“只看 pooled subgroup 高分”的更强 generalization 检查。
-
 ### `sparsity_overlap`
 
 `reports/sparsity_overlap.md` / `summary/sparsity_overlap.json` 回答：
 
 - baseline 与 diagnostic 的 sparse mask 是否稳定
-- full-data 与各个 holdout fit 的 dominant edges 是否稳定
 - current study 与更厚数据版本相比，主边是否基本不变
 
 这里会正式输出：

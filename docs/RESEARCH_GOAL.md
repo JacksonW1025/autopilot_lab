@@ -32,10 +32,8 @@
   overall 虽然 `supported`，但更像只在局部 operating point 站得住。
 - `not_generalized`
   当前还不能把它当成跨 scenario 的常见映射。
-- `all_holdouts_supported`
-  leave-one-scenario-out 之后，三个 holdout 都仍然通过支持门槛。
 - `mature_positive`
-  至少一个 strict-raw-linear state-evolution 组合同时通过 baseline、diagnostic 和全部 holdout。
+  至少一个 strict-raw-linear state-evolution 组合同时在 baseline、diagnostic 和 sparse-edge overlap 上保持稳定。
 - `mature_negative`
   state-evolution 长期表现为高 `R2`、高条件数和稳定 sparse edges，因此已经足够形成成熟负结论。
 - `inconclusive`
@@ -49,4 +47,4 @@
 - ArduPilot targeted line 回答“state-evolution 在不混 mode 的条件下，是否已经足够成熟”。
 - 如果 PX4 和 ArduPilot 都出现相似的 `generalized_supported` 结果，这会增强“线性结论本身可信”的解释力度。
 - 如果一边更宽、一边更窄，也先解释为“线性证据的范围不同”，而不是立刻上升为“backend 输赢”。
-- 如果出现高 `R2` 但 support 不稳的结果，必须同时看条件数、系数稳定性、holdout 和 sparsity overlap，不能只看拟合分数。
+- 如果出现高 `R2` 但 support 不稳的结果，必须同时看条件数、系数稳定性、scenario generalization 和 sparsity overlap，不能只看拟合分数。

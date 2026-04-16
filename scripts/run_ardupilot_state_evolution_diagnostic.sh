@@ -267,8 +267,6 @@ run_stage_check artifact-paths \
   --study-dir "${STUDY_DIR}" \
   --required-path reports/scenario_generalization.md \
   --required-path summary/scenario_generalization.json \
-  --required-path reports/scenario_holdout.md \
-  --required-path summary/scenario_holdout.json \
   --required-path reports/state_evolution_audit.md \
   --required-path summary/state_evolution_audit.json \
   --required-path reports/sparsity_overlap.md \

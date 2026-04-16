@@ -1,0 +1,122 @@
+{
+  "study_scope": {
+    "backend": "ardupilot",
+    "mode_scope": [
+      "STABILIZE"
+    ],
+    "x_schema": "commands_only",
+    "y_schema": "actuator_response",
+    "input_source": "telemetry/input_trace.csv",
+    "response_source": "telemetry/bin_rcou.csv",
+    "response_focus": [
+      "collective_floor_state",
+      "pair_imbalance_12_vs_34",
+      "single_actuator_floor_state"
+    ],
+    "floor_threshold": 0.02,
+    "pair_split_threshold": 0.1
+  },
+  "scenario_results": [
+    {
+      "flight_mode": "STABILIZE",
+      "scenario": "nominal",
+      "accepted_count": 15,
+      "attempt_count": 15,
+      "recommended_target": "collective_floor_state",
+      "recommended_path": "collective_only_no_new_target_gain",
+      "collective_floor": {
+        "median_active_rate": 0.59375,
+        "median_baseline_rate": 0.3860759493670886,
+        "median_specificity": 0.20361990950226244,
+        "tier_range_specificity": 0.021139115292243604
+      },
+      "pair_imbalance": {
+        "median_active_rate": 0.0,
+        "median_baseline_rate": 0.0,
+        "median_specificity": 0.0,
+        "median_sign_consistency": NaN,
+        "tier_range_specificity": 0.0,
+        "dominant_direction": "none"
+      },
+      "best_single_actuator": {
+        "actuator": "actuator_1",
+        "median_active_rate": 0.59375,
+        "median_baseline_rate": 0.3860759493670886,
+        "median_specificity": 0.20361990950226244,
+        "tier_range_specificity": 0.021139115292243604
+      },
+      "actuator_specificity_spread": 0.0,
+      "active_dominant_vector_state": "0.000|0.000|0.000|0.000",
+      "active_dominant_vector_purity": 1.0,
+      "baseline_dominant_vector_state": "0.100|0.100|0.100|0.100",
+      "baseline_dominant_vector_purity": 1.0,
+      "blocking_reasons": [
+        "pair_active_rate_below_threshold",
+        "pair_sign_consistency_below_threshold",
+        "pair_specificity_below_threshold",
+        "single_actuator_symmetry_collapse"
+      ]
+    },
+    {
+      "flight_mode": "STABILIZE",
+      "scenario": "throttle_biased",
+      "accepted_count": 15,
+      "attempt_count": 15,
+      "recommended_target": "collective_floor_state",
+      "recommended_path": "collective_only_no_new_target_gain",
+      "collective_floor": {
+        "median_active_rate": 0.6060606060606061,
+        "median_baseline_rate": 0.3875,
+        "median_specificity": 0.21998465669351747,
+        "tier_range_specificity": 0.01863971998465669
+      },
+      "pair_imbalance": {
+        "median_active_rate": 0.0,
+        "median_baseline_rate": 0.0,
+        "median_specificity": 0.0,
+        "median_sign_consistency": NaN,
+        "tier_range_specificity": 0.0,
+        "dominant_direction": "none"
+      },
+      "best_single_actuator": {
+        "actuator": "actuator_1",
+        "median_active_rate": 0.6060606060606061,
+        "median_baseline_rate": 0.3875,
+        "median_specificity": 0.21998465669351747,
+        "tier_range_specificity": 0.01863971998465669
+      },
+      "actuator_specificity_spread": 0.0,
+      "active_dominant_vector_state": "0.000|0.000|0.000|0.000",
+      "active_dominant_vector_purity": 1.0,
+      "baseline_dominant_vector_state": "0.100|0.100|0.100|0.100",
+      "baseline_dominant_vector_purity": 1.0,
+      "blocking_reasons": [
+        "pair_active_rate_below_threshold",
+        "pair_sign_consistency_below_threshold",
+        "pair_specificity_below_threshold",
+        "single_actuator_symmetry_collapse"
+      ]
+    }
+  ],
+  "overall_decision": {
+    "recommended_next_target": "none",
+    "recommended_next_step": "no_target_signal_identified",
+    "recommended_mode": "none",
+    "mode_status": {
+      "STABILIZE": {
+        "nominal": "collective_floor_state",
+        "throttle_biased": "collective_floor_state"
+      }
+    }
+  },
+  "blocking_reasons": [
+    "pair_active_rate_below_threshold",
+    "pair_sign_consistency_below_threshold",
+    "pair_specificity_below_threshold",
+    "single_actuator_symmetry_collapse",
+    "pair_active_rate_below_threshold",
+    "pair_sign_consistency_below_threshold",
+    "pair_specificity_below_threshold",
+    "single_actuator_symmetry_collapse"
+  ]
+}

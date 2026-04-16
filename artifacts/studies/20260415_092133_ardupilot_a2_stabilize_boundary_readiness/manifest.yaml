@@ -1,0 +1,183 @@
+study_name: ardupilot_a2_stabilize_boundary_readiness
+study_id: 20260415_092133_ardupilot_a2_stabilize_boundary_readiness
+runs_manifest: /mnt/nvme/autopilot_lab/artifacts/ardupilot_matrix/20260415_090338_ardupilot/runs.csv
+source_run_dirs:
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090338_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090412_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090446_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090520_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090555_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090629_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090703_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090737_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090811_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090846_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090920_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090954_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091028_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091102_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091137_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091211_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091245_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091319_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091353_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091428_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091502_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091536_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091610_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091644_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091719_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091753_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091827_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091901_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091935_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_092009_ardupilot_manual_pulse_train_throttle_r5
+output_files:
+  report: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_092133_ardupilot_a2_stabilize_boundary_readiness/reports/a2_boundary_readiness.md
+  summary: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_092133_ardupilot_a2_stabilize_boundary_readiness/summary/a2_boundary_readiness.json
+  run_level_boundary_effects: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_092133_ardupilot_a2_stabilize_boundary_readiness/tables/run_level_boundary_effects.csv
+  config_threshold_matrix: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_092133_ardupilot_a2_stabilize_boundary_readiness/tables/config_threshold_matrix.csv
+summary:
+  study_scope:
+    backend: ardupilot
+    mode: STABILIZE
+    x_schema: commands_only
+    y_schema: actuator_response
+    input_source: telemetry/input_trace.csv
+    response_source: telemetry/bin_rcou.csv
+    response_focus: min(actuator_1..4)
+    profile_type: pulse_train
+    scenario_scope:
+    - nominal
+    - throttle_biased
+    tier_scope:
+    - micro
+    - probe
+    - confirm
+    accepted_target_per_config: 5
+    max_attempts_per_config: 10
+  floor_definition:
+    normalized_pwm: clamp((pwm - 1000) / 1000, 0, 1)
+    floor_signal: a_min = min(actuator_1..4)
+    floor_threshold: 0.02
+    floor_hit_definition: a_min <= 0.02
+    recovery_tolerance: 0.02
+    recovery_definition: abs(a_min - baseline_min_actuator) <= 0.02
+  config_results:
+  - scenario: nominal
+    accepted_count: 5
+    attempt_count: 15
+    gate_rate: 0.0
+    failsafe_rate: 0.0
+    threshold_window_present: false
+    ready: false
+    blocking_reasons:
+    - nominal_micro_trigger_rate_above_ceiling
+    - nominal_micro_floor_hit_rate_above_ceiling
+    - nominal_micro_baseline_false_trigger_rate_above_ceiling
+    - nominal_probe_trigger_rate_below_floor
+    - nominal_probe_recovery_rate_below_floor
+    - nominal_confirm_floor_hit_rate_regressed
+    - nominal_confirm_recovery_rate_below_floor
+    tiers:
+      micro:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        median_pulse_trigger_rate: 0.6
+        median_floor_hit_rate: 0.59375
+        median_baseline_false_trigger_rate: 0.391025641025641
+        median_hit_latency_ms: 0.0
+        median_recovery_rate: 0.5
+        median_hit_pattern_consistency: 1.0
+      probe:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        median_pulse_trigger_rate: 0.6
+        median_floor_hit_rate: 0.6060606060606061
+        median_baseline_false_trigger_rate: 0.3860759493670886
+        median_hit_latency_ms: 0.0
+        median_recovery_rate: 0.5
+        median_hit_pattern_consistency: 1.0
+      confirm:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        median_pulse_trigger_rate: 0.6
+        median_floor_hit_rate: 0.5882352941176471
+        median_baseline_false_trigger_rate: 0.3860759493670886
+        median_hit_latency_ms: 0.0
+        median_recovery_rate: 0.5
+        median_hit_pattern_consistency: 1.0
+  - scenario: throttle_biased
+    accepted_count: 5
+    attempt_count: 15
+    gate_rate: 0.0
+    failsafe_rate: 0.0
+    threshold_window_present: false
+    ready: false
+    blocking_reasons:
+    - throttle_biased_micro_trigger_rate_above_ceiling
+    - throttle_biased_micro_floor_hit_rate_above_ceiling
+    - throttle_biased_micro_baseline_false_trigger_rate_above_ceiling
+    - throttle_biased_probe_trigger_rate_below_floor
+    - throttle_biased_probe_recovery_rate_below_floor
+    - throttle_biased_confirm_recovery_rate_below_floor
+    tiers:
+      micro:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        median_pulse_trigger_rate: 0.6
+        median_floor_hit_rate: 0.59375
+        median_baseline_false_trigger_rate: 0.3885350318471338
+        median_hit_latency_ms: 0.0
+        median_recovery_rate: 0.5
+        median_hit_pattern_consistency: 1.0
+      probe:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        median_pulse_trigger_rate: 0.6
+        median_floor_hit_rate: 0.6060606060606061
+        median_baseline_false_trigger_rate: 0.3860759493670886
+        median_hit_latency_ms: 0.0
+        median_recovery_rate: 0.5
+        median_hit_pattern_consistency: 1.0
+      confirm:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        median_pulse_trigger_rate: 0.6
+        median_floor_hit_rate: 0.6060606060606061
+        median_baseline_false_trigger_rate: 0.3860759493670886
+        median_hit_latency_ms: 0.0
+        median_recovery_rate: 0.47368421052631576
+        median_hit_pattern_consistency: 1.0
+  overall_decision:
+    ready_for_binary_attack_v1: false
+    recommended_path: change_target_or_regime
+    scenario_status:
+      nominal: false
+      throttle_biased: false
+  blocking_reasons:
+  - nominal_micro_trigger_rate_above_ceiling
+  - nominal_micro_floor_hit_rate_above_ceiling
+  - nominal_micro_baseline_false_trigger_rate_above_ceiling
+  - nominal_probe_trigger_rate_below_floor
+  - nominal_probe_recovery_rate_below_floor
+  - nominal_confirm_floor_hit_rate_regressed
+  - nominal_confirm_recovery_rate_below_floor
+  - throttle_biased_micro_trigger_rate_above_ceiling
+  - throttle_biased_micro_floor_hit_rate_above_ceiling
+  - throttle_biased_micro_baseline_false_trigger_rate_above_ceiling
+  - throttle_biased_probe_trigger_rate_below_floor
+  - throttle_biased_probe_recovery_rate_below_floor
+  - throttle_biased_confirm_recovery_rate_below_floor

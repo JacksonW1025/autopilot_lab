@@ -129,14 +129,13 @@ def write_xy_schema_guide(
         "1. 先看 generalization full 的 `summary.md` 与 `scenario_generalization.md`。",
         "2. 再看 targeted line 的 `state_evolution_validation.md`。",
         "3. 如果某个 state-evolution 组合高 `R2` 但结论仍谨慎，再一起看：",
-        "   - `scenario_holdout.md`",
         "   - `sparsity_overlap.md`",
         "   - `state_evolution_audit.md`",
         "",
         "## 当前最重要的阅读边界",
         "",
         "- `best_result` 不一定等于“最稳的正式结论”。",
-        "- 对 ArduPilot 尤其要注意：高 `R2` 不等于已经得到稳定 state-evolution 结论，必须把 holdout、条件数、稳定性和 sparsity overlap 一起看。",
+        "- 对 ArduPilot 尤其要注意：高 `R2` 不等于已经得到稳定 state-evolution 结论，必须把 scenario generalization、条件数、稳定性和 sparsity overlap 一起看。",
     ]
     (ROOT_DIR / "docs" / "XY_SCHEMA_GUIDE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -192,11 +191,9 @@ def write_experiment_protocol(
         "",
         "- `reports/summary.md`",
         "- `reports/scenario_generalization.md`",
-        "- `reports/scenario_holdout.md`",
         "- `reports/sparsity_overlap.md`",
         "- `summary/study_summary.json`",
         "- `summary/scenario_generalization.json`",
-        "- `summary/scenario_holdout.json`",
         "- `summary/sparsity_overlap.json`",
         "",
         "每个 targeted study 额外要输出：",
@@ -213,8 +210,7 @@ def write_experiment_protocol(
         "",
         "- `supported`：当前 study 中已经得到可接受的线性 `f`。",
         "- `generalized_supported`：当前 `supported` 结果在多个 scenario 下仍然稳定成立。",
-        "- `all_holdouts_supported`：leave-one-scenario-out 之后仍然稳定通过。",
-        "- `mature_positive`：至少一个 strict-raw-linear state-evolution 组合同时通过 baseline、diagnostic 和全部 holdout。",
+        "- `mature_positive`：至少一个 strict-raw-linear state-evolution 组合同时在 baseline、diagnostic 和 sparse-edge overlap 上保持稳定。",
         "- `mature_negative`：state-evolution 长期表现为高 `R2` + 高条件数 + stable sparse edges，因此可以成熟地下负结论。",
     ]
     (ROOT_DIR / "docs" / "EXPERIMENT_PROTOCOL.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

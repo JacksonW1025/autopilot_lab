@@ -1,0 +1,167 @@
+{
+  "study_scope": {
+    "backend": "ardupilot",
+    "mode": "STABILIZE",
+    "x_schema": "commands_only",
+    "y_schema": "actuator_response",
+    "input_source": "telemetry/input_trace.csv",
+    "response_source": "telemetry/bin_rcou.csv",
+    "response_focus": "min(actuator_1..4)",
+    "profile_type": "pulse_train",
+    "scenario_scope": [
+      "nominal",
+      "throttle_biased"
+    ],
+    "tier_scope": [
+      "micro",
+      "probe",
+      "confirm"
+    ],
+    "accepted_target_per_config": 5,
+    "max_attempts_per_config": 10
+  },
+  "floor_definition": {
+    "normalized_pwm": "clamp((pwm - 1000) / 1000, 0, 1)",
+    "floor_signal": "a_min = min(actuator_1..4)",
+    "floor_threshold": 0.02,
+    "floor_hit_definition": "a_min <= 0.02",
+    "recovery_tolerance": 0.02,
+    "recovery_definition": "abs(a_min - baseline_min_actuator) <= 0.02"
+  },
+  "config_results": [
+    {
+      "scenario": "nominal",
+      "accepted_count": 5,
+      "attempt_count": 15,
+      "gate_rate": 0.0,
+      "failsafe_rate": 0.0,
+      "threshold_window_present": false,
+      "ready": false,
+      "blocking_reasons": [
+        "nominal_micro_trigger_rate_above_ceiling",
+        "nominal_micro_floor_hit_rate_above_ceiling",
+        "nominal_micro_baseline_false_trigger_rate_above_ceiling",
+        "nominal_probe_trigger_rate_below_floor",
+        "nominal_probe_recovery_rate_below_floor",
+        "nominal_confirm_floor_hit_rate_regressed",
+        "nominal_confirm_recovery_rate_below_floor"
+      ],
+      "tiers": {
+        "micro": {
+          "attempt_count": 5,
+          "accepted_count": 5,
+          "gate_rate": 0.0,
+          "failsafe_rate": 0.0,
+          "median_pulse_trigger_rate": 0.6,
+          "median_floor_hit_rate": 0.59375,
+          "median_baseline_false_trigger_rate": 0.391025641025641,
+          "median_hit_latency_ms": 0.0,
+          "median_recovery_rate": 0.5,
+          "median_hit_pattern_consistency": 1.0
+        },
+        "probe": {
+          "attempt_count": 5,
+          "accepted_count": 5,
+          "gate_rate": 0.0,
+          "failsafe_rate": 0.0,
+          "median_pulse_trigger_rate": 0.6,
+          "median_floor_hit_rate": 0.6060606060606061,
+          "median_baseline_false_trigger_rate": 0.3860759493670886,
+          "median_hit_latency_ms": 0.0,
+          "median_recovery_rate": 0.5,
+          "median_hit_pattern_consistency": 1.0
+        },
+        "confirm": {
+          "attempt_count": 5,
+          "accepted_count": 5,
+          "gate_rate": 0.0,
+          "failsafe_rate": 0.0,
+          "median_pulse_trigger_rate": 0.6,
+          "median_floor_hit_rate": 0.5882352941176471,
+          "median_baseline_false_trigger_rate": 0.3860759493670886,
+          "median_hit_latency_ms": 0.0,
+          "median_recovery_rate": 0.5,
+          "median_hit_pattern_consistency": 1.0
+        }
+      }
+    },
+    {
+      "scenario": "throttle_biased",
+      "accepted_count": 5,
+      "attempt_count": 15,
+      "gate_rate": 0.0,
+      "failsafe_rate": 0.0,
+      "threshold_window_present": false,
+      "ready": false,
+      "blocking_reasons": [
+        "throttle_biased_micro_trigger_rate_above_ceiling",
+        "throttle_biased_micro_floor_hit_rate_above_ceiling",
+        "throttle_biased_micro_baseline_false_trigger_rate_above_ceiling",
+        "throttle_biased_probe_trigger_rate_below_floor",
+        "throttle_biased_probe_recovery_rate_below_floor",
+        "throttle_biased_confirm_recovery_rate_below_floor"
+      ],
+      "tiers": {
+        "micro": {
+          "attempt_count": 5,
+          "accepted_count": 5,
+          "gate_rate": 0.0,
+          "failsafe_rate": 0.0,
+          "median_pulse_trigger_rate": 0.6,
+          "median_floor_hit_rate": 0.59375,
+          "median_baseline_false_trigger_rate": 0.3885350318471338,
+          "median_hit_latency_ms": 0.0,
+          "median_recovery_rate": 0.5,
+          "median_hit_pattern_consistency": 1.0
+        },
+        "probe": {
+          "attempt_count": 5,
+          "accepted_count": 5,
+          "gate_rate": 0.0,
+          "failsafe_rate": 0.0,
+          "median_pulse_trigger_rate": 0.6,
+          "median_floor_hit_rate": 0.6060606060606061,
+          "median_baseline_false_trigger_rate": 0.3860759493670886,
+          "median_hit_latency_ms": 0.0,
+          "median_recovery_rate": 0.5,
+          "median_hit_pattern_consistency": 1.0
+        },
+        "confirm": {
+          "attempt_count": 5,
+          "accepted_count": 5,
+          "gate_rate": 0.0,
+          "failsafe_rate": 0.0,
+          "median_pulse_trigger_rate": 0.6,
+          "median_floor_hit_rate": 0.6060606060606061,
+          "median_baseline_false_trigger_rate": 0.3860759493670886,
+          "median_hit_latency_ms": 0.0,
+          "median_recovery_rate": 0.47368421052631576,
+          "median_hit_pattern_consistency": 1.0
+        }
+      }
+    }
+  ],
+  "overall_decision": {
+    "ready_for_binary_attack_v1": false,
+    "recommended_path": "change_target_or_regime",
+    "scenario_status": {
+      "nominal": false,
+      "throttle_biased": false
+    }
+  },
+  "blocking_reasons": [
+    "nominal_micro_trigger_rate_above_ceiling",
+    "nominal_micro_floor_hit_rate_above_ceiling",
+    "nominal_micro_baseline_false_trigger_rate_above_ceiling",
+    "nominal_probe_trigger_rate_below_floor",
+    "nominal_probe_recovery_rate_below_floor",
+    "nominal_confirm_floor_hit_rate_regressed",
+    "nominal_confirm_recovery_rate_below_floor",
+    "throttle_biased_micro_trigger_rate_above_ceiling",
+    "throttle_biased_micro_floor_hit_rate_above_ceiling",
+    "throttle_biased_micro_baseline_false_trigger_rate_above_ceiling",
+    "throttle_biased_probe_trigger_rate_below_floor",
+    "throttle_biased_probe_recovery_rate_below_floor",
+    "throttle_biased_confirm_recovery_rate_below_floor"
+  ]
+}

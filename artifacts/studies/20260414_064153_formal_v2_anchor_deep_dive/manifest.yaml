@@ -1,0 +1,84 @@
+study_name: formal_v2_anchor_deep_dive
+generated_at: '2026-04-14T06:42:00.917734-07:00'
+raw_top_k: 4
+source_studies:
+  px4_baseline: artifacts/studies/20260410_224818_px4_real_generalization_ablation
+  px4_diagnostic: artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+  ardupilot_baseline: artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation
+  ardupilot_diagnostic: artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix
+  targeted_validation: artifacts/studies/20260413_134505_ardupilot_state_evolution_validation
+  stabilize_baseline: artifacts/studies/20260413_115811_ardupilot_state_evolution_stabilize_baseline
+  stabilize_diagnostic: artifacts/studies/20260413_122521_ardupilot_state_evolution_stabilize_diagnostic
+  guided_nogps_baseline: artifacts/studies/20260413_124654_ardupilot_state_evolution_guided_nogps_baseline
+  guided_nogps_diagnostic: artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic
+anchor_families:
+- family_id: A1
+  backend: px4
+  mode_scope: OFFBOARD_ATTITUDE, POSCTL
+  scenario_scope: dynamic, nominal, throttle_biased
+  combo:
+    x_schema: full_augmented
+    y_schema: next_raw_state
+    model_name: ols_affine
+    pooling_mode: stratified
+  baseline_study_key: px4_baseline
+  diagnostic_study_key: px4_diagnostic
+- family_id: B1
+  backend: px4
+  mode_scope: OFFBOARD_ATTITUDE, POSCTL
+  scenario_scope: dynamic, nominal, throttle_biased
+  combo:
+    x_schema: full_augmented
+    y_schema: delta_state
+    model_name: ols_affine
+    pooling_mode: stratified
+  baseline_study_key: px4_baseline
+  diagnostic_study_key: px4_diagnostic
+- family_id: A2
+  backend: ardupilot
+  mode_scope: GUIDED_NOGPS, STABILIZE
+  scenario_scope: dynamic, nominal, throttle_biased
+  combo:
+    x_schema: commands_only
+    y_schema: actuator_response
+    model_name: ridge_affine
+    pooling_mode: pooled
+  baseline_study_key: ardupilot_baseline
+  diagnostic_study_key: ardupilot_diagnostic
+- family_id: C1
+  backend: ardupilot
+  mode_scope: GUIDED_NOGPS, STABILIZE
+  scenario_scope: dynamic, nominal, throttle_biased
+  combo:
+    x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+  baseline_study_key: ardupilot_baseline
+  diagnostic_study_key: ardupilot_diagnostic
+- family_id: D1
+  backend: ardupilot
+  mode_scope: STABILIZE
+  scenario_scope: dynamic, nominal, throttle_biased
+  combo:
+    x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+  baseline_study_key: stabilize_baseline
+  diagnostic_study_key: stabilize_diagnostic
+- family_id: D2
+  backend: ardupilot
+  mode_scope: GUIDED_NOGPS
+  scenario_scope: dynamic, nominal, throttle_biased
+  combo:
+    x_schema: commands_plus_state_history
+    y_schema: selected_state_subset
+    model_name: ols_affine
+    pooling_mode: pooled
+  baseline_study_key: guided_nogps_baseline
+  diagnostic_study_key: guided_nogps_diagnostic
+outputs:
+  summary: summary/anchor_deep_dive.json
+  px4_table: tables/px4_a1_b1_matrix_comparison.csv
+  ardupilot_table: tables/ardupilot_a2_c1_d1_d2_boundary.csv

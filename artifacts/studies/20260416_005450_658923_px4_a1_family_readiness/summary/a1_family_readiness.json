@@ -1,0 +1,186 @@
+{
+  "study_scope": {
+    "backend": "px4",
+    "anchor_id": "A1",
+    "combo": "full_augmented | next_raw_state | ols_affine | stratified",
+    "baseline_study": "/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation",
+    "diagnostic_study": "/home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix",
+    "target_family_scope": [
+      "attitude_roll_pitch_continuation",
+      "yaw_heading_continuation",
+      "horizontal_position_continuation",
+      "vertical_dual_continuation",
+      "horizontal_velocity_continuation"
+    ]
+  },
+  "selected_family": "attitude_roll_pitch_continuation",
+  "phase_generalization": {
+    "baseline": {
+      "x_schema": "full_augmented",
+      "y_schema": "next_raw_state",
+      "pooling_mode": "stratified",
+      "model_name": "ols_affine",
+      "support": "supported",
+      "median_test_r2": 0.9995277520082995,
+      "effective_condition_number": 3435.5927411399257,
+      "coefficient_stability": 0.8958333333333334,
+      "scenario_consistency": 0.9902751674447235,
+      "scenario_subgroup_metrics": {
+        "dynamic": {
+          "r2": 0.9619208565064419,
+          "mse": 0.008677301866296843,
+          "mae": 0.0355808689102117,
+          "residual_mean_abs": 0.0355808689102117,
+          "residual_std": 0.09057857194310055,
+          "residual_max_abs": 0.7782143353759586,
+          "sample_count": 3809.0
+        },
+        "nominal": {
+          "r2": 0.9525663372454887,
+          "mse": 0.008696976051983182,
+          "mae": 0.03539566504250635,
+          "residual_mean_abs": 0.03539566504250635,
+          "residual_std": 0.09059394406154596,
+          "residual_max_abs": 0.7846606120702738,
+          "sample_count": 3833.0
+        },
+        "throttle_biased": {
+          "r2": 0.9544173764231022,
+          "mse": 0.009579001197405465,
+          "mae": 0.0373976349501289,
+          "residual_mean_abs": 0.0373976349501289,
+          "residual_std": 0.09515732124154268,
+          "residual_max_abs": 0.816012843248725,
+          "sample_count": 3753.0
+        }
+      },
+      "scenario_subgroup_r2": {
+        "dynamic": 0.9619208565064419,
+        "nominal": 0.9525663372454887,
+        "throttle_biased": 0.9544173764231022
+      },
+      "generalization_status": "generalized_supported",
+      "high_local_scenarios": [
+        "dynamic",
+        "nominal",
+        "throttle_biased"
+      ],
+      "metrics_path": "/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/fits/full_augmented__next_raw_state__stratified/ols_affine/metrics.json"
+    },
+    "diagnostic": {
+      "x_schema": "full_augmented",
+      "y_schema": "next_raw_state",
+      "pooling_mode": "stratified",
+      "model_name": "ols_affine",
+      "support": "supported",
+      "median_test_r2": 0.9990850111923917,
+      "effective_condition_number": 2455.3807349368735,
+      "coefficient_stability": 0.9204545454545454,
+      "scenario_consistency": 0.9975657449369468,
+      "scenario_subgroup_metrics": {
+        "dynamic": {
+          "r2": 0.9946986195069523,
+          "mse": 0.0011762873839267708,
+          "mae": 0.01669956717438095,
+          "residual_mean_abs": 0.01669956717438095,
+          "residual_std": 0.03378610299940961,
+          "residual_max_abs": 0.9452962034956427,
+          "sample_count": 7028.0
+        },
+        "nominal": {
+          "r2": 0.9948041756873742,
+          "mse": 0.0010981915585186602,
+          "mae": 0.01599926956779135,
+          "residual_mean_abs": 0.01599926956779135,
+          "residual_std": 0.03266545504256342,
+          "residual_max_abs": 0.8148049534317977,
+          "sample_count": 9233.0
+        },
+        "throttle_biased": {
+          "r2": 0.9923825685859607,
+          "mse": 0.001615252648808892,
+          "mae": 0.017059421309823283,
+          "residual_mean_abs": 0.017059421309823283,
+          "residual_std": 0.03976636861599804,
+          "residual_max_abs": 0.8538950739350687,
+          "sample_count": 2242.0
+        }
+      },
+      "scenario_subgroup_r2": {
+        "dynamic": 0.9946986195069523,
+        "nominal": 0.9948041756873742,
+        "throttle_biased": 0.9923825685859607
+      },
+      "generalization_status": "generalized_supported",
+      "high_local_scenarios": [
+        "dynamic",
+        "nominal",
+        "throttle_biased"
+      ],
+      "metrics_path": "/home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix/fits/full_augmented__next_raw_state__stratified/ols_affine/metrics.json"
+    }
+  },
+  "family_result": {
+    "family_id": "attitude_roll_pitch_continuation",
+    "response_count": 2,
+    "baseline_scenario_consistency": 0.9902751674447235,
+    "diagnostic_scenario_consistency": 0.9975657449369468,
+    "baseline_min_scenario_r2": 0.9525663372454887,
+    "diagnostic_min_scenario_r2": 0.9923825685859607,
+    "baseline_median_same_family_share": 0.5926829830126259,
+    "diagnostic_median_same_family_share": 0.7098516065372562,
+    "median_command_share": 0.08287212754024065,
+    "median_mode_share": 3.8324839996697814e-16,
+    "top1_stability_rate": 1.0,
+    "top1_sign_match_rate": 1.0,
+    "median_top5_jaccard": 0.5476190476190476,
+    "ready": true,
+    "blocking_reasons": []
+  },
+  "response_rows": [
+    {
+      "response_name": "future_state_roll",
+      "family_id": "attitude_roll_pitch_continuation",
+      "baseline_top1_feature": "roll",
+      "baseline_top1_value": 2.3903503567271494,
+      "diagnostic_top1_feature": "roll",
+      "diagnostic_top1_value": 2.3020723514737993,
+      "baseline_same_family_share": 0.5957762003414695,
+      "diagnostic_same_family_share": 0.7377114541473786,
+      "baseline_command_share": 0.09632875829391901,
+      "diagnostic_command_share": 0.05157818794077368,
+      "baseline_mode_share": 4.133597278912308e-17,
+      "diagnostic_mode_share": 9.351198144449353e-16,
+      "top1_stable": true,
+      "top1_sign_match": true,
+      "top5_jaccard": 0.42857142857142855,
+      "baseline_top5_features": "roll,roll__lag_1,roll__lag_3,yaw__lag_3,heading__lag_3",
+      "diagnostic_top5_features": "roll,roll__lag_1,roll__lag_2,roll__lag_3,yaw__lag_1"
+    },
+    {
+      "response_name": "future_state_pitch",
+      "family_id": "attitude_roll_pitch_continuation",
+      "baseline_top1_feature": "pitch",
+      "baseline_top1_value": 2.21452629952317,
+      "diagnostic_top1_feature": "pitch",
+      "diagnostic_top1_value": 2.117851564877715,
+      "baseline_same_family_share": 0.5895897656837823,
+      "diagnostic_same_family_share": 0.6819917589271339,
+      "baseline_command_share": 0.13098081275095072,
+      "diagnostic_command_share": 0.052600751175319184,
+      "baseline_mode_share": 1.9092198930691864e-17,
+      "diagnostic_mode_share": 5.374456137031622e-16,
+      "top1_stable": true,
+      "top1_sign_match": true,
+      "top5_jaccard": 0.6666666666666666,
+      "baseline_top5_features": "pitch,pitch__lag_1,pitch__lag_2,pitch__lag_3,heading__lag_3",
+      "diagnostic_top5_features": "pitch,pitch__lag_1,pitch__lag_2,pitch__lag_3,heading__lag_2"
+    }
+  ],
+  "overall_decision": {
+    "selected_family": "attitude_roll_pitch_continuation",
+    "ready_for_reproduction_v1": true,
+    "recommended_path": "continue_px4_a1_attitude_reproduction"
+  },
+  "blocking_reasons": []
+}

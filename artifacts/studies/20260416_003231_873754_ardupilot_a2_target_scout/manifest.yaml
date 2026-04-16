@@ -1,0 +1,140 @@
+study_name: ardupilot_a2_target_scout
+study_id: 20260416_003231_873754_ardupilot_a2_target_scout
+runs_manifest: /mnt/nvme/autopilot_lab/artifacts/ardupilot_matrix/20260415_090338_ardupilot/runs.csv
+source_run_dirs:
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090338_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090412_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090446_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090520_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090555_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090629_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090703_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090737_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090811_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090846_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090920_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_090954_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091028_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091102_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091137_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091211_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091245_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091319_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091353_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091428_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091502_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091536_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091610_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091644_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091719_ardupilot_manual_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091753_ardupilot_manual_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091827_ardupilot_manual_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091901_ardupilot_manual_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_091935_ardupilot_manual_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_092009_ardupilot_manual_pulse_train_throttle_r5
+output_files:
+  report: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_003231_873754_ardupilot_a2_target_scout/reports/a2_target_scout.md
+  summary: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_003231_873754_ardupilot_a2_target_scout/summary/a2_target_scout.json
+  run_level_target_scout: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_003231_873754_ardupilot_a2_target_scout/tables/run_level_target_scout.csv
+  scenario_target_matrix: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_003231_873754_ardupilot_a2_target_scout/tables/scenario_target_matrix.csv
+summary:
+  study_scope:
+    backend: ardupilot
+    mode_scope:
+    - STABILIZE
+    x_schema: commands_only
+    y_schema: actuator_response
+    input_source: telemetry/input_trace.csv
+    response_source: telemetry/bin_rcou.csv
+    response_focus:
+    - collective_floor_state
+    - pair_imbalance_12_vs_34
+    - single_actuator_floor_state
+    floor_threshold: 0.02
+    pair_split_threshold: 0.1
+  scenario_results:
+  - flight_mode: STABILIZE
+    scenario: nominal
+    accepted_count: 15
+    attempt_count: 15
+    recommended_target: collective_floor_state
+    recommended_path: collective_only_no_new_target_gain
+    collective_floor:
+      median_active_rate: 0.59375
+      median_baseline_rate: 0.3860759493670886
+      median_specificity: 0.20361990950226244
+      tier_range_specificity: 0.021139115292243604
+    pair_imbalance:
+      median_active_rate: 0.0
+      median_baseline_rate: 0.0
+      median_specificity: 0.0
+      median_sign_consistency: .nan
+      tier_range_specificity: 0.0
+      dominant_direction: none
+    best_single_actuator:
+      actuator: actuator_1
+      median_active_rate: 0.59375
+      median_baseline_rate: 0.3860759493670886
+      median_specificity: 0.20361990950226244
+      tier_range_specificity: 0.021139115292243604
+    actuator_specificity_spread: 0.0
+    active_dominant_vector_state: 0.000|0.000|0.000|0.000
+    active_dominant_vector_purity: 1.0
+    baseline_dominant_vector_state: 0.100|0.100|0.100|0.100
+    baseline_dominant_vector_purity: 1.0
+    blocking_reasons:
+    - pair_active_rate_below_threshold
+    - pair_sign_consistency_below_threshold
+    - pair_specificity_below_threshold
+    - single_actuator_symmetry_collapse
+  - flight_mode: STABILIZE
+    scenario: throttle_biased
+    accepted_count: 15
+    attempt_count: 15
+    recommended_target: collective_floor_state
+    recommended_path: collective_only_no_new_target_gain
+    collective_floor:
+      median_active_rate: 0.6060606060606061
+      median_baseline_rate: 0.3875
+      median_specificity: 0.21998465669351747
+      tier_range_specificity: 0.01863971998465669
+    pair_imbalance:
+      median_active_rate: 0.0
+      median_baseline_rate: 0.0
+      median_specificity: 0.0
+      median_sign_consistency: .nan
+      tier_range_specificity: 0.0
+      dominant_direction: none
+    best_single_actuator:
+      actuator: actuator_1
+      median_active_rate: 0.6060606060606061
+      median_baseline_rate: 0.3875
+      median_specificity: 0.21998465669351747
+      tier_range_specificity: 0.01863971998465669
+    actuator_specificity_spread: 0.0
+    active_dominant_vector_state: 0.000|0.000|0.000|0.000
+    active_dominant_vector_purity: 1.0
+    baseline_dominant_vector_state: 0.100|0.100|0.100|0.100
+    baseline_dominant_vector_purity: 1.0
+    blocking_reasons:
+    - pair_active_rate_below_threshold
+    - pair_sign_consistency_below_threshold
+    - pair_specificity_below_threshold
+    - single_actuator_symmetry_collapse
+  overall_decision:
+    recommended_next_target: none
+    recommended_next_step: no_target_signal_identified
+    recommended_mode: none
+    mode_status:
+      STABILIZE:
+        nominal: collective_floor_state
+        throttle_biased: collective_floor_state
+  blocking_reasons:
+  - pair_active_rate_below_threshold
+  - pair_sign_consistency_below_threshold
+  - pair_specificity_below_threshold
+  - single_actuator_symmetry_collapse
+  - pair_active_rate_below_threshold
+  - pair_sign_consistency_below_threshold
+  - pair_specificity_below_threshold
+  - single_actuator_symmetry_collapse

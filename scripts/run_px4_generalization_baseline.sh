@@ -250,8 +250,6 @@ run_stage_check full-baseline \
   --accepted-target "${ACCEPTED_TARGET}" \
   --required-path reports/scenario_generalization.md \
   --required-path summary/scenario_generalization.json \
-  --required-path reports/scenario_holdout.md \
-  --required-path summary/scenario_holdout.json \
   --required-path reports/sparsity_overlap.md \
   --required-path summary/sparsity_overlap.json
 

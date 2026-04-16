@@ -1,0 +1,181 @@
+study_name: ardupilot_a2_stabilize_readiness
+study_id: 20260415_073011_ardupilot_a2_stabilize_readiness
+runs_manifest: /mnt/nvme/autopilot_lab/artifacts/ardupilot_matrix/20260415_071105_ardupilot/runs.csv
+baseline_study_dir: /home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation
+source_run_dirs:
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071105_ardupilot_manual_alternating_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071141_ardupilot_manual_alternating_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071215_ardupilot_manual_alternating_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071249_ardupilot_manual_alternating_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071323_ardupilot_manual_alternating_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071357_ardupilot_manual_alternating_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071432_ardupilot_manual_alternating_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071506_ardupilot_manual_alternating_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071540_ardupilot_manual_alternating_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071615_ardupilot_manual_alternating_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071649_ardupilot_manual_alternating_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071723_ardupilot_manual_alternating_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071757_ardupilot_manual_alternating_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071832_ardupilot_manual_alternating_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071906_ardupilot_manual_alternating_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_071940_ardupilot_manual_alternating_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072014_ardupilot_manual_alternating_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072049_ardupilot_manual_alternating_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072123_ardupilot_manual_alternating_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072157_ardupilot_manual_alternating_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072231_ardupilot_manual_alternating_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072306_ardupilot_manual_alternating_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072340_ardupilot_manual_alternating_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072414_ardupilot_manual_alternating_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072448_ardupilot_manual_alternating_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072522_ardupilot_manual_alternating_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072557_ardupilot_manual_alternating_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072631_ardupilot_manual_alternating_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072705_ardupilot_manual_alternating_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260415_072740_ardupilot_manual_alternating_pulse_train_throttle_r5
+output_files:
+  report: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_073011_ardupilot_a2_stabilize_readiness/reports/a2_readiness.md
+  summary: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_073011_ardupilot_a2_stabilize_readiness/summary/a2_readiness.json
+  run_level_effects: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_073011_ardupilot_a2_stabilize_readiness/tables/run_level_effects.csv
+  config_readiness_matrix: /mnt/nvme/autopilot_lab/artifacts/studies/20260415_073011_ardupilot_a2_stabilize_readiness/tables/config_readiness_matrix.csv
+summary:
+  study_scope:
+    backend: ardupilot
+    mode: STABILIZE
+    x_schema: commands_only
+    y_schema: actuator_response
+    input_source: telemetry/input_trace.csv
+    response_source: telemetry/bin_rcou.csv
+    scenario_scope:
+    - nominal
+    - proxy_dynamic
+    - throttle_biased
+    tier_scope:
+    - small
+    - medium
+    accepted_target_per_config: 5
+    max_attempts_per_config: 10
+    accepted_count_definition: min(accepted_count_small, accepted_count_medium)
+    proxy_dynamic_note: proxy_dynamic is a throttle-only, higher-cadence proxy and
+      not the Formal V2 dynamic scenario.
+  sign_ref:
+    sign: -1
+    mean_weight: -0.4301960750405939
+    weights:
+      actuator_1: -0.4303787803775698
+      actuator_2: -0.4300398404490664
+      actuator_3: -0.4300762160286806
+      actuator_4: -0.43028946330705875
+    source_study_dir: /home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation
+    source_matrix_path: /home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/fits/commands_only__actuator_response__pooled/ridge_affine/matrix_f.csv
+    combo: commands_only | actuator_response | ridge_affine | pooled
+  config_results:
+  - scenario: nominal
+    accepted_count: 5
+    attempt_count: 10
+    gate_rate: 0.0
+    failsafe_rate: 0.0
+    direction_consistency: 0.0
+    predictability_cv: 0.33333333333333326
+    small_tier_above_noise: true
+    monotonicity: false
+    profile_not_completed_rate: 0.0
+    ready: false
+    blocking_reasons:
+    - nominal_direction_consistency_below_threshold
+    - nominal_monotonicity_failed
+    tiers:
+      small:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        direction_consistency: 0.0
+        predictability_cv: 1.19904086659517e-16
+        median_snr: 100000.00000000001
+        median_slope_abs: 3.7037037037037006
+      medium:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        direction_consistency: 0.0
+        predictability_cv: 1.19904086659517e-16
+        median_snr: 100000.00000000001
+        median_slope_abs: 1.8518518518518503
+  - scenario: proxy_dynamic
+    accepted_count: 5
+    attempt_count: 10
+    gate_rate: 0.0
+    failsafe_rate: 0.0
+    direction_consistency: 1.0
+    predictability_cv: 0.33333333333333326
+    small_tier_above_noise: true
+    monotonicity: false
+    profile_not_completed_rate: 0.0
+    ready: true
+    blocking_reasons: []
+    tiers:
+      small:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        direction_consistency: 1.0
+        predictability_cv: 0.0
+        median_snr: 100000.00000000001
+        median_slope_abs: 3.0864197530864215
+      medium:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        direction_consistency: 1.0
+        predictability_cv: 0.0
+        median_snr: 100000.00000000001
+        median_slope_abs: 1.5432098765432107
+  - scenario: throttle_biased
+    accepted_count: 5
+    attempt_count: 10
+    gate_rate: 0.0
+    failsafe_rate: 0.0
+    direction_consistency: 0.0
+    predictability_cv: 0.33333333333333326
+    small_tier_above_noise: true
+    monotonicity: false
+    profile_not_completed_rate: 0.0
+    ready: false
+    blocking_reasons:
+    - throttle_biased_direction_consistency_below_threshold
+    - throttle_biased_monotonicity_failed
+    tiers:
+      small:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        direction_consistency: 0.0
+        predictability_cv: 0.0
+        median_snr: 100000.00000000001
+        median_slope_abs: 3.0864197530864215
+      medium:
+        attempt_count: 5
+        accepted_count: 5
+        gate_rate: 0.0
+        failsafe_rate: 0.0
+        direction_consistency: 0.0
+        predictability_cv: 0.0
+        median_snr: 100000.00000000001
+        median_slope_abs: 1.5432098765432107
+  overall_decision:
+    ready_for_attack_v1: false
+    next_step: iterate_capture_profile_only
+    scenario_status:
+      nominal: false
+      proxy_dynamic: true
+      throttle_biased: false
+  blocking_reasons:
+  - nominal_direction_consistency_below_threshold
+  - nominal_monotonicity_failed
+  - throttle_biased_direction_consistency_below_threshold
+  - throttle_biased_monotonicity_failed

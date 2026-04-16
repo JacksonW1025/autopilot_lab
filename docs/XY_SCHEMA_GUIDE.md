@@ -46,11 +46,10 @@
 1. 先看 generalization full 的 `summary.md` 与 `scenario_generalization.md`。
 2. 再看 targeted line 的 `state_evolution_validation.md`。
 3. 如果某个 state-evolution 组合高 `R2` 但结论仍谨慎，再一起看：
-   - `scenario_holdout.md`
    - `sparsity_overlap.md`
    - `state_evolution_audit.md`
 
 ## 当前最重要的阅读边界
 
 - `best_result` 不一定等于“最稳的正式结论”。
-- 对 ArduPilot 尤其要注意：高 `R2` 不等于已经得到稳定 state-evolution 结论，必须把 holdout、条件数、稳定性和 sparsity overlap 一起看。
+- 对 ArduPilot 尤其要注意：高 `R2` 不等于已经得到稳定 state-evolution 结论，必须把 scenario generalization、条件数、稳定性和 sparsity overlap 一起看。

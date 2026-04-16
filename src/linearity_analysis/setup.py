@@ -22,11 +22,18 @@ setup(
     entry_points={
         "console_scripts": [
             "linearity_analyze = linearity_analysis.linearity_analyze:main",
+            "linearity_ardupilot_a2_boundary_readiness = linearity_analysis.ardupilot_a2_boundary_readiness:main",
+            "linearity_ardupilot_a2_pair_target_readiness = linearity_analysis.ardupilot_a2_pair_target_readiness:main",
+            "linearity_ardupilot_a2_target_scout = linearity_analysis.ardupilot_a2_target_scout:main",
             "linearity_compare_schemas = linearity_analysis.linearity_compare_schemas:main",
             "linearity_contract_audit = linearity_analysis.contract_audit:main",
+            "linearity_ardupilot_a2_readiness = linearity_analysis.ardupilot_a2_readiness:main",
             "linearity_matrix_gallery = linearity_analysis.matrix_gallery:main",
             "linearity_milestone_report = linearity_analysis.milestone_report:main",
             "linearity_prune_artifacts = linearity_analysis.prune_artifacts:main",
+            "linearity_px4_a1_family_readiness = linearity_analysis.px4_a1_family_readiness:main",
+            "linearity_px4_a1_roll_pitch_targeted_reproduction = linearity_analysis.px4_a1_roll_pitch_targeted_reproduction:main",
+            "linearity_px4_a1_target_scout = linearity_analysis.px4_a1_target_scout:main",
             "linearity_stage_checks = linearity_analysis.stage_checks:main",
         ],
     },

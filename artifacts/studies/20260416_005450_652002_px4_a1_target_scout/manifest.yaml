@@ -1,0 +1,391 @@
+study_name: px4_a1_target_scout
+study_id: 20260416_005450_652002_px4_a1_target_scout
+baseline_study: /home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation
+diagnostic_study: /home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+output_files:
+  report: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_005450_652002_px4_a1_target_scout/reports/a1_target_scout.md
+  summary: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_005450_652002_px4_a1_target_scout/summary/a1_target_scout.json
+  response_level_target_scout: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_005450_652002_px4_a1_target_scout/tables/response_level_target_scout.csv
+  family_target_matrix: /mnt/nvme/autopilot_lab/artifacts/studies/20260416_005450_652002_px4_a1_target_scout/tables/family_target_matrix.csv
+summary:
+  study_scope:
+    backend: px4
+    anchor_id: A1
+    combo: full_augmented | next_raw_state | ols_affine | stratified
+    baseline_study: /home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation
+    diagnostic_study: /home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+    target_family_scope:
+    - attitude_roll_pitch_continuation
+    - yaw_heading_continuation
+    - horizontal_position_continuation
+    - vertical_dual_continuation
+    - horizontal_velocity_continuation
+  phase_generalization:
+    baseline:
+      x_schema: full_augmented
+      y_schema: next_raw_state
+      pooling_mode: stratified
+      model_name: ols_affine
+      support: supported
+      median_test_r2: 0.9995277520082995
+      effective_condition_number: 3435.5927411399257
+      coefficient_stability: 0.8958333333333334
+      scenario_consistency: 0.9902751674447235
+      scenario_subgroup_metrics:
+        dynamic:
+          r2: 0.9619208565064419
+          mse: 0.008677301866296843
+          mae: 0.0355808689102117
+          residual_mean_abs: 0.0355808689102117
+          residual_std: 0.09057857194310055
+          residual_max_abs: 0.7782143353759586
+          sample_count: 3809.0
+        nominal:
+          r2: 0.9525663372454887
+          mse: 0.008696976051983182
+          mae: 0.03539566504250635
+          residual_mean_abs: 0.03539566504250635
+          residual_std: 0.09059394406154596
+          residual_max_abs: 0.7846606120702738
+          sample_count: 3833.0
+        throttle_biased:
+          r2: 0.9544173764231022
+          mse: 0.009579001197405465
+          mae: 0.0373976349501289
+          residual_mean_abs: 0.0373976349501289
+          residual_std: 0.09515732124154268
+          residual_max_abs: 0.816012843248725
+          sample_count: 3753.0
+      scenario_subgroup_r2:
+        dynamic: 0.9619208565064419
+        nominal: 0.9525663372454887
+        throttle_biased: 0.9544173764231022
+      generalization_status: generalized_supported
+      high_local_scenarios:
+      - dynamic
+      - nominal
+      - throttle_biased
+      metrics_path: /home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/fits/full_augmented__next_raw_state__stratified/ols_affine/metrics.json
+    diagnostic:
+      x_schema: full_augmented
+      y_schema: next_raw_state
+      pooling_mode: stratified
+      model_name: ols_affine
+      support: supported
+      median_test_r2: 0.9990850111923917
+      effective_condition_number: 2455.3807349368735
+      coefficient_stability: 0.9204545454545454
+      scenario_consistency: 0.9975657449369468
+      scenario_subgroup_metrics:
+        dynamic:
+          r2: 0.9946986195069523
+          mse: 0.0011762873839267708
+          mae: 0.01669956717438095
+          residual_mean_abs: 0.01669956717438095
+          residual_std: 0.03378610299940961
+          residual_max_abs: 0.9452962034956427
+          sample_count: 7028.0
+        nominal:
+          r2: 0.9948041756873742
+          mse: 0.0010981915585186602
+          mae: 0.01599926956779135
+          residual_mean_abs: 0.01599926956779135
+          residual_std: 0.03266545504256342
+          residual_max_abs: 0.8148049534317977
+          sample_count: 9233.0
+        throttle_biased:
+          r2: 0.9923825685859607
+          mse: 0.001615252648808892
+          mae: 0.017059421309823283
+          residual_mean_abs: 0.017059421309823283
+          residual_std: 0.03976636861599804
+          residual_max_abs: 0.8538950739350687
+          sample_count: 2242.0
+      scenario_subgroup_r2:
+        dynamic: 0.9946986195069523
+        nominal: 0.9948041756873742
+        throttle_biased: 0.9923825685859607
+      generalization_status: generalized_supported
+      high_local_scenarios:
+      - dynamic
+      - nominal
+      - throttle_biased
+      metrics_path: /home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix/fits/full_augmented__next_raw_state__stratified/ols_affine/metrics.json
+  response_rows:
+  - response_name: future_state_roll
+    family_id: attitude_roll_pitch_continuation
+    baseline_top1_feature: roll
+    baseline_top1_value: 2.3903503567271494
+    diagnostic_top1_feature: roll
+    diagnostic_top1_value: 2.3020723514737993
+    baseline_same_family_share: 0.5957762003414695
+    diagnostic_same_family_share: 0.7377114541473786
+    baseline_command_share: 0.09632875829391901
+    diagnostic_command_share: 0.05157818794077368
+    baseline_mode_share: 4.133597278912308e-17
+    diagnostic_mode_share: 9.351198144449353e-16
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.42857142857142855
+    baseline_top5_features: roll,roll__lag_1,roll__lag_3,yaw__lag_3,heading__lag_3
+    diagnostic_top5_features: roll,roll__lag_1,roll__lag_2,roll__lag_3,yaw__lag_1
+  - response_name: future_state_pitch
+    family_id: attitude_roll_pitch_continuation
+    baseline_top1_feature: pitch
+    baseline_top1_value: 2.21452629952317
+    diagnostic_top1_feature: pitch
+    diagnostic_top1_value: 2.117851564877715
+    baseline_same_family_share: 0.5895897656837823
+    diagnostic_same_family_share: 0.6819917589271339
+    baseline_command_share: 0.13098081275095072
+    diagnostic_command_share: 0.052600751175319184
+    baseline_mode_share: 1.9092198930691864e-17
+    diagnostic_mode_share: 5.374456137031622e-16
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.6666666666666666
+    baseline_top5_features: pitch,pitch__lag_1,pitch__lag_2,pitch__lag_3,heading__lag_3
+    diagnostic_top5_features: pitch,pitch__lag_1,pitch__lag_2,pitch__lag_3,heading__lag_2
+  - response_name: future_state_yaw
+    family_id: yaw_heading_continuation
+    baseline_top1_feature: yaw
+    baseline_top1_value: 3.423885182097043
+    diagnostic_top1_feature: yaw
+    diagnostic_top1_value: 1.3265989335114696
+    baseline_same_family_share: 0.4750867024869598
+    diagnostic_same_family_share: 0.5396900474196199
+    baseline_command_share: 0.16708754657881691
+    diagnostic_command_share: 0.05017479465373533
+    baseline_mode_share: 9.568115928425853e-16
+    diagnostic_mode_share: 1.78856965705769e-15
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.42857142857142855
+    baseline_top5_features: yaw,heading,heading__lag_1,yaw__lag_1,roll__lag_1
+    diagnostic_top5_features: yaw,heading__lag_1,heading__lag_2,roll,yaw__lag_1
+  - response_name: future_state_heading
+    family_id: yaw_heading_continuation
+    baseline_top1_feature: yaw
+    baseline_top1_value: 3.3073910020476585
+    diagnostic_top1_feature: yaw
+    diagnostic_top1_value: 1.3098389123621197
+    baseline_same_family_share: 0.4674523973009389
+    diagnostic_same_family_share: 0.5105642265065582
+    baseline_command_share: 0.17573282198762705
+    diagnostic_command_share: 0.049475043455790915
+    baseline_mode_share: 9.862279770649456e-16
+    diagnostic_mode_share: 1.5798000924455924e-15
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.42857142857142855
+    baseline_top5_features: yaw,heading,heading__lag_1,yaw__lag_1,roll__lag_1
+    diagnostic_top5_features: yaw,heading__lag_1,heading__lag_2,roll,yaw__lag_1
+  - response_name: future_state_yaw_rate
+    family_id: yaw_heading_continuation
+    baseline_top1_feature: yaw_rate
+    baseline_top1_value: 1.22271308350216
+    diagnostic_top1_feature: yaw_rate
+    diagnostic_top1_value: 1.4904755955621014
+    baseline_same_family_share: 0.16474968984625246
+    diagnostic_same_family_share: 0.3474686401103957
+    baseline_command_share: 0.3492294347723498
+    diagnostic_command_share: 0.04257954616294051
+    baseline_mode_share: 1.1801350268061077e-16
+    diagnostic_mode_share: 3.2383842537246313e-16
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.1111111111111111
+    baseline_top5_features: yaw_rate,command_yaw__lag_2,command_pitch__lag_1,command_pitch__lag_2,command_yaw__lag_1
+    diagnostic_top5_features: yaw_rate,yaw_rate__lag_1,actuator_1,position_x__lag_2,integrator_roll
+  - response_name: future_state_position_x
+    family_id: horizontal_position_continuation
+    baseline_top1_feature: position_x
+    baseline_top1_value: 2.1933773891504686
+    diagnostic_top1_feature: position_x
+    diagnostic_top1_value: 2.06790487643073
+    baseline_same_family_share: 0.3544195201718168
+    diagnostic_same_family_share: 0.6206576816772869
+    baseline_command_share: 0.026131593444864622
+    diagnostic_command_share: 0.009366937800360775
+    baseline_mode_share: 9.456595482289195e-17
+    diagnostic_mode_share: 3.220289213230495e-15
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.25
+    baseline_top5_features: position_x,heading,yaw,position_x__lag_1,heading__lag_3
+    diagnostic_top5_features: position_x,position_x__lag_1,position_x__lag_2,velocity_x,pitch__lag_2
+  - response_name: future_state_position_y
+    family_id: horizontal_position_continuation
+    baseline_top1_feature: position_y
+    baseline_top1_value: 1.9046111626617388
+    diagnostic_top1_feature: position_y
+    diagnostic_top1_value: 1.803455594288613
+    baseline_same_family_share: 0.40599803977832993
+    diagnostic_same_family_share: 0.5097672861611254
+    baseline_command_share: 0.032001467058294465
+    diagnostic_command_share: 0.012826975644295652
+    baseline_mode_share: 4.261882983440825e-17
+    diagnostic_mode_share: 1.0096280248504594e-14
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.25
+    baseline_top5_features: position_y,position_y__lag_1,yaw__lag_2,heading__lag_2,heading
+    diagnostic_top5_features: position_y,position_y__lag_1,velocity_y,position_y__lag_3,position_y__lag_2
+  - response_name: future_state_position_z
+    family_id: vertical_dual_continuation
+    baseline_top1_feature: altitude
+    baseline_top1_value: -0.872385287897669
+    diagnostic_top1_feature: altitude
+    diagnostic_top1_value: -0.8373935518657989
+    baseline_same_family_share: 0.30801945400637226
+    diagnostic_same_family_share: 0.5061372265803716
+    baseline_command_share: 0.030286227652120988
+    diagnostic_command_share: 0.020857947494556363
+    baseline_mode_share: 1.3747816337343843e-16
+    diagnostic_mode_share: 4.799310620937004e-15
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.25
+    baseline_top5_features: altitude,position_z,heading__lag_3,yaw__lag_3,yaw
+    diagnostic_top5_features: altitude,position_z,roll__lag_1,altitude__lag_2,position_z__lag_2
+  - response_name: future_state_altitude
+    family_id: vertical_dual_continuation
+    baseline_top1_feature: altitude
+    baseline_top1_value: 0.872385287897669
+    diagnostic_top1_feature: altitude
+    diagnostic_top1_value: 0.8373935518657989
+    baseline_same_family_share: 0.30801945400637226
+    diagnostic_same_family_share: 0.5061372265803716
+    baseline_command_share: 0.030286227652120988
+    diagnostic_command_share: 0.020857947494556363
+    baseline_mode_share: 1.3747816337343843e-16
+    diagnostic_mode_share: 4.799310620937004e-15
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.25
+    baseline_top5_features: altitude,position_z,heading__lag_3,yaw__lag_3,yaw
+    diagnostic_top5_features: altitude,position_z,roll__lag_1,altitude__lag_2,position_z__lag_2
+  - response_name: future_state_velocity_x
+    family_id: horizontal_velocity_continuation
+    baseline_top1_feature: velocity_x
+    baseline_top1_value: 1.532019113802232
+    diagnostic_top1_feature: velocity_x
+    diagnostic_top1_value: 1.4622942551965195
+    baseline_same_family_share: 0.24743377976745531
+    diagnostic_same_family_share: 0.3142556079403704
+    baseline_command_share: 0.10815916186632034
+    diagnostic_command_share: 0.05204494859300158
+    baseline_mode_share: 1.6822400999308044e-17
+    diagnostic_mode_share: 6.434764554696143e-16
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.6666666666666666
+    baseline_top5_features: velocity_x,roll,roll__lag_1,position_x__lag_1,position_x
+    diagnostic_top5_features: velocity_x,roll,roll__lag_2,roll__lag_1,position_x__lag_1
+  - response_name: future_state_velocity_y
+    family_id: horizontal_velocity_continuation
+    baseline_top1_feature: velocity_y
+    baseline_top1_value: 1.622980320492312
+    diagnostic_top1_feature: velocity_y
+    diagnostic_top1_value: 1.5481724907649714
+    baseline_same_family_share: 0.25698966205097834
+    diagnostic_same_family_share: 0.3804190511556668
+    baseline_command_share: 0.07976954934938821
+    diagnostic_command_share: 0.043306868702349705
+    baseline_mode_share: 1.5241038721026473e-17
+    diagnostic_mode_share: 8.126644283356009e-16
+    top1_stable: true
+    top1_sign_match: true
+    top5_jaccard: 0.42857142857142855
+    baseline_top5_features: velocity_y,pitch,pitch__lag_1,yaw,heading
+    diagnostic_top5_features: velocity_y,pitch,pitch__lag_1,velocity_y__lag_3,position_y__lag_1
+  family_results:
+  - family_id: attitude_roll_pitch_continuation
+    response_count: 2
+    responses:
+    - future_state_roll
+    - future_state_pitch
+    baseline_median_same_family_share: 0.5926829830126259
+    diagnostic_median_same_family_share: 0.7098516065372562
+    median_command_share: 0.08287212754024065
+    median_mode_share: 3.8324839996697814e-16
+    top1_stability_rate: 1.0
+    top1_sign_match_rate: 1.0
+    median_top5_jaccard: 0.5476190476190476
+    supported: true
+    blocking_reasons: []
+  - family_id: yaw_heading_continuation
+    response_count: 3
+    responses:
+    - future_state_yaw
+    - future_state_heading
+    - future_state_yaw_rate
+    baseline_median_same_family_share: 0.4674523973009389
+    diagnostic_median_same_family_share: 0.5105642265065582
+    median_command_share: 0.11260393272170899
+    median_mode_share: 1.2830140347552689e-15
+    top1_stability_rate: 1.0
+    top1_sign_match_rate: 1.0
+    median_top5_jaccard: 0.42857142857142855
+    supported: true
+    blocking_reasons: []
+  - family_id: horizontal_position_continuation
+    response_count: 2
+    responses:
+    - future_state_position_x
+    - future_state_position_y
+    baseline_median_same_family_share: 0.3802087799750734
+    diagnostic_median_same_family_share: 0.5652124839192061
+    median_command_share: 0.02008174348695388
+    median_mode_share: 3.3634385615980972e-15
+    top1_stability_rate: 1.0
+    top1_sign_match_rate: 1.0
+    median_top5_jaccard: 0.25
+    supported: false
+    blocking_reasons:
+    - baseline_same_family_share_below_threshold
+    - top5_overlap_below_threshold
+  - family_id: vertical_dual_continuation
+    response_count: 2
+    responses:
+    - future_state_position_z
+    - future_state_altitude
+    baseline_median_same_family_share: 0.30801945400637226
+    diagnostic_median_same_family_share: 0.5061372265803716
+    median_command_share: 0.025572087573338675
+    median_mode_share: 2.468394392155221e-15
+    top1_stability_rate: 1.0
+    top1_sign_match_rate: 1.0
+    median_top5_jaccard: 0.25
+    supported: false
+    blocking_reasons:
+    - baseline_same_family_share_below_threshold
+    - top5_overlap_below_threshold
+  - family_id: horizontal_velocity_continuation
+    response_count: 2
+    responses:
+    - future_state_velocity_x
+    - future_state_velocity_y
+    baseline_median_same_family_share: 0.25221172090921684
+    diagnostic_median_same_family_share: 0.3473373295480186
+    median_command_share: 0.07082013212776496
+    median_mode_share: 3.720510808813874e-16
+    top1_stability_rate: 1.0
+    top1_sign_match_rate: 1.0
+    median_top5_jaccard: 0.5476190476190476
+    supported: false
+    blocking_reasons:
+    - baseline_same_family_share_below_threshold
+    - diagnostic_same_family_share_below_threshold
+  overall_decision:
+    recommended_next_target: attitude_roll_pitch_continuation
+    recommended_next_step: start_px4_a1_attitude_family_readiness
+    combo_ready: true
+    selected_family: attitude_roll_pitch_continuation
+  blocking_reasons:
+  - baseline_same_family_share_below_threshold
+  - top5_overlap_below_threshold
+  - baseline_same_family_share_below_threshold
+  - top5_overlap_below_threshold
+  - baseline_same_family_share_below_threshold
+  - diagnostic_same_family_share_below_threshold

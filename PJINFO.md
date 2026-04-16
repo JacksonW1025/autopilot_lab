@@ -10,7 +10,6 @@
 - 当前正式判断标准：
   - `support == supported` 才能作为“得到了可接受线性 `f`”的证据
   - `generalized_supported` 才能作为“这个 `f` 跨 scenario 仍然成立”的证据
-  - `all_holdouts_supported` 才能作为“leave-one-scenario-out 后仍然稳定”的证据
   - `mature_positive / mature_negative / inconclusive` 是 targeted line 的正式状态
 
 ## 环境基线
@@ -120,10 +119,41 @@
   - PX4 diagnostic generalized_supported=`111`
   - ArduPilot baseline generalized_supported=`12`
   - ArduPilot diagnostic generalized_supported=`12`
+- [2026-04-14] 当前 insight-phase 结果 memo 已完成：
+  - `docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md`
+  - anchor deep dive artifact: `artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive`
+  - full in-depth synthesis artifact: `artifacts/studies/20260414_064902_formal_v2_in_depth_analysis`
+
+## 当前 insight 摘要
+
+- [2026-04-14] 当前这份 insight memo 是结果文档，不是计划：
+  - `docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md`
+- [2026-04-14] generalized-supported 的稳定结构现在可以压缩成两类：
+  - PX4：state-dominated 的短时传播结构，stable-core=`80`
+  - ArduPilot：`commands_only` 主导的低维 direct-control 结构，stable-core=`12`
+- [2026-04-14] PX4 最可靠的 generalized-supported 证据更像 `current state + short lag -> future/summary`，不是 command-only 主导。
+- [2026-04-14] ArduPilot 最可靠的 generalized-supported 证据集中在 `commands_only -> actuator_response`，其中 `command_throttle` 对 `actuator_1~4` 的支配最稳定。
+- [2026-04-14] ArduPilot `commands_plus_state_history -> selected_state_subset` 这类高分路径不是“没结构”，而是被 formal boundary 卡住：
+  - `C1`：stable partial mask + 极高 condition number
+  - `D2`：empty mask + stable raw template
+  - `D1`：empty mask + raw collapse
+- [2026-04-14] backend-shared 的是语义输出家族，不是 support pattern 本身：
+  - shared alignment key=`9`
+  - top-edge overlap 平均接近 `0`
+- [2026-04-14] 当前已足够支持后续 attack design 的最小原则：
+  - 低维优先
+  - 非空且跨 study 稳定的 support 优先
+  - direct-control path 优先
+  - 高分但病态路径降权
+  - PX4 若继续推进，应优先考虑 state/feedback channel，不默认走 throttle
 
 ## 最近变更
 
-- `scenario_holdout` 与 `sparsity_overlap` 已进入正式 artifact 链路
+- `docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md` 已从 checkpoint 扩展为当前 repo-state 下的完整 insight-phase 结果 memo
+- 新增 `artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive`
+- 新增 `artifacts/studies/20260414_064902_formal_v2_in_depth_analysis`
+- 新增 `scripts/analyze_anchor_deep_dive.py` 与 `src/linearity_analysis/linearity_analysis/anchor_deep_dive.py`
+- `scenario_generalization` 与 `sparsity_overlap` 已进入正式 artifact 链路
 - ArduPilot mode-isolated targeted line 已加入 Formal V2 正式口径
 - milestone report / appendix 已显式引用 targeted aggregate 与四个 targeted input study
 - `README.md`、`PJINFO.md`、`docs/RESEARCH_GOAL.md`、`docs/DATA_SCHEMA.md` 已与 latest Formal V2 同步

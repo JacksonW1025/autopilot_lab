@@ -1,0 +1,24 @@
+study_name: formal_v2_in_depth_analysis
+study_id: 20260414_064902_formal_v2_in_depth_analysis
+source_studies:
+  px4_baseline: /mnt/nvme/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation
+  px4_diagnostic: /mnt/nvme/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix
+  ardupilot_baseline: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation
+  ardupilot_diagnostic: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix
+  targeted_validation: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation
+  targeted_modes:
+    stabilize:
+      baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_115811_ardupilot_state_evolution_stabilize_baseline
+      diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_122521_ardupilot_state_evolution_stabilize_diagnostic
+      representative_combo: commands_plus_state_history | selected_state_subset |
+        ols_affine | pooled
+    guided_nogps:
+      baseline_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_124654_ardupilot_state_evolution_guided_nogps_baseline
+      diagnostic_dir: /mnt/nvme/autopilot_lab/artifacts/studies/20260413_132622_ardupilot_state_evolution_guided_nogps_diagnostic
+      representative_combo: commands_plus_state_history | selected_state_subset |
+        ols_affine | pooled
+  top_k: 10
+summary:
+  px4_stable_core_count: 80
+  ardupilot_stable_core_count: 12
+  shared_alignment_key_count: 9

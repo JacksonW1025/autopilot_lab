@@ -1,6 +1,12 @@
 # autopilot_lab
 
-`autopilot_lab` 是一个面向无人机输入到响应关系研究的实验仓库。当前正式主线已经切到 `Formal V2`：
+`autopilot_lab` 是一个面向无人机输入到响应关系研究的实验仓库。当前正式主线仍是 `Formal V2`，但仓库状态已经不只停留在 milestone summary；截至 `2026-04-14`，基于当前 repo artifact 的 insight-phase 分析也已经完成，并落到：
+
+- [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
+- [20260414_064153_formal_v2_anchor_deep_dive](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive)
+- [20260414_064902_formal_v2_in_depth_analysis](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis)
+
+Formal V2 的基本问题仍然是：
 
 > 在统一的 `X / Y schema` 口径下，验证 PX4 与 ArduPilot 是否都存在稳定、可解释的全局线性或仿射映射 `Y ≈ fX (+ b)`；并进一步检查它是否能跨 `nominal / dynamic / throttle_biased` 三档 scenario 成立，以及 ArduPilot 的 mode-isolated state-evolution 能否形成成熟结论。
 
@@ -20,6 +26,8 @@
 - ArduPilot full baseline: [20260413_070802_ardupilot_real_generalization_ablation](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation)
 - ArduPilot full diagnostic: [20260413_091420_ardupilot_generalization_diagnostic_matrix](/home/car/autopilot_lab/artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix)
 - ArduPilot targeted validation: [20260413_134505_ardupilot_state_evolution_validation](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation)
+- latest insight memo: [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
+- latest insight aggregate: [20260414_064153_formal_v2_anchor_deep_dive](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive), [20260414_064902_formal_v2_in_depth_analysis](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis)
 
 当前最简明的结论是：
 
@@ -29,25 +37,38 @@
 - ArduPilot 的 mode-isolated targeted line 已经形成正式 artifact，但 `overall_status=mode_isolated_state_evolution_still_inconclusive`。
 - compare 当前仍然是 `baseline_stability_unresolved`，所以 backend 差异仍然不是主标题。
 
+如果只看当前 repo-state 下最重要的 insight 结果，可以再压缩成下面 6 条：
+
+- PX4 当前最可靠的 generalized-supported 结构不是 command-only，而是 state-dominated 的短时传播结构；stable-core=`80`。
+- ArduPilot 当前最可靠的 generalized-supported 结构是 `commands_only` 主导的低维 direct-control path；stable-core=`12`。
+- ArduPilot 最适合作为后续 attack principal anchor 的是 `commands_only -> actuator_response`，尤其是 `command_throttle -> actuator_1~4`。
+- `commands_plus_state_history -> selected_state_subset` 一类高分路径不是没结构，而是被 conditioning / mask-collapse / raw-collapse 卡住，因此目前仍不能当正式主攻击基础。
+- backend-shared 的是语义输出家族，不是 support pattern 本身；shared alignment key=`9`，但 top-edge overlap 平均接近 `0`。
+- 当前已经足够支持的 design principle 是：低维优先、稳定非空 support 优先、direct-control path 优先、高分病态路径降权；PX4 若继续推进，更应考虑 state/feedback channel。
+
 ## 建议阅读顺序
 
 如果你是第一次进仓库，按这个顺序读：
 
-1. [MILESTONE_LINEAR_F_REPORT.md](docs/MILESTONE_LINEAR_F_REPORT.md)
-2. [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
-3. [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
-4. [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
-5. [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
-6. [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
-7. [docs/figures/heatmaps/README.md](docs/figures/heatmaps/README.md)
+1. [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
+2. [MILESTONE_LINEAR_F_REPORT.md](docs/MILESTONE_LINEAR_F_REPORT.md)
+3. [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
+4. [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
+5. [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
+6. [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
+7. [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
+8. [docs/figures/heatmaps/README.md](docs/figures/heatmaps/README.md)
 
 如果要直接看最新正式 artifact，建议从这里开始：
 
-1. [backend_compare.md](/home/car/autopilot_lab/artifacts/studies/20260413_134755_px4_vs_ardupilot_compare/reports/backend_compare.md)
-2. [state_evolution_validation.md](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation/reports/state_evolution_validation.md)
-3. [PX4 scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/reports/scenario_generalization.md)
-4. [ArduPilot scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/scenario_generalization.md)
-5. [ArduPilot scenario_holdout.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/scenario_holdout.md)
+1. [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
+2. [backend_compare.md](/home/car/autopilot_lab/artifacts/studies/20260413_134755_px4_vs_ardupilot_compare/reports/backend_compare.md)
+3. [state_evolution_validation.md](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation/reports/state_evolution_validation.md)
+4. [anchor_deep_dive.json](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive/summary/anchor_deep_dive.json)
+5. [in_depth_analysis.json](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis/summary/in_depth_analysis.json)
+6. [PX4 scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/reports/scenario_generalization.md)
+7. [ArduPilot scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/scenario_generalization.md)
+8. [ArduPilot sparsity_overlap.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/sparsity_overlap.md)
 
 ## 当前研究口径
 
@@ -174,14 +195,12 @@ source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 - `reports/diagnostic_gate.md`
 - `reports/matrix_gallery.md`
 - `reports/scenario_generalization.md`
-- `reports/scenario_holdout.md`
 - `reports/sparsity_overlap.md`
 - `summary/study_summary.json`
 - `summary/baseline_stability.json`
 - `summary/diagnostic_gate.json`
 - `summary/matrix_gallery.json`
 - `summary/scenario_generalization.json`
-- `summary/scenario_holdout.json`
 - `summary/sparsity_overlap.json`
 
 ArduPilot targeted study 额外包含：

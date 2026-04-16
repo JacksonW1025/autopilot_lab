@@ -10,7 +10,6 @@ from linearity_core.study_artifacts import (
     build_backend_compare_payload,
     build_ardupilot_state_evolution_validation_payload,
     build_baseline_stability_payload,
-    build_scenario_holdout_payload,
     build_scenario_generalization_payload,
     build_sparsity_overlap_payload,
     build_guided_mode_smoke_payload,
@@ -19,7 +18,6 @@ from linearity_core.study_artifacts import (
     render_backend_compare_markdown,
     render_ardupilot_state_evolution_validation_markdown,
     render_baseline_stability_markdown,
-    render_scenario_holdout_markdown,
     render_scenario_generalization_markdown,
     render_sparsity_overlap_markdown,
     render_guided_mode_smoke_markdown,
@@ -550,57 +548,7 @@ def test_scenario_generalization_payload_distinguishes_global_vs_local_support(t
     assert "supported_but_local" in markdown
 
 
-def test_scenario_holdout_payload_distinguishes_global_vs_local_support(tmp_path: Path) -> None:
-    payload = build_scenario_holdout_payload(
-        tmp_path / "study",
-        "ardupilot_state_evolution_stabilize_baseline",
-        ["dynamic", "nominal", "throttle_biased"],
-        [
-            {
-                "x_schema": "full_augmented",
-                "y_schema": "next_raw_state",
-                "model_name": "ols_affine",
-                "pooling_mode": "pooled",
-                "support": "supported",
-                "median_test_r2": 0.93,
-                "coefficient_stability": 0.83,
-                "effective_condition_number": 8.5e5,
-                "holdout_status": "all_holdouts_supported",
-                "holdouts": [
-                    {"scenario": "dynamic", "test_r2": 0.91, "support": "supported"},
-                    {"scenario": "nominal", "test_r2": 0.94, "support": "supported"},
-                    {"scenario": "throttle_biased", "test_r2": 0.90, "support": "supported"},
-                ],
-            },
-            {
-                "x_schema": "commands_plus_state_history",
-                "y_schema": "selected_state_subset",
-                "model_name": "ridge_affine",
-                "pooling_mode": "pooled",
-                "support": "supported",
-                "median_test_r2": 0.89,
-                "coefficient_stability": 0.71,
-                "effective_condition_number": 9.0e5,
-                "holdout_status": "supported_but_holdout_local",
-                "holdouts": [
-                    {"scenario": "dynamic", "test_r2": 0.87, "support": "supported"},
-                    {"scenario": "nominal", "test_r2": 0.52, "support": "partial"},
-                    {"scenario": "throttle_biased", "test_r2": 0.40, "support": "partial"},
-                ],
-            },
-        ],
-    )
-
-    assert payload["status"] == "holdout_available"
-    assert payload["counts"]["all_holdouts_supported"] == 1
-    assert payload["counts"]["supported_but_holdout_local"] == 1
-    assert payload["representative_combo"] == "full_augmented | next_raw_state | ols_affine | pooled"
-    markdown = render_scenario_holdout_markdown(payload)
-    assert "Scenario Holdout" in markdown
-    assert "all_holdouts_supported" in markdown
-
-
-def test_sparsity_overlap_payload_reports_baseline_holdout_and_thickening_overlap(tmp_path: Path, monkeypatch) -> None:
+def test_sparsity_overlap_payload_reports_baseline_and_thickening_overlap(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(study_artifacts, "STUDY_ARTIFACT_ROOT", tmp_path)
     study_name = "ardupilot_state_evolution_stabilize_baseline"
     current_dir = tmp_path / f"20260412_120000_{study_name}"
@@ -719,48 +667,28 @@ def test_sparsity_overlap_payload_reports_baseline_holdout_and_thickening_overla
         _write_sparsity_mask(study_dir / "fits" / "full_augmented__next_raw_state__pooled" / "ols_affine" / "matrix_f.csv", edges)
         _write_sparsity_mask(study_dir / "fits" / "full_augmented__next_raw_state__pooled" / "ols_affine" / "sparsity_mask.csv", edges)
 
-    combo_key = "full_augmented | next_raw_state | ols_affine | pooled"
-    holdout_snapshots = {
-        combo_key: {
-            "dynamic": {
-                "summary": {"selection_frequency": [[0.90], [0.10]]},
-                "feature_names": ["command_roll", "roll"],
-                "response_names": ["future_state_roll"],
-                "coefficient_matrix": [[1.0], [0.4]],
-                "sparsity_mask": [[1.0], [1.0]],
-            },
-            "nominal": {
-                "summary": {"selection_frequency": [[0.88], [0.05]]},
-                "feature_names": ["command_roll", "roll"],
-                "response_names": ["future_state_roll"],
-                "coefficient_matrix": [[1.0], [0.0]],
-                "sparsity_mask": [[1.0], [0.0]],
-            },
-        }
-    }
-
     payload = build_sparsity_overlap_payload(
         current_dir,
         study_name,
         {"ranking": []},
         {"run_count": 10, "data_quality": {"accepted_run_count": 10}},
         manifest,
-        {"status": "holdout_available"},
-        holdout_snapshots,
     )
 
     assert payload["status"] == "overlap_available"
     assert payload["representative_combo"]["x_schema"] == "full_augmented"
     assert payload["baseline_vs_diagnostic"]["status"] == "comparison_available"
     assert payload["data_thickening"]["status"] == "comparison_available"
-    assert len(payload["full_vs_holdouts"]) == 2
+    assert not payload["assessment"]["baseline_vs_diagnostic_meets_target"]
+    assert payload["assessment"]["data_thickening_meets_target"]
+    assert payload["assessment"]["high_frequency_overlap_nonempty"]
     markdown = render_sparsity_overlap_markdown(payload)
     assert "Sparsity Overlap" in markdown
     assert "baseline_vs_diagnostic" in markdown
 
 
 def test_ardupilot_state_evolution_validation_payload_distinguishes_positive_and_negative_modes(tmp_path: Path) -> None:
-    def _write_targeted_study(study_dir: Path, support: str, holdout_status: str, *, r2: float, condition: float, overlap_status: str) -> None:
+    def _write_targeted_study(study_dir: Path, support: str, *, r2: float, condition: float, overlap_ready: bool) -> None:
         _write_summary(
             study_dir / "summary" / "study_summary.json",
             {
@@ -773,20 +701,6 @@ def test_ardupilot_state_evolution_validation_payload_distinguishes_positive_and
                         "support": support,
                         "median_test_r2": r2,
                         "effective_condition_number": condition,
-                    }
-                ]
-            },
-        )
-        _write_summary(
-            study_dir / "summary" / "scenario_holdout.json",
-            {
-                "entries": [
-                    {
-                        "x_schema": "full_augmented",
-                        "y_schema": "next_raw_state",
-                        "model_name": "ols_affine",
-                        "pooling_mode": "pooled",
-                        "holdout_status": holdout_status,
                     }
                 ]
             },
@@ -806,8 +720,8 @@ def test_ardupilot_state_evolution_validation_payload_distinguishes_positive_and
                     "stable_mask_overlap": {"jaccard_overlap": 0.62},
                 },
                 "assessment": {
-                    "holdout_meets_target": overlap_status == "negative_ready",
-                    "high_frequency_overlap_nonempty": overlap_status == "negative_ready",
+                    "baseline_vs_diagnostic_meets_target": overlap_ready,
+                    "high_frequency_overlap_nonempty": overlap_ready,
                 },
             },
         )
@@ -816,10 +730,10 @@ def test_ardupilot_state_evolution_validation_payload_distinguishes_positive_and
     stabilize_diagnostic = tmp_path / "stabilize_diagnostic"
     guided_baseline = tmp_path / "guided_baseline"
     guided_diagnostic = tmp_path / "guided_diagnostic"
-    _write_targeted_study(stabilize_baseline, "supported", "all_holdouts_supported", r2=0.91, condition=9.0e5, overlap_status="positive")
-    _write_targeted_study(stabilize_diagnostic, "supported", "all_holdouts_supported", r2=0.90, condition=8.5e5, overlap_status="positive")
-    _write_targeted_study(guided_baseline, "partial", "supported_but_holdout_local", r2=0.88, condition=2.0e8, overlap_status="negative_ready")
-    _write_targeted_study(guided_diagnostic, "partial", "supported_but_holdout_local", r2=0.87, condition=2.3e8, overlap_status="negative_ready")
+    _write_targeted_study(stabilize_baseline, "supported", r2=0.91, condition=9.0e5, overlap_ready=True)
+    _write_targeted_study(stabilize_diagnostic, "supported", r2=0.90, condition=8.5e5, overlap_ready=True)
+    _write_targeted_study(guided_baseline, "partial", r2=0.88, condition=2.0e8, overlap_ready=True)
+    _write_targeted_study(guided_diagnostic, "partial", r2=0.87, condition=2.3e8, overlap_ready=True)
 
     payload = build_ardupilot_state_evolution_validation_payload(
         stabilize_baseline_dir=stabilize_baseline,

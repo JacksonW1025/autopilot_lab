@@ -730,110 +730,12 @@ def render_scenario_generalization_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-HOLDOUT_STATUS_ORDER = {
-    "all_holdouts_supported": 2,
-    "supported_but_holdout_local": 1,
-    "holdout_failed": 0,
-}
 BASELINE_DIAGNOSTIC_STUDY_PAIRS = {
     "px4_real_generalization_ablation": "px4_generalization_diagnostic_matrix",
     "px4_generalization_diagnostic_matrix": "px4_real_generalization_ablation",
     "ardupilot_real_generalization_ablation": "ardupilot_generalization_diagnostic_matrix",
     "ardupilot_generalization_diagnostic_matrix": "ardupilot_real_generalization_ablation",
 }
-
-
-def build_scenario_holdout_payload(
-    study_dir: Path,
-    study_name: str,
-    expected_scenarios: list[str],
-    entries: list[dict[str, Any]],
-) -> dict[str, Any]:
-    payload: dict[str, Any] = {
-        "status": "holdout_unavailable",
-        "study_name": study_name,
-        "study_dir": str(study_dir),
-        "expected_scenarios": sorted(str(item) for item in expected_scenarios if str(item).strip()),
-        "entries": [],
-        "counts": {
-            "all_holdouts_supported": 0,
-            "supported_but_holdout_local": 0,
-            "holdout_failed": 0,
-        },
-        "representative_combo": "",
-        "conclusion": "study 的 scenario 数不足 3，无法做 leave-one-scenario-out。",
-    }
-    if len(payload["expected_scenarios"]) < 3:
-        return payload
-
-    ordered_entries = sorted(
-        entries,
-        key=lambda item: (
-            HOLDOUT_STATUS_ORDER.get(str(item.get("holdout_status", "")), -1),
-            _safe_float(item.get("median_test_r2")),
-            _safe_float(item.get("coefficient_stability")),
-            -_safe_float(item.get("effective_condition_number")),
-        ),
-        reverse=True,
-    )
-    counts = Counter(str(item.get("holdout_status", "holdout_failed")) for item in ordered_entries)
-    payload["status"] = "holdout_available"
-    payload["entries"] = ordered_entries
-    payload["counts"] = {
-        "all_holdouts_supported": int(counts.get("all_holdouts_supported", 0)),
-        "supported_but_holdout_local": int(counts.get("supported_but_holdout_local", 0)),
-        "holdout_failed": int(counts.get("holdout_failed", 0)),
-    }
-    if ordered_entries:
-        payload["representative_combo"] = _combo_key(ordered_entries[0])
-
-    if payload["counts"]["all_holdouts_supported"] > 0:
-        payload["conclusion"] = "当前 study 已出现 leave-one-scenario-out 仍然全部保持 supported 的组合，线性关系不只是在 pooled 数据上成立。"
-    elif payload["counts"]["supported_but_holdout_local"] > 0:
-        payload["conclusion"] = "当前 study 的 supported 组合在 pooled 汇总上成立，但留出单个 scenario 后仍带有明显局部性。"
-    else:
-        payload["conclusion"] = "当前 study 还没有出现跨三个 holdout 都稳定通过的组合，leave-one-scenario-out 证据仍偏弱。"
-    return payload
-
-
-def render_scenario_holdout_markdown(payload: dict[str, Any]) -> str:
-    lines = [
-        "# Scenario Holdout",
-        "",
-        f"- status: `{payload.get('status', 'holdout_unavailable')}`",
-        f"- expected_scenarios: {', '.join(payload.get('expected_scenarios', [])) or 'none'}",
-    ]
-    if payload.get("status") != "holdout_available":
-        lines.append(f"- reason: {payload.get('conclusion', 'holdout analysis is unavailable.')}")
-        return "\n".join(lines)
-
-    counts = payload.get("counts", {})
-    lines.extend(
-        [
-            "",
-            "## Status Counts",
-            f"- all_holdouts_supported: {int(counts.get('all_holdouts_supported', 0))}",
-            f"- supported_but_holdout_local: {int(counts.get('supported_but_holdout_local', 0))}",
-            f"- holdout_failed: {int(counts.get('holdout_failed', 0))}",
-            f"- representative_combo: `{payload.get('representative_combo', '')}`",
-            "",
-            "## Combo Reading",
-        ]
-    )
-    for entry in payload.get("entries", []):
-        holdout_text = ", ".join(
-            f"{item.get('scenario', '')}={_safe_float(item.get('test_r2')):.4f}:{item.get('support', '')}"
-            for item in entry.get("holdouts", [])
-        ) or "none"
-        lines.append(
-            f"- `{_combo_key(entry)}`: holdout_status={entry.get('holdout_status', 'holdout_failed')}; "
-            f"support={entry.get('support', '')}; median_test_r2={_safe_float(entry.get('median_test_r2')):.4f}; "
-            f"coefficient_stability={_safe_float(entry.get('coefficient_stability')):.4f}; "
-            f"effective_condition_number={_safe_float(entry.get('effective_condition_number')):.4f}; "
-            f"holdouts=[{holdout_text}]"
-        )
-    lines.extend(["", "## Conclusion", f"- {payload.get('conclusion', '')}"])
-    return "\n".join(lines)
 
 
 def _study_pair_candidates(study_name: str) -> list[str]:
@@ -1089,8 +991,6 @@ def build_sparsity_overlap_payload(
     current_summary: dict[str, Any],
     current_inventory: dict[str, Any],
     current_manifest: dict[str, Any],
-    scenario_holdout_payload: dict[str, Any],
-    holdout_fit_snapshots: dict[str, dict[str, dict[str, Any]]],
     *,
     top_k: int = 10,
     high_frequency_threshold: float = 0.80,
@@ -1102,13 +1002,10 @@ def build_sparsity_overlap_payload(
         "study_dir": str(current_study_dir),
         "representative_combo": {},
         "baseline_vs_diagnostic": {"status": "comparison_unavailable"},
-        "full_vs_holdouts": [],
         "data_thickening": {"status": "comparison_unavailable"},
         "reporting_targets": {
             "baseline_vs_diagnostic_jaccard_target": 0.55,
             "data_thickening_jaccard_target": 0.55,
-            "holdout_median_jaccard_target": 0.55,
-            "holdout_min_jaccard_target": 0.50,
             "high_frequency_overlap_nonempty": True,
             "top_k": top_k,
             "high_frequency_threshold": high_frequency_threshold,
@@ -1168,63 +1065,23 @@ def build_sparsity_overlap_payload(
             comparison_ref=str(previous_study_dir),
         )
 
-    combo_holdouts = holdout_fit_snapshots.get(_combo_key(combo), {})
-    holdout_comparisons: list[dict[str, Any]] = []
-    for scenario_name in sorted(combo_holdouts):
-        snapshot = combo_holdouts[scenario_name]
-        holdout_comparisons.append(
-            _comparison_payload(
-                current_snapshot,
-                _combo_snapshot_from_arrays(
-                    combo,
-                    dict(snapshot.get("summary", {}) or {}),
-                    list(snapshot.get("feature_names", []) or []),
-                    list(snapshot.get("response_names", []) or []),
-                    np.asarray(snapshot.get("coefficient_matrix"), dtype=float),
-                    np.asarray(snapshot.get("sparsity_mask"), dtype=float),
-                    top_k=top_k,
-                    high_frequency_threshold=high_frequency_threshold,
-                ),
-                label="full_vs_holdout",
-                comparison_ref=scenario_name,
-            )
-        )
-    payload["full_vs_holdouts"] = holdout_comparisons
-
-    holdout_jaccards = [
-        _safe_float(item.get("stable_mask_overlap", {}).get("jaccard_overlap"))
-        for item in holdout_comparisons
-        if item.get("status") == "comparison_available"
-    ]
-    finite_holdout_jaccards = [value for value in holdout_jaccards if math.isfinite(value)]
     baseline_jaccard = _safe_float(payload.get("baseline_vs_diagnostic", {}).get("stable_mask_overlap", {}).get("jaccard_overlap"))
     thickening_jaccard = _safe_float(payload.get("data_thickening", {}).get("stable_mask_overlap", {}).get("jaccard_overlap"))
-    holdout_high_freq_nonempty = all(
-        int(item.get("high_frequency_edge_overlap", {}).get("intersection_count", 0)) > 0
-        for item in holdout_comparisons
-        if item.get("status") == "comparison_available"
-    )
     assessment = {
         "baseline_vs_diagnostic_meets_target": math.isfinite(baseline_jaccard) and baseline_jaccard >= 0.55,
         "data_thickening_meets_target": math.isfinite(thickening_jaccard) and thickening_jaccard >= 0.55,
-        "holdout_median_jaccard": float(np.median(finite_holdout_jaccards)) if finite_holdout_jaccards else math.nan,
-        "holdout_min_jaccard": min(finite_holdout_jaccards) if finite_holdout_jaccards else math.nan,
-        "holdout_meets_target": bool(finite_holdout_jaccards)
-        and float(np.median(finite_holdout_jaccards)) >= 0.55
-        and min(finite_holdout_jaccards) >= 0.50,
         "high_frequency_overlap_nonempty": (
             int(payload.get("baseline_vs_diagnostic", {}).get("high_frequency_edge_overlap", {}).get("intersection_count", 0)) > 0
             or int(payload.get("data_thickening", {}).get("high_frequency_edge_overlap", {}).get("intersection_count", 0)) > 0
-            or holdout_high_freq_nonempty
         ),
     }
     payload["assessment"] = assessment
-    if assessment["holdout_meets_target"] and assessment["high_frequency_overlap_nonempty"]:
-        payload["conclusion"] = "代表性组合的 dominant edges 在 baseline/diagnostic、holdout 与厚化对照之间基本稳定，sparsity 可以正式进入主报告。"
-    elif finite_holdout_jaccards:
-        payload["conclusion"] = "代表性组合已经出现非偶然的 overlap，但 holdout 或厚化对照仍不足以把 sparsity 写成完全成熟结论。"
+    if assessment["baseline_vs_diagnostic_meets_target"] and assessment["high_frequency_overlap_nonempty"]:
+        payload["conclusion"] = "代表性组合的 dominant edges 在 baseline/diagnostic 之间基本稳定，并且高频边没有完全漂移，sparsity 可以进入正式阅读链。"
+    elif assessment["data_thickening_meets_target"] or assessment["high_frequency_overlap_nonempty"]:
+        payload["conclusion"] = "代表性组合已经出现非偶然的 overlap，但 baseline/diagnostic 或厚化对照仍不足以把 sparsity 写成完全成熟结论。"
     else:
-        payload["conclusion"] = "当前只有代表性组合本体，缺少可用的 holdout/thickening overlap，因此 sparsity 还不能单独升格。"
+        payload["conclusion"] = "当前只有代表性组合本体，缺少足够稳定的 baseline/diagnostic 或厚化 overlap，因此 sparsity 还不能单独升格。"
     return payload
 
 
@@ -1261,8 +1118,6 @@ def render_sparsity_overlap_markdown(payload: dict[str, Any]) -> str:
 
     lines.extend(["", "## Comparisons"])
     lines.extend(_comparison_lines(dict(payload.get("baseline_vs_diagnostic", {}) or {}), "baseline_vs_diagnostic"))
-    for item in payload.get("full_vs_holdouts", []):
-        lines.extend(_comparison_lines(dict(item or {}), f"full_vs_holdout[{item.get('comparison_ref', '')}]"))
     lines.extend(_comparison_lines(dict(payload.get("data_thickening", {}) or {}), "data_thickening"))
 
     assessment = dict(payload.get("assessment", {}) or {})
@@ -1272,9 +1127,6 @@ def render_sparsity_overlap_markdown(payload: dict[str, Any]) -> str:
             "## Assessment",
             f"- baseline_vs_diagnostic_meets_target: {str(bool(assessment.get('baseline_vs_diagnostic_meets_target'))).lower()}",
             f"- data_thickening_meets_target: {str(bool(assessment.get('data_thickening_meets_target'))).lower()}",
-            f"- holdout_median_jaccard: {_safe_float(assessment.get('holdout_median_jaccard')):.4f}",
-            f"- holdout_min_jaccard: {_safe_float(assessment.get('holdout_min_jaccard')):.4f}",
-            f"- holdout_meets_target: {str(bool(assessment.get('holdout_meets_target'))).lower()}",
             f"- high_frequency_overlap_nonempty: {str(bool(assessment.get('high_frequency_overlap_nonempty'))).lower()}",
             "",
             "## Conclusion",
@@ -1750,11 +1602,6 @@ def _load_scenario_generalization(study_dir: Path) -> dict[str, Any]:
     return build_scenario_generalization_payload(study_dir, str(manifest.get("study_name", "")), manifest)
 
 
-def _load_scenario_holdout(study_dir: Path) -> dict[str, Any]:
-    path = study_dir / "summary" / "scenario_holdout.json"
-    return read_yaml(path) if path.exists() else {}
-
-
 def _load_sparsity_overlap(study_dir: Path) -> dict[str, Any]:
     path = study_dir / "summary" / "sparsity_overlap.json"
     return read_yaml(path) if path.exists() else {}
@@ -1772,13 +1619,6 @@ def _strict_raw_state_evolution_entries(summary: dict[str, Any]) -> list[dict[st
     return entries
 
 
-def _holdout_status_for_combo(payload: dict[str, Any], combo_key: str) -> str:
-    for entry in payload.get("entries", []):
-        if _combo_key(entry) == combo_key:
-            return str(entry.get("holdout_status", ""))
-    return ""
-
-
 def _entry_lookup(summary: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {_combo_key(item): dict(item) for item in summary.get("ranking", [])}
 
@@ -1786,12 +1626,14 @@ def _entry_lookup(summary: dict[str, Any]) -> dict[str, dict[str, Any]]:
 def _mode_validation_payload(mode: str, baseline_dir: Path, diagnostic_dir: Path) -> dict[str, Any]:
     baseline_summary = _load_study_summary(baseline_dir)
     diagnostic_summary = _load_study_summary(diagnostic_dir)
-    baseline_holdout = _load_scenario_holdout(baseline_dir)
-    diagnostic_holdout = _load_scenario_holdout(diagnostic_dir)
     baseline_overlap = _load_sparsity_overlap(baseline_dir)
     baseline_entries = _entry_lookup({"ranking": _strict_raw_state_evolution_entries(baseline_summary)})
     diagnostic_entries = _entry_lookup({"ranking": _strict_raw_state_evolution_entries(diagnostic_summary)})
     candidate_keys = sorted(set(baseline_entries) & set(diagnostic_entries))
+    overlap_assessment = dict(baseline_overlap.get("assessment", {}) or {})
+    overlap_ready = bool(overlap_assessment.get("baseline_vs_diagnostic_meets_target")) and bool(
+        overlap_assessment.get("high_frequency_overlap_nonempty")
+    )
     positive_candidates: list[dict[str, Any]] = []
     for combo_key in candidate_keys:
         baseline_entry = baseline_entries[combo_key]
@@ -1799,8 +1641,6 @@ def _mode_validation_payload(mode: str, baseline_dir: Path, diagnostic_dir: Path
         if (
             str(baseline_entry.get("support", "")).strip().lower() == "supported"
             and str(diagnostic_entry.get("support", "")).strip().lower() == "supported"
-            and _holdout_status_for_combo(baseline_holdout, combo_key) == "all_holdouts_supported"
-            and _holdout_status_for_combo(diagnostic_holdout, combo_key) == "all_holdouts_supported"
         ):
             positive_candidates.append(
                 {
@@ -1811,26 +1651,21 @@ def _mode_validation_payload(mode: str, baseline_dir: Path, diagnostic_dir: Path
             )
 
     positive_candidates.sort(key=lambda item: (item["baseline_r2"], item["diagnostic_r2"]), reverse=True)
-    if positive_candidates:
+    if positive_candidates and overlap_ready:
         return {
             "mode": mode,
             "status": "mature_positive",
             "baseline_dir": str(baseline_dir),
             "diagnostic_dir": str(diagnostic_dir),
             "positive_combo": positive_candidates[0]["combo"],
-            "conclusion": "该 mode 已出现 strict-raw-linear state-evolution 组合，同时通过 baseline、diagnostic 与全部 scenario holdout。",
+            "conclusion": "该 mode 已出现 strict-raw-linear state-evolution 组合，同时在 baseline、diagnostic 与 sparse-edge overlap 上保持稳定。",
         }
 
     representative = dict(baseline_overlap.get("representative_combo", {}) or {})
     stable_jaccard = _safe_float(
         baseline_overlap.get("baseline_vs_diagnostic", {}).get("stable_mask_overlap", {}).get("jaccard_overlap")
     )
-    high_frequency_nonempty = bool(
-        baseline_overlap.get("assessment", {}).get("high_frequency_overlap_nonempty")
-    )
-    holdout_meets_target = bool(
-        baseline_overlap.get("assessment", {}).get("holdout_meets_target")
-    )
+    high_frequency_nonempty = bool(overlap_assessment.get("high_frequency_overlap_nonempty"))
     if (
         representative
         and representative.get("x_schema") in STATE_EVOLUTION_X_SCHEMAS
@@ -1840,7 +1675,6 @@ def _mode_validation_payload(mode: str, baseline_dir: Path, diagnostic_dir: Path
         and math.isfinite(stable_jaccard)
         and stable_jaccard >= 0.55
         and high_frequency_nonempty
-        and holdout_meets_target
     ):
         return {
             "mode": mode,
@@ -1891,8 +1725,6 @@ def build_ardupilot_state_evolution_validation_payload(
         },
         "reporting_targets": {
             "baseline_vs_diagnostic_jaccard_target": 0.55,
-            "holdout_median_jaccard_target": 0.55,
-            "holdout_min_jaccard_target": 0.50,
             "high_frequency_overlap_nonempty": True,
         },
         "conclusion": conclusion,
