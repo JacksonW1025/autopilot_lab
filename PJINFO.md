@@ -81,6 +81,17 @@
   - `scripts/run_ardupilot_state_evolution_baseline.sh`
   - `scripts/run_ardupilot_state_evolution_diagnostic.sh`
 
+- 当前 next-phase narrowing scripts：
+  - `scripts/run_ardupilot_a2_stabilize_readiness.sh`
+  - `scripts/run_ardupilot_a2_stabilize_boundary_readiness.sh`
+  - `scripts/run_ardupilot_a2_guided_nogps_boundary_readiness.sh`
+  - `scripts/run_ardupilot_a2_target_scout.sh`
+  - `scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh`
+  - `scripts/run_px4_a1_target_scout.sh`
+  - `scripts/run_px4_a1_attitude_family_readiness.sh`
+  - `scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh`
+  - `scripts/run_formal_v2_next_phase_decision.sh`
+
 ## 当前状态
 
 - [2026-04-13] Formal V2 ArduPilot refresh 已完整结束：
@@ -123,6 +134,44 @@
   - `docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md`
   - anchor deep dive artifact: `artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive`
   - full in-depth synthesis artifact: `artifacts/studies/20260414_064902_formal_v2_in_depth_analysis`
+- [2026-04-15] A2 readiness / boundary narrowing 已完成：
+  - `STABILIZE + throttle -> mean/min actuator` 这条 collective boundary 线已经被正式排除
+- [2026-04-16] `GUIDED_NOGPS target-scout` 选中的下一个 target 是 `pair_imbalance_12_vs_34`
+- [2026-04-16] A2 当前正式状态：
+  - `artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+  - `ready_for_pair_attack_v1=yes`
+  - `recommended_path=start_guided_nogps_pair_attack_v1`
+- [2026-04-16] A1 当前正式状态：
+  - `artifacts/studies/20260416_005450_652002_px4_a1_target_scout`
+  - `artifacts/studies/20260416_005450_658923_px4_a1_family_readiness`
+  - `artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction`
+  - `ready_for_targeted_reproduction_v1=yes`
+  - `recommended_path=lock_px4_a1_roll_pitch_targeted_scope`
+- [2026-04-16] 统一决策层已完成：
+  - `artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer`
+  - `default_entry=A2`
+  - `hard_mode=A1`
+  - `contrast_only=B1`
+  - `boundary_candidates=C1,D1,D2`
+- [2026-04-16] 当前故事阶段：
+  - 全项目主线：`theory -> empirical validation -> insight` 已完成
+  - A2 子线：已到 `attack algorithm` 入口
+  - A1 子线：已收窄成 `roll/pitch targeted reproduction`，当前仍是 reproduction/contrast line，不是 attack-ready line
+
+## 当前 live TODO
+
+- A2 主线：
+  - 从 `GUIDED_NOGPS + pair_imbalance_12_vs_34` 的 readiness 进入具体 attack algorithm 设计
+- A1 对照线：
+  - 保持 `future_state_roll / future_state_pitch` 作为可复现 continuation / contrast line
+- 文档与决策口径：
+  - 默认以 `artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer` 作为当前 route-selection 入口
+
+## 已完成 / 不再作为 live TODO
+
+- `NEXT.md` 里的 intervention-readiness / next-phase decision layer 构建任务已完成，不要再把它当成当前待办。
+- broad validation 扩展不是当前优先级；当前不建议再回头扩更宽的 generalized combo 搜索。
+- A2 的 collective throttle-floor / collective actuator boundary 线已正式排除，不再作为主线目标。
 
 ## 当前 insight 摘要
 
@@ -133,6 +182,7 @@
   - ArduPilot：`commands_only` 主导的低维 direct-control 结构，stable-core=`12`
 - [2026-04-14] PX4 最可靠的 generalized-supported 证据更像 `current state + short lag -> future/summary`，不是 command-only 主导。
 - [2026-04-14] ArduPilot 最可靠的 generalized-supported 证据集中在 `commands_only -> actuator_response`，其中 `command_throttle` 对 `actuator_1~4` 的支配最稳定。
+- [2026-04-16] 上面的 A2 仍是 insight anchor，不等于最终 executable target；当前真正通过 narrowing 站住的是 pair target，而不是 collective throttle-floor。
 - [2026-04-14] ArduPilot `commands_plus_state_history -> selected_state_subset` 这类高分路径不是“没结构”，而是被 formal boundary 卡住：
   - `C1`：stable partial mask + 极高 condition number
   - `D2`：empty mask + stable raw template
@@ -146,6 +196,14 @@
   - direct-control path 优先
   - 高分但病态路径降权
   - PX4 若继续推进，应优先考虑 state/feedback channel，不默认走 throttle
+- [2026-04-16] A2 的最新 narrowing 结论：
+  - 可用 target 不是 collective throttle-floor，也不是 `mean(actuator_1..4)`
+  - 当前最稳 target 是 `GUIDED_NOGPS + pair_imbalance_12_vs_34`
+  - dominant direction 固定为 `12_gt_34`
+- [2026-04-16] A1 的最新 narrowing 结论：
+  - 当前最稳 family 是 `attitude_roll_pitch_continuation`
+  - 当前最稳 exact reproduction scope 是 `future_state_roll / future_state_pitch`
+  - baseline/diagnostic 两相的 top1 都稳定落在 `roll / pitch`
 
 ## 最近变更
 
@@ -158,6 +216,24 @@
 - milestone report / appendix 已显式引用 targeted aggregate 与四个 targeted input study
 - `README.md`、`PJINFO.md`、`docs/RESEARCH_GOAL.md`、`docs/DATA_SCHEMA.md` 已与 latest Formal V2 同步
 - 旧 `20260409` 准备性 artifact、旧 ArduPilot full studies、旧 compare 已从当前正式引用集移除并完成 prune
+- 新增 A2 narrowing analysis：
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_readiness.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_boundary_readiness.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_target_scout.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_readiness.py`
+- 新增 A1 narrowing analysis：
+  - `src/linearity_analysis/linearity_analysis/px4_a1_target_scout.py`
+  - `src/linearity_analysis/linearity_analysis/px4_a1_family_readiness.py`
+  - `src/linearity_analysis/linearity_analysis/px4_a1_roll_pitch_targeted_reproduction.py`
+- 新增最新 decisive narrowing artifacts：
+  - `artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+  - `artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction`
+- 新增统一决策层：
+  - `src/linearity_analysis/linearity_analysis/next_phase_decision_layer.py`
+  - `scripts/analyze_formal_v2_next_phase_decision.py`
+  - `scripts/run_formal_v2_next_phase_decision.sh`
+  - `docs/NEXT_PHASE_DECISION_LAYER.md`
+  - `artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer`
 
 ## 常用命令
 
@@ -197,11 +273,25 @@ targeted line 局部入口：
 /home/car/autopilot_lab/scripts/run_ardupilot_state_evolution_diagnostic.sh --mode guided_nogps
 ```
 
+next-phase narrowing 入口：
+
+```bash
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_target_scout.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh
+/home/car/autopilot_lab/scripts/run_px4_a1_target_scout.sh
+/home/car/autopilot_lab/scripts/run_px4_a1_attitude_family_readiness.sh
+/home/car/autopilot_lab/scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh
+```
+
 ## 注意事项
 
 - 所有文档和交互统一使用简体中文
 - 当前正式主标题是“线性关系 `f` 的证据及其跨 scenario 泛化性”，不是“backend 对比”
 - Formal V2 有两条同级正式线：generalization full 和 ArduPilot targeted validation
+- next-phase narrowing studies 是 Formal V2 之后的窄分析线；它们依赖 canonical artifact，但不替代 Formal V2 主线
 - targeted aggregate 和四个 targeted input study 都属于当前正式 artifact，不是 supplementary
 - 只有 latest Formal V2 artifact 可以进入当前里程碑汇报
 - `20260409` broad baseline、旧 ArduPilot `20260411` full studies 和旧 compare 已从当前正式口径移出
+- 当前建议优先级：
+  - 主线：A2 `GUIDED_NOGPS / pair_imbalance_12_vs_34`
+  - 对照线：A1 `roll/pitch targeted reproduction`

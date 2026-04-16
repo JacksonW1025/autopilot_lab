@@ -11,6 +11,11 @@
 - `ArduPilot targeted aggregate`
   汇总上面四个 targeted study，给出 `mature_positive / mature_negative / inconclusive`
 
+在 Formal V2 之后，仓库里还新增了一组 `narrowing studies`。它们不再回答“线性是否存在”，而是回答“已经成立的主锚点能否被收窄成可执行 target 或可复现 response family”。
+
+- `A2 readiness / target-scout / pair-target readiness`
+- `A1 target-scout / family readiness / targeted reproduction`
+
 ## Raw Run
 
 raw run 放在：
@@ -148,6 +153,25 @@ ArduPilot targeted aggregate 输出：
 - `reports/state_evolution_validation.md`
 - `summary/state_evolution_validation.json`
 
+### Narrowing Studies
+
+这类 study 通常不再产出 `prepared/` 与 `fits/`，而是直接消费已有 canonical study 或新的窄 matrix run，并输出：
+
+- `reports/*.md`
+- `summary/*.json`
+- `tables/*.csv`
+- `manifest.yaml`
+
+当前已经落地的 narrowing artifact 类型包括：
+
+- `a2_readiness`
+- `a2_boundary_readiness`
+- `a2_target_scout`
+- `a2_pair_target_readiness`
+- `a1_target_scout`
+- `a1_family_readiness`
+- `a1_roll_pitch_targeted_reproduction`
+
 ## Current Artifact Meanings
 
 ### `scenario_generalization`
@@ -204,3 +228,40 @@ ArduPilot targeted aggregate 输出：
 - `matrix_heatmap_signed.png`
 
 如果当前 study 没有任何 `supported` 组合，则会明确写出“该 study 未得到可接受的全局线性 f，因此没有矩阵图册”。
+
+### `a2_target_scout`
+
+`reports/a2_target_scout.md` / `summary/a2_target_scout.json` 回答：
+
+- 当前 actuator 层还有哪些 target family 值得继续追
+- 哪个 scenario / mode 下最值得继续 narrowing
+- 当前推荐的 next target 是 collective 还是 pair/pattern
+
+### `a2_pair_target_readiness`
+
+`reports/a2_pair_target_readiness.md` / `summary/a2_pair_target_readiness.json` 回答：
+
+- 选中的 pair target 是否已经稳定、可重复、具方向一致性
+- 当前是否达到 `ready_for_pair_attack_v1`
+- 当前 dominant direction 是什么
+
+### `a1_target_scout`
+
+`reports/a1_target_scout.md` / `summary/a1_target_scout.json` 回答：
+
+- 在 PX4 A1 里，哪个 response family 最值得继续收窄
+- 当前 continuation family 更像 attitude、yaw 还是位置/速度
+
+### `a1_family_readiness`
+
+`reports/a1_family_readiness.md` / `summary/a1_family_readiness.json` 回答：
+
+- 选中的 response family 是否足够稳定到可以进入 reproduction
+- 当前是否 `ready_for_reproduction_v1`
+
+### `a1_roll_pitch_targeted_reproduction`
+
+`reports/a1_roll_pitch_targeted_reproduction.md` / `summary/a1_roll_pitch_targeted_reproduction.json` 回答：
+
+- `future_state_roll / future_state_pitch` 是否已经被压缩成 exact continuation scope
+- 同轴 direct-share / lag-share / top-feature pattern 是否在 baseline 和 diagnostic 下保持稳定

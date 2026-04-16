@@ -39,6 +39,24 @@
 - `inconclusive`
   targeted line 已有正式 artifact，但 state-evolution 还没有收敛到成熟正/负结论。
 
+## 当前 repo-stage 判断
+
+如果按 `sparsity hypothesis -> empirical validation -> insight -> attack algorithm -> evaluation` 这条故事看当前仓库：
+
+- `theory / hypothesis` 已完成
+- `empirical validation` 已完成
+- `insight` 已完成
+- 当前真正的工作重点已经从“继续证明线性存在”切到“从 insight 中抽出可执行的窄 target”
+
+这一步现在分成两条线：
+
+- A2 主线
+  - 目标：从 ArduPilot 的 direct-control 结构中抽出 attack-ready target
+  - 当前状态：`GUIDED_NOGPS + pair_imbalance_12_vs_34` 已经 `ready_for_pair_attack_v1`
+- A1 对照线
+  - 目标：把 PX4 的 state-continuation 结构收窄成可复现、可讲述的 contrast line
+  - 当前状态：`future_state_roll / future_state_pitch` 已经 `ready_for_targeted_reproduction_v1`
+
 ## 当前解释原则
 
 - backend 差异始终是次级解释。
@@ -48,3 +66,6 @@
 - 如果 PX4 和 ArduPilot 都出现相似的 `generalized_supported` 结果，这会增强“线性结论本身可信”的解释力度。
 - 如果一边更宽、一边更窄，也先解释为“线性证据的范围不同”，而不是立刻上升为“backend 输赢”。
 - 如果出现高 `R2` 但 support 不稳的结果，必须同时看条件数、系数稳定性、scenario generalization 和 sparsity overlap，不能只看拟合分数。
+- 当前 next-step 的优先级不是“再开更宽的 validation”，而是：
+  - 主线把 A2 从 readiness 推进到 attack algorithm
+  - 对照线把 A1 保持为 reproducible continuation evidence

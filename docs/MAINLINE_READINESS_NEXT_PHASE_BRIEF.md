@@ -1,8 +1,23 @@
-# 主线 Readiness Confirmation + Next-Phase Analysis Brief
+# 主线 Readiness Confirmation + Next-Phase Progress Brief
 
 ## 一句话结论
 
-可以进入下一阶段，但要带边界：当前 Formal V2 主线 empirical validation 已足够可靠，足以从“线性关系是否存在/是否跨 scenario 成立”转入 in-depth analysis；ArduPilot targeted state-evolution 子线当前仍是 `inconclusive`，但它只阻塞更窄的 mode-isolated state-evolution 子问题，不阻塞主线前进。
+主线 readiness 判断已经被后续工作验证了：当前 Formal V2 主线 empirical validation 不仅足够进入 in-depth analysis，而且这一步已经完成；截至 `2026-04-16`，A2 已经进一步收窄到 `pair-target readiness=yes`，A1 也已经收窄到 `roll/pitch targeted reproduction=yes`。ArduPilot targeted state-evolution 子线仍然是 `inconclusive`，但它现在只是一个保留的边界问题，不再阻塞主线推进。
+
+## 当前阶段更新
+
+- 已完成：
+  - insight memo
+  - anchor deep dive
+  - in-depth analysis
+  - A2 narrowing chain
+  - A1 narrowing chain
+- 当前最重要的新结论：
+  - A2：`GUIDED_NOGPS + pair_imbalance_12_vs_34` 已经 `ready_for_pair_attack_v1`
+  - A1：`future_state_roll / future_state_pitch` 已经 `ready_for_targeted_reproduction_v1`
+- 当前建议：
+  - 主线实现优先 A2
+  - PX4 A1 继续作为 contrast / backup line
 
 ## 1. Source-of-Truth 说明
 

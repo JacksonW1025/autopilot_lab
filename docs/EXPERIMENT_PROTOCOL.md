@@ -69,3 +69,46 @@ targeted 聚合还要输出：
 - `generalized_supported`：当前 `supported` 结果在多个 scenario 下仍然稳定成立。
 - `mature_positive`：至少一个 strict-raw-linear state-evolution 组合同时在 baseline、diagnostic 和 sparse-edge overlap 上保持稳定。
 - `mature_negative`：state-evolution 长期表现为高 `R2` + 高条件数 + stable sparse edges，因此可以成熟地下负结论。
+
+## Formal V2 之后的 narrowing studies
+
+这些 study 不是新的 `Formal V3`，也不替代 canonical Formal V2。它们的作用是把已经成立的 insight 压缩成更窄的执行线。
+
+### ArduPilot A2 narrowing
+
+推荐按下面顺序读：
+
+1. `artifacts/studies/20260416_003238_183129_ardupilot_a2_target_scout`
+2. `artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+
+当前正式结论：
+
+- `STABILIZE + throttle collective boundary` 线已经被排除
+- 当前最稳 target 是 `GUIDED_NOGPS + pair_imbalance_12_vs_34`
+- `ready_for_pair_attack_v1=yes`
+
+### PX4 A1 narrowing
+
+推荐按下面顺序读：
+
+1. `artifacts/studies/20260416_005450_652002_px4_a1_target_scout`
+2. `artifacts/studies/20260416_005450_658923_px4_a1_family_readiness`
+3. `artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction`
+
+当前正式结论：
+
+- 当前最稳 family 是 `attitude_roll_pitch_continuation`
+- 当前最稳 exact scope 是 `future_state_roll / future_state_pitch`
+- 这条线当前是 `targeted reproduction / contrast line`，不是 attack-ready line
+
+## 当前推荐入口
+
+Formal V2 主入口之外，当前常用的 narrowing 入口是：
+
+```bash
+../scripts/run_ardupilot_a2_target_scout.sh
+../scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh
+../scripts/run_px4_a1_target_scout.sh
+../scripts/run_px4_a1_attitude_family_readiness.sh
+../scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh
+```
