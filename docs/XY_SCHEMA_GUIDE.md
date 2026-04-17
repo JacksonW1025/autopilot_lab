@@ -16,9 +16,11 @@
    - `../artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix`
 5. ArduPilot targeted state-evolution validation
    - `../artifacts/studies/20260413_134505_ardupilot_state_evolution_validation`
-6. ArduPilot A2 pair target readiness
-   - `../artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
-7. PX4 A1 roll/pitch targeted reproduction
+6. ArduPilot A2 target scout
+   - `../artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+7. ArduPilot A2 pair target readiness
+   - `../artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
+8. PX4 A1 roll/pitch targeted reproduction
    - `../artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction`
 
 理由很简单：Formal V2 现在同时回答“线性是否存在、是否跨 scenario 成立、以及 ArduPilot 的 state-evolution 在 mode-isolated 条件下是成熟正结论还是成熟负结论”。
@@ -38,7 +40,8 @@
 ### ArduPilot：当前最值得继续推进的窄 target
 
 - `GUIDED_NOGPS | pair_imbalance_12_vs_34`
-- readiness 路径：`../artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+- target-scout 路径：`../artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+- readiness 路径：`../artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
 - 当前状态：`ready_for_pair_attack_v1=yes`
 
 ### ArduPilot targeted：mode-isolated state-evolution

@@ -216,3 +216,103 @@ def test_ardupilot_acceptance_accepts_alternating_pulse_train_active_phases(tmp_
     assert acceptance["active_phase_present"] is True
     assert acceptance["active_nonzero_command_samples"] == 35
     assert acceptance["rejection_reasons"] == []
+
+
+def test_ardupilot_data_quality_normalizes_bin_alignment_and_excludes_heartbeat_from_alignment_flag(
+    tmp_path: Path,
+) -> None:
+    paths, command_trace, config, runtime_report = _write_ardupilot_acceptance_fixture(
+        tmp_path,
+        active_nonzero_samples=35,
+        experiment_started=True,
+    )
+    telemetry_dir = paths["telemetry_dir"]
+    start_ns = 1_000_000_000
+    period_ns = int(1_000_000_000 / config.sampling_rate_hz)
+
+    write_rows_csv(
+        telemetry_dir / "heartbeat.csv",
+        [
+            {
+                "received_time_ns": start_ns + index * 1_000_000_000,
+                "system_status": mavutil.mavlink.MAV_STATE_ACTIVE,
+            }
+            for index in range(3)
+        ],
+    )
+    for filename, fieldnames, payload in (
+        (
+            "bin_att.csv",
+            ["received_time_ns", "des_roll", "roll", "des_pitch", "pitch", "des_yaw", "yaw", "err_rp", "err_yaw"],
+            {
+                "des_roll": 0.0,
+                "roll": 0.0,
+                "des_pitch": 0.0,
+                "pitch": 0.0,
+                "des_yaw": 0.0,
+                "yaw": 0.0,
+                "err_rp": 0.0,
+                "err_yaw": 0.0,
+            },
+        ),
+        (
+            "bin_rate.csv",
+            [
+                "received_time_ns",
+                "des_roll_rate",
+                "roll_rate",
+                "roll_out",
+                "des_pitch_rate",
+                "pitch_rate",
+                "pitch_out",
+                "des_yaw_rate",
+                "yaw_rate",
+                "yaw_out",
+            ],
+            {
+                "des_roll_rate": 0.0,
+                "roll_rate": 0.0,
+                "roll_out": 0.0,
+                "des_pitch_rate": 0.0,
+                "pitch_rate": 0.0,
+                "pitch_out": 0.0,
+                "des_yaw_rate": 0.0,
+                "yaw_rate": 0.0,
+                "yaw_out": 0.0,
+            },
+        ),
+        (
+            "bin_motb.csv",
+            ["received_time_ns", "th_limit"],
+            {
+                "th_limit": 0.10,
+            },
+        ),
+        (
+            "bin_rcou.csv",
+            ["received_time_ns", "c1", "c2", "c3", "c4"],
+            {
+                "c1": 1500,
+                "c2": 1500,
+                "c3": 1500,
+                "c4": 1500,
+            },
+        ),
+    ):
+        write_rows_csv(
+            telemetry_dir / filename,
+            [
+                {
+                    "received_time_ns": 5_000_000 + index * period_ns,
+                    **payload,
+                }
+                for index in range(35)
+            ],
+            fieldnames=fieldnames,
+        )
+
+    quality = _ardupilot_data_quality(paths, command_trace, config, runtime_report, "completed")
+
+    assert quality["input_alignment_ns"]["bin_rcou"]["p95_ns"] < 150_000_000.0
+    assert "bin_rcou" not in quality["quality_flags"]["alignment_p95_exceeded_streams"]
+    assert "heartbeat" not in quality["quality_flags"]["alignment_p95_exceeded_streams"]

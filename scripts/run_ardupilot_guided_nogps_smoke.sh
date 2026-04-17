@@ -8,11 +8,13 @@ REPEAT=3
 SKIP_SITL=0
 SKIP_CAPTURE=0
 MATRIX_DIR=""
+ENABLE_VISUALIZATION=0
 
 usage() {
   cat <<'EOF'
 Usage: run_ardupilot_guided_nogps_smoke.sh [--vehicle ArduCopter] [--frame quad] [--repeat 3]
                                            [--skip-sitl] [--skip-capture --matrix-dir DIR]
+                                           [--enable-visualization]
 EOF
 }
 
@@ -24,6 +26,7 @@ while [[ $# -gt 0 ]]; do
     --skip-sitl) SKIP_SITL=1 ;;
     --skip-capture) SKIP_CAPTURE=1 ;;
     --matrix-dir) MATRIX_DIR="$2"; shift ;;
+    --enable-visualization) ENABLE_VISUALIZATION=1 ;;
     --help|-h)
       usage
       exit 0
@@ -57,6 +60,9 @@ if [[ $SKIP_CAPTURE -eq 0 ]]; then
   )
   if [[ $SKIP_SITL -eq 1 ]]; then
     MATRIX_ARGS+=(--skip-sitl)
+  fi
+  if [[ $ENABLE_VISUALIZATION -eq 1 ]]; then
+    MATRIX_ARGS+=(--enable-visualization)
   fi
   if command -v ros2 >/dev/null 2>&1 && ros2 pkg prefix ardupilot_mavlink_backend >/dev/null 2>&1; then
     MATRIX_OUTPUT="$(ros2 run ardupilot_mavlink_backend ardupilot_linearity_matrix "${MATRIX_ARGS[@]}")"

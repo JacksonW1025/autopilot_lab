@@ -23,6 +23,15 @@ def test_visualization_respects_headless_override(monkeypatch) -> None:
     assert session._visualization_enabled() is False
 
 
+def test_visualization_explicit_false_overrides_display(monkeypatch) -> None:
+    monkeypatch.delenv("AUTOPILOT_LAB_HEADLESS", raising=False)
+    monkeypatch.setenv("DISPLAY", ":1")
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+
+    assert session._headless_enabled() is False
+    assert session._visualization_enabled(False) is False
+
+
 def test_visualizer_command_includes_map_when_supported(monkeypatch) -> None:
     monkeypatch.setattr(session, "_mavproxy_executable", lambda: "/usr/bin/mavproxy.py")
 
@@ -178,3 +187,35 @@ def test_start_visualizer_launches_after_connection(tmp_path: Path, monkeypatch)
     assert updated.visualization is not None
     assert updated.visualization.mavproxy_started is True
     assert updated.visualization.map_requested is True
+
+
+def test_connect_allows_autoreconnect_override(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    class _FakeMaster:
+        def setup_logfile_raw(self, path: str) -> None:
+            captured["logfile"] = path
+
+        def wait_heartbeat(self, timeout: float) -> None:
+            captured["timeout"] = timeout
+
+        class mav:
+            @staticmethod
+            def request_data_stream_send(*args, **kwargs):  # noqa: ANN002,ARG003
+                return None
+
+        target_system = 1
+        target_component = 1
+
+    def _fake_connection(uri: str, source_system: int, autoreconnect: bool):
+        captured["uri"] = uri
+        captured["source_system"] = source_system
+        captured["autoreconnect"] = autoreconnect
+        return _FakeMaster()
+
+    monkeypatch.setattr(session.mavutil, "mavlink_connection", _fake_connection)
+
+    master = session.connect("tcp:127.0.0.1:5760", tmp_path / "mav.tlog", timeout_s=3.0, autoreconnect=False)
+
+    assert isinstance(master, _FakeMaster)
+    assert captured["autoreconnect"] is False

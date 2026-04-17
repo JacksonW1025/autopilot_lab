@@ -1,0 +1,85 @@
+study_name: ardupilot_a2_pair_target_readiness
+study_id: 20260417_001925_356349_ardupilot_a2_pair_target_readiness
+runs_manifest: /mnt/nvme/autopilot_lab/artifacts/ardupilot_matrix/20260417_000721_ardupilot/runs.csv
+source_run_dirs:
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000721_ardupilot_attitude_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000745_ardupilot_attitude_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000809_ardupilot_attitude_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000833_ardupilot_attitude_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000857_ardupilot_attitude_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000921_ardupilot_attitude_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_000945_ardupilot_attitude_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001009_ardupilot_attitude_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001033_ardupilot_attitude_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001057_ardupilot_attitude_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001121_ardupilot_attitude_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001145_ardupilot_attitude_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001209_ardupilot_attitude_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001233_ardupilot_attitude_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001258_ardupilot_attitude_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001322_ardupilot_attitude_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001346_ardupilot_attitude_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001410_ardupilot_attitude_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001434_ardupilot_attitude_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001458_ardupilot_attitude_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001522_ardupilot_attitude_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001546_ardupilot_attitude_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001610_ardupilot_attitude_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001634_ardupilot_attitude_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001658_ardupilot_attitude_pulse_train_throttle_r5
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001722_ardupilot_attitude_pulse_train_throttle_r1
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001746_ardupilot_attitude_pulse_train_throttle_r2
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001810_ardupilot_attitude_pulse_train_throttle_r3
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001834_ardupilot_attitude_pulse_train_throttle_r4
+- /mnt/nvme/autopilot_lab/artifacts/raw/ardupilot/20260417_001858_ardupilot_attitude_pulse_train_throttle_r5
+output_files:
+  report: /mnt/nvme/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness/reports/a2_pair_target_readiness.md
+  summary: /mnt/nvme/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness/summary/a2_pair_target_readiness.json
+  run_level_pair_target: /mnt/nvme/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness/tables/run_level_pair_target.csv
+  scenario_pair_target_matrix: /mnt/nvme/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness/tables/scenario_pair_target_matrix.csv
+summary:
+  study_scope:
+    backend: ardupilot
+    mode_scope:
+    - GUIDED_NOGPS
+    x_schema: commands_only
+    y_schema: actuator_response
+    target_signal: pair_imbalance_12_vs_34
+    input_source: telemetry/input_trace.csv
+    response_source: telemetry/bin_rcou.csv
+    scenario_scope:
+    - nominal
+    - throttle_biased
+  scenario_results:
+  - scenario: nominal
+    accepted_count: 15
+    attempt_count: 15
+    ready: true
+    median_active_pair_rate: 0.20588235294117646
+    median_baseline_pair_rate: 0.01910828025477707
+    median_pair_specificity: 0.18717948717948718
+    median_pair_sign_consistency: 1.0
+    median_pair_to_collective_ratio: 0.9165927240461402
+    pair_tier_range_specificity: 0.024380856394736944
+    dominant_direction: 12_gt_34
+    blocking_reasons: []
+  - scenario: throttle_biased
+    accepted_count: 15
+    attempt_count: 15
+    ready: true
+    median_active_pair_rate: 0.20588235294117646
+    median_baseline_pair_rate: 0.01910828025477707
+    median_pair_specificity: 0.19301293186643506
+    median_pair_sign_consistency: 1.0
+    median_pair_to_collective_ratio: 0.9464627151051624
+    pair_tier_range_specificity: 0.0
+    dominant_direction: 12_gt_34
+    blocking_reasons: []
+  overall_decision:
+    ready_for_pair_attack_v1: true
+    recommended_path: start_guided_nogps_pair_attack_v1
+    dominant_direction: 12_gt_34
+    scenario_status:
+      nominal: true
+      throttle_biased: true
+  blocking_reasons: []

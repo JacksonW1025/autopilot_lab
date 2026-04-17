@@ -51,8 +51,8 @@
 这一步现在分成两条线：
 
 - A2 主线
-  - 目标：从 ArduPilot 的 direct-control 结构中抽出 attack-ready target
-  - 当前状态：`GUIDED_NOGPS + pair_imbalance_12_vs_34` 已经 `ready_for_pair_attack_v1`
+  - 目标：把 ArduPilot 的 direct-control 结构收敛成可评估、可进入 live evidence 的算法接口
+  - 当前状态：`GUIDED_NOGPS + pair_imbalance_12_vs_34` 已经 `ready_for_pair_attack_v1`，并进入 `algorithm spec + offline evaluation + live evaluation + live campaign`
 - A1 对照线
   - 目标：把 PX4 的 state-continuation 结构收窄成可复现、可讲述的 contrast line
   - 当前状态：`future_state_roll / future_state_pitch` 已经 `ready_for_targeted_reproduction_v1`
@@ -67,5 +67,5 @@
 - 如果一边更宽、一边更窄，也先解释为“线性证据的范围不同”，而不是立刻上升为“backend 输赢”。
 - 如果出现高 `R2` 但 support 不稳的结果，必须同时看条件数、系数稳定性、scenario generalization 和 sparsity overlap，不能只看拟合分数。
 - 当前 next-step 的优先级不是“再开更宽的 validation”，而是：
-  - 主线把 A2 从 readiness 推进到 attack algorithm
+  - 主线把 A2 从 readiness 推进到 `algorithm spec + offline/live evaluation + medium robustness campaign`
   - 对照线把 A1 保持为 reproducible continuation evidence

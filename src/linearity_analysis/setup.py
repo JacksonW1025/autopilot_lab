@@ -22,6 +22,10 @@ setup(
     entry_points={
         "console_scripts": [
             "linearity_analyze = linearity_analysis.linearity_analyze:main",
+            "linearity_ardupilot_a2_pair_target_algorithm_evaluation = linearity_analysis.ardupilot_a2_pair_target_algorithm_evaluation:main",
+            "linearity_ardupilot_a2_pair_target_live_campaign = linearity_analysis.ardupilot_a2_pair_target_live_campaign:main",
+            "linearity_ardupilot_a2_pair_target_live_evaluation = linearity_analysis.ardupilot_a2_pair_target_live_evaluation:main",
+            "linearity_ardupilot_a2_guided_nogps_pair_pipeline = linearity_analysis.ardupilot_a2_guided_nogps_pair_pipeline:main",
             "linearity_ardupilot_a2_boundary_readiness = linearity_analysis.ardupilot_a2_boundary_readiness:main",
             "linearity_ardupilot_a2_pair_target_readiness = linearity_analysis.ardupilot_a2_pair_target_readiness:main",
             "linearity_ardupilot_a2_target_scout = linearity_analysis.ardupilot_a2_target_scout:main",

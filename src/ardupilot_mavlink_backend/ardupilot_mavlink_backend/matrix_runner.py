@@ -77,6 +77,7 @@ def run_matrix(
     *,
     accepted_target: int = 0,
     max_attempts_per_config: int | None = None,
+    enable_visualization: bool = False,
 ) -> tuple[Path, list[dict[str, str]]]:
     run_id = f"{datetime.now(timezone.utc).astimezone():%Y%m%d_%H%M%S}_ardupilot"
     matrix_dir = ARDUPILOT_MATRIX_ROOT / run_id
@@ -114,6 +115,7 @@ def run_matrix(
                 frame=frame,
                 start_sitl=not skip_sitl,
                 sitl_log_path=session_dir / "ardupilot_sitl.log",
+                enable_visualization=enable_visualization,
             )
             research_acceptance = _acceptance_state(str(artifact_dir))
             if research_acceptance == "accepted":
@@ -142,6 +144,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--vehicle", default="ArduCopter")
     parser.add_argument("--frame", default="quad")
     parser.add_argument("--skip-sitl", action="store_true")
+    parser.add_argument("--enable-visualization", action="store_true", help="显式启用 MAVProxy/map 可视化。默认关闭。")
     parser.add_argument("--repeat", type=int, default=1, help="每个 config fresh 重复次数。")
     parser.add_argument("--accepted-target", type=int, default=0, help="每个 config 需要达到的 accepted raw run 数量。")
     parser.add_argument("--max-attempts-per-config", type=int, default=None, help="accepted-target 模式下每个 config 的最大尝试次数。")
@@ -157,6 +160,7 @@ def main(argv: list[str] | None = None) -> None:
         repeat=args.repeat,
         accepted_target=args.accepted_target,
         max_attempts_per_config=args.max_attempts_per_config,
+        enable_visualization=args.enable_visualization,
     )
     print(f"matrix_dir={matrix_dir}")
     print(f"jobs={len(rows)}")

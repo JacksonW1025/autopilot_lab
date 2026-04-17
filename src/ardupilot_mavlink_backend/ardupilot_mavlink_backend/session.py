@@ -316,10 +316,12 @@ def connect(
     tlog_path: Path,
     timeout_s: float,
     stream_rate_hz: int = 20,
+    *,
+    autoreconnect: bool = True,
 ) -> mavutil.mavfile:
     tlog_path.parent.mkdir(parents=True, exist_ok=True)
     tlog_path.touch(exist_ok=True)
-    master = mavutil.mavlink_connection(master_uri, source_system=250, autoreconnect=True)
+    master = mavutil.mavlink_connection(master_uri, source_system=250, autoreconnect=autoreconnect)
     master.setup_logfile_raw(str(tlog_path))
     master.wait_heartbeat(timeout=timeout_s)
     master.mav.request_data_stream_send(

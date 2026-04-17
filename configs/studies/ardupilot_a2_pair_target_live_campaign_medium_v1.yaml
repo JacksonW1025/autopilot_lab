@@ -1,0 +1,54 @@
+campaign_name: ardupilot_a2_pair_target_live_campaign_medium_v1
+campaign_version: v1
+a2_target_scout_dir: ../../artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout
+a2_pair_target_dir: ../../artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness
+phase_order:
+  - probe_stability_r1
+  - probe_stability_r2
+  - micro_robustness_r1
+  - confirm_robustness_r1
+phases:
+  - phase_id: probe_stability_r1
+    reference_tier: probe
+    scenario_scope: both
+    direction: 12_gt_34
+    pulse_amplitude: 0.05
+    use_canonical_bias_by_scenario: true
+    pulse_count: 5
+    pulse_width_s: 0.35
+    pulse_gap_s: 0.95
+    accepted_target: 5
+    max_attempts_per_config: 10
+  - phase_id: probe_stability_r2
+    reference_tier: probe
+    scenario_scope: both
+    direction: 12_gt_34
+    pulse_amplitude: 0.05
+    use_canonical_bias_by_scenario: true
+    pulse_count: 5
+    pulse_width_s: 0.35
+    pulse_gap_s: 0.95
+    accepted_target: 5
+    max_attempts_per_config: 10
+  - phase_id: micro_robustness_r1
+    reference_tier: micro
+    scenario_scope: both
+    direction: 12_gt_34
+    pulse_amplitude: 0.02
+    use_canonical_bias_by_scenario: true
+    pulse_count: 5
+    pulse_width_s: 0.35
+    pulse_gap_s: 0.95
+    accepted_target: 5
+    max_attempts_per_config: 10
+  - phase_id: confirm_robustness_r1
+    reference_tier: confirm
+    scenario_scope: both
+    direction: 12_gt_34
+    pulse_amplitude: 0.10
+    use_canonical_bias_by_scenario: true
+    pulse_count: 5
+    pulse_width_s: 0.35
+    pulse_gap_s: 0.95
+    accepted_target: 5
+    max_attempts_per_config: 10

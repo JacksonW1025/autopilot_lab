@@ -2,7 +2,7 @@
 
 ## 一句话结论
 
-主线 readiness 判断已经被后续工作验证了：当前 Formal V2 主线 empirical validation 不仅足够进入 in-depth analysis，而且这一步已经完成；截至 `2026-04-16`，A2 已经进一步收窄到 `pair-target readiness=yes`，A1 也已经收窄到 `roll/pitch targeted reproduction=yes`。ArduPilot targeted state-evolution 子线仍然是 `inconclusive`，但它现在只是一个保留的边界问题，不再阻塞主线推进。
+主线 readiness 判断已经被后续工作验证了：当前 Formal V2 主线 empirical validation 不仅足够进入 in-depth analysis，而且这一步已经完成；截至 `2026-04-17`，A2 已经通过真实端到端 pipeline 刷新到新的 canonical chain，并继续保持 `pair-target readiness=yes` 与 `default_entry=A2`，A1 也已经收窄到 `roll/pitch targeted reproduction=yes`。ArduPilot targeted state-evolution 子线仍然是 `inconclusive`，但它现在只是一个保留的边界问题，不再阻塞主线推进。
 
 ## 当前阶段更新
 

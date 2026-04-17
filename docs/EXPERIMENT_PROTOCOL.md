@@ -78,14 +78,23 @@ targeted 聚合还要输出：
 
 推荐按下面顺序读：
 
-1. `artifacts/studies/20260416_003238_183129_ardupilot_a2_target_scout`
-2. `artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+1. `artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+2. `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
+3. `docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md`
+4. `docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md`
 
 当前正式结论：
 
 - `STABILIZE + throttle collective boundary` 线已经被排除
 - 当前最稳 target 是 `GUIDED_NOGPS + pair_imbalance_12_vs_34`
 - `ready_for_pair_attack_v1=yes`
+- `2026-04-17` 的真实端到端 A2 pipeline 已刷新 current canonical A2 chain，并保持 `default_entry=A2`
+- 当前工程主入口是 `../scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh`
+- 当前 algorithm shell 入口是 `../scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh`
+- 当前 live shell 入口是 `../scripts/run_ardupilot_a2_pair_target_live_evaluation.sh`
+- 当前 live campaign 入口是 `../scripts/run_ardupilot_a2_pair_target_live_campaign.sh`
+- 当前 algorithm evaluation、live evaluation 和 live campaign 都是独立 gate，不进入当前 decision layer
+- 当前 A2 主入口默认 headless；可视化不是默认路径
 
 ### PX4 A1 narrowing
 
@@ -106,8 +115,12 @@ targeted 聚合还要输出：
 Formal V2 主入口之外，当前常用的 narrowing 入口是：
 
 ```bash
+../scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh
 ../scripts/run_ardupilot_a2_target_scout.sh
 ../scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh
+../scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh
+../scripts/run_ardupilot_a2_pair_target_live_evaluation.sh
+../scripts/run_ardupilot_a2_pair_target_live_campaign.sh
 ../scripts/run_px4_a1_target_scout.sh
 ../scripts/run_px4_a1_attitude_family_readiness.sh
 ../scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh

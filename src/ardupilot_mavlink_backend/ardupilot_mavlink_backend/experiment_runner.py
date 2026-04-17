@@ -53,6 +53,8 @@ INPUT_TRACE_FIELDNAMES = [
 ACTIVE_PHASE_COMPATIBILITY = {"experiment"}
 BLOCKING_TOPICS = ("attitude", "local_position", "heartbeat", "sys_status")
 QUALITY_TOPICS = BLOCKING_TOPICS + ("bin_att", "bin_rate", "bin_motb", "bin_rcou")
+ALIGNMENT_FLAG_TOPICS = ("attitude", "local_position", "sys_status", "bin_att", "bin_rate", "bin_motb", "bin_rcou")
+BIN_ALIGNMENT_TOPICS = ("bin_att", "bin_rate", "bin_motb", "bin_rcou")
 CANONICAL_TELEMETRY_FILES = {
     "attitude.csv": ("attitude", ATTITUDE_FIELDNAMES),
     "local_position.csv": ("local_position", LOCAL_POSITION_FIELDNAMES),
@@ -123,6 +125,49 @@ def _resolve_latest_file(before: dict[str, float], after: dict[str, float]) -> s
         return None
     candidates.sort(key=lambda item: after[item], reverse=True)
     return candidates[0]
+
+
+def _input_anchor_time_ns(input_rows: list[dict[str, Any]]) -> int | None:
+    positive = [_safe_timestamp_ns(row.get("publish_time_ns"), 0) for row in input_rows]
+    positive = [value for value in positive if value > 0]
+    if not positive:
+        return None
+    return min(positive)
+
+
+def _bin_global_start_ns_from_telemetry_dir(
+    telemetry_dir: Path,
+    filenames: tuple[str, ...] = ("bin_att.csv", "bin_rate.csv", "bin_motb.csv", "bin_rcou.csv"),
+) -> int | None:
+    candidates: list[int] = []
+    for filename in filenames:
+        rows = _sorted_csv_rows(telemetry_dir / filename, "received_time_ns")
+        if not rows:
+            continue
+        positive = [_safe_timestamp_ns(row.get("received_time_ns"), 0) for row in rows]
+        positive = [value for value in positive if value > 0]
+        if positive:
+            candidates.append(min(positive))
+    if not candidates:
+        return None
+    return min(candidates)
+
+
+def _aligned_bin_rows(input_rows: list[dict[str, Any]], bin_rows: list[dict[str, Any]], *, telemetry_dir: Path) -> list[dict[str, Any]]:
+    anchor_time_ns = _input_anchor_time_ns(input_rows)
+    bin_start_ns = _bin_global_start_ns_from_telemetry_dir(telemetry_dir)
+    if anchor_time_ns is None or bin_start_ns is None:
+        return []
+    aligned_rows: list[dict[str, Any]] = []
+    for row in bin_rows:
+        received_time_ns = _safe_timestamp_ns(row.get("received_time_ns"), 0)
+        aligned_rows.append(
+            {
+                **row,
+                "aligned_time_ns": anchor_time_ns + max(0, received_time_ns - bin_start_ns),
+            }
+        )
+    return aligned_rows
 
 
 def _set_mode(master: mavutil.mavfile, mode_name: str) -> bool:
@@ -851,15 +896,20 @@ def _ardupilot_data_quality(
         "input_trace": _timestamp_monotonic(input_rows, "publish_time_ns"),
         **{name: _timestamp_monotonic(rows, "received_time_ns") for name, rows in telemetry_rows.items()},
     }
-    input_alignment_ns = {
-        name: _nearest_gap_metrics(input_rows, rows, "publish_time_ns", "received_time_ns")
-        for name, rows in telemetry_rows.items()
-    }
+    input_alignment_ns: dict[str, dict[str, float]] = {}
+    for name, rows in telemetry_rows.items():
+        if name in BIN_ALIGNMENT_TOPICS:
+            aligned_rows = _aligned_bin_rows(input_rows, rows, telemetry_dir=paths["telemetry_dir"])
+            input_alignment_ns[name] = _nearest_gap_metrics(input_rows, aligned_rows, "publish_time_ns", "aligned_time_ns")
+        else:
+            input_alignment_ns[name] = _nearest_gap_metrics(input_rows, rows, "publish_time_ns", "received_time_ns")
     max_alignment_error_ms = float(config.reporting.get("max_alignment_error_ms", 150.0))
     p95_alignment_failures = sorted(
         name
         for name, metrics in input_alignment_ns.items()
-        if not math.isnan(metrics["p95_ns"]) and metrics["p95_ns"] > max_alignment_error_ms * 1_000_000.0
+        if name in ALIGNMENT_FLAG_TOPICS
+        and not math.isnan(metrics["p95_ns"])
+        and metrics["p95_ns"] > max_alignment_error_ms * 1_000_000.0
     )
     acceptance = _ardupilot_acceptance(paths, command_trace, config, runtime_report, status, missing_topics)
     return {
@@ -954,6 +1004,7 @@ def run_capture(
     start_sitl: bool = True,
     connect_timeout_s: float = 60.0,
     sitl_log_path: Path | None = None,
+    enable_visualization: bool | None = None,
 ) -> tuple[int, Path]:
     start_time = datetime.now(timezone.utc).astimezone()
     capture_start_time_ns = time.time_ns()
@@ -998,7 +1049,13 @@ def run_capture(
     try:
         if start_sitl:
             cleanup_residual_processes()
-            process = start_sitl_process(run_id, vehicle, frame, resolved_sitl_log_path)
+            process = start_sitl_process(
+                run_id,
+                vehicle,
+                frame,
+                resolved_sitl_log_path,
+                enable_visualization=enable_visualization,
+            )
 
         master = connect(master_uri, tlog_path, connect_timeout_s)
         if process is not None:
@@ -1113,6 +1170,8 @@ def run_capture(
                 position_origin = _append_message_rows(master, attitude_rows, position_rows, heartbeat_rows, status_rows, position_origin)
                 if parameter_snapshot_after != parameter_snapshot_before:
                     anomalies.extend(_restore_parameters(master, parameter_snapshot_before))
+                if hasattr(master, "autoreconnect"):
+                    master.autoreconnect = False
                 master.close()
             except Exception:
                 pass
@@ -1217,6 +1276,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--frame", default="quad", help="SITL frame，默认 quad。")
     parser.add_argument("--master", default=DEFAULT_MASTER, help="MAVLink master URI，默认 tcp:127.0.0.1:5760。")
     parser.add_argument("--skip-sitl", action="store_true", help="连接已有实例，不启动 sim_vehicle.py。")
+    parser.add_argument("--enable-visualization", action="store_true", help="显式启用 MAVProxy/map 可视化。默认关闭。")
     args = parser.parse_args(argv)
 
     config = load_run_config(args.config)
@@ -1226,6 +1286,7 @@ def main(argv: list[str] | None = None) -> None:
         frame=args.frame,
         master_uri=args.master,
         start_sitl=not args.skip_sitl,
+        enable_visualization=args.enable_visualization,
     )
     print(f"artifact_dir={artifact_dir}")
     raise SystemExit(exit_code)

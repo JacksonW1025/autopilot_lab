@@ -1,0 +1,57 @@
+{
+  "study_scope": {
+    "backend": "ardupilot",
+    "mode_scope": [
+      "GUIDED_NOGPS"
+    ],
+    "x_schema": "commands_only",
+    "y_schema": "actuator_response",
+    "target_signal": "pair_imbalance_12_vs_34",
+    "input_source": "telemetry/input_trace.csv",
+    "response_source": "telemetry/bin_rcou.csv",
+    "scenario_scope": [
+      "nominal",
+      "throttle_biased"
+    ]
+  },
+  "scenario_results": [
+    {
+      "scenario": "nominal",
+      "accepted_count": 15,
+      "attempt_count": 15,
+      "ready": true,
+      "median_active_pair_rate": 0.20588235294117646,
+      "median_baseline_pair_rate": 0.01910828025477707,
+      "median_pair_specificity": 0.18717948717948718,
+      "median_pair_sign_consistency": 1.0,
+      "median_pair_to_collective_ratio": 0.9165927240461402,
+      "pair_tier_range_specificity": 0.024380856394736944,
+      "dominant_direction": "12_gt_34",
+      "blocking_reasons": []
+    },
+    {
+      "scenario": "throttle_biased",
+      "accepted_count": 15,
+      "attempt_count": 15,
+      "ready": true,
+      "median_active_pair_rate": 0.20588235294117646,
+      "median_baseline_pair_rate": 0.01910828025477707,
+      "median_pair_specificity": 0.19301293186643506,
+      "median_pair_sign_consistency": 1.0,
+      "median_pair_to_collective_ratio": 0.9464627151051624,
+      "pair_tier_range_specificity": 0.0,
+      "dominant_direction": "12_gt_34",
+      "blocking_reasons": []
+    }
+  ],
+  "overall_decision": {
+    "ready_for_pair_attack_v1": true,
+    "recommended_path": "start_guided_nogps_pair_attack_v1",
+    "dominant_direction": "12_gt_34",
+    "scenario_status": {
+      "nominal": true,
+      "throttle_biased": true
+    }
+  },
+  "blocking_reasons": []
+}

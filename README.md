@@ -1,13 +1,14 @@
 # autopilot_lab
 
-`autopilot_lab` 是一个面向无人机输入到响应关系研究的实验仓库。当前正式主线仍是 `Formal V2`，但仓库状态已经不只停留在 milestone summary；截至 `2026-04-16`，基于当前 repo artifact 的 insight-phase 分析和后续 narrowing studies 都已经落盘，并至少覆盖：
+`autopilot_lab` 是一个面向无人机输入到响应关系研究的实验仓库。当前正式主线仍是 `Formal V2`，但仓库状态已经不只停留在 milestone summary；截至 `2026-04-17`，基于当前 repo artifact 的 insight-phase 分析和后续 narrowing studies 都已经落盘，并至少覆盖：
 
 - [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
 - [20260414_064153_formal_v2_anchor_deep_dive](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive)
 - [20260414_064902_formal_v2_in_depth_analysis](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis)
-- [20260416_003634_371133_ardupilot_a2_pair_target_readiness](/home/car/autopilot_lab/artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness)
+- [20260417_001924_151397_ardupilot_a2_target_scout](/home/car/autopilot_lab/artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout)
+- [20260417_001925_356349_ardupilot_a2_pair_target_readiness](/home/car/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness)
 - [20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction)
-- [20260416_064841_formal_v2_next_phase_decision_layer](/home/car/autopilot_lab/artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer)
+- [20260417_001929_formal_v2_next_phase_decision_layer](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer)
 
 Formal V2 的基本问题仍然是：
 
@@ -27,7 +28,7 @@ Formal V2 的基本问题仍然是：
 - `2. empirical validation`：已完成
 - `3. in-depth analysis / insight`：已完成
 - `4. attack algorithm`
-  - A2 子线：已经到入口，可以开始设计
+  - A2 子线：已进入 `algorithm spec + offline/live evaluation + live campaign`
   - A1 子线：还停在 targeted reproduction，不是 attack-ready line
 - `5. evaluation`：尚未开始
 
@@ -35,10 +36,11 @@ Formal V2 的基本问题仍然是：
 
 - 主线：A2 `GUIDED_NOGPS + pair_imbalance_12_vs_34`
   - 当前 decision layer 已经把它锁成 default entry
+  - 当前先走 `pair_target_readiness -> algorithm_evaluation -> live_evaluation -> live_campaign`
 - 对照线：A1 `future_state_roll / future_state_pitch`
   - 保持为 reproducible continuation / contrast line，不升格成主攻击入口
 - 当前 route-selection 入口：
-  - [next_phase_decision_layer.md](/home/car/autopilot_lab/artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer/reports/next_phase_decision_layer.md)
+  - [next_phase_decision_layer.md](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer/reports/next_phase_decision_layer.md)
 
 ## 已完成 / 不再作为 live TODO
 
@@ -58,14 +60,26 @@ Formal V2 的基本问题仍然是：
 - ArduPilot targeted validation: [20260413_134505_ardupilot_state_evolution_validation](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation)
 - latest insight memo: [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
 - latest insight aggregate: [20260414_064153_formal_v2_anchor_deep_dive](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive), [20260414_064902_formal_v2_in_depth_analysis](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis)
-- latest decision layer: [20260416_064841_formal_v2_next_phase_decision_layer](/home/car/autopilot_lab/artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer)
+- latest decision layer: [20260417_001929_formal_v2_next_phase_decision_layer](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer)
 - A2 narrowing chain:
-  - target scout: [20260416_003238_183129_ardupilot_a2_target_scout](/home/car/autopilot_lab/artifacts/studies/20260416_003238_183129_ardupilot_a2_target_scout)
-  - pair-target readiness: [20260416_003634_371133_ardupilot_a2_pair_target_readiness](/home/car/autopilot_lab/artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness)
+  - target scout: [20260417_001924_151397_ardupilot_a2_target_scout](/home/car/autopilot_lab/artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout)
+  - pair-target readiness: [20260417_001925_356349_ardupilot_a2_pair_target_readiness](/home/car/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness)
+  - algorithm spec: [A2_PAIR_TARGET_ALGORITHM_SPEC.md](docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md)
+  - evaluation protocol: [A2_PAIR_TARGET_EVALUATION_PROTOCOL.md](docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md)
+  - live protocol: [A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md](docs/A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md)
+  - campaign plan: [A2_PAIR_TARGET_CAMPAIGN_PLAN.md](docs/A2_PAIR_TARGET_CAMPAIGN_PLAN.md)
+  - live runner: [run_ardupilot_a2_pair_target_live_evaluation.sh](/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_evaluation.sh)
+  - live campaign: [run_ardupilot_a2_pair_target_live_campaign.sh](/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_campaign.sh)
 - A1 narrowing chain:
   - target scout: [20260416_005450_652002_px4_a1_target_scout](/home/car/autopilot_lab/artifacts/studies/20260416_005450_652002_px4_a1_target_scout)
   - family readiness: [20260416_005450_658923_px4_a1_family_readiness](/home/car/autopilot_lab/artifacts/studies/20260416_005450_658923_px4_a1_family_readiness)
   - targeted reproduction: [20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction)
+- `2026-04-17` real A2 end-to-end refresh:
+  - `GUIDED_NOGPS` smoke passed
+  - 主 capture 的 6 个固定配置全部达到 `5/5 accepted`
+  - A2 target scout 继续锁定 `pair_imbalance_12_vs_34`
+  - A2 pair readiness 继续保持 `ready_for_pair_attack_v1=yes`
+  - decision layer 继续给出 `default_entry=A2`
 
 当前最简明的结论是：
 
@@ -111,12 +125,15 @@ Formal V2 的基本问题仍然是：
 3. [state_evolution_validation.md](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation/reports/state_evolution_validation.md)
 4. [anchor_deep_dive.json](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive/summary/anchor_deep_dive.json)
 5. [in_depth_analysis.json](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis/summary/in_depth_analysis.json)
-6. [a2_pair_target_readiness.md](/home/car/autopilot_lab/artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness/reports/a2_pair_target_readiness.md)
-7. [a1_roll_pitch_targeted_reproduction.md](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction/reports/a1_roll_pitch_targeted_reproduction.md)
-8. [next_phase_decision_layer.md](/home/car/autopilot_lab/artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer/reports/next_phase_decision_layer.md)
-9. [PX4 scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/reports/scenario_generalization.md)
-10. [ArduPilot scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/scenario_generalization.md)
-11. [ArduPilot sparsity_overlap.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/sparsity_overlap.md)
+6. [a2_target_scout.md](/home/car/autopilot_lab/artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout/reports/a2_target_scout.md)
+7. [a2_pair_target_readiness.md](/home/car/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness/reports/a2_pair_target_readiness.md)
+8. [A2_PAIR_TARGET_ALGORITHM_SPEC.md](docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md)
+9. [A2_PAIR_TARGET_EVALUATION_PROTOCOL.md](docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md)
+10. [a1_roll_pitch_targeted_reproduction.md](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction/reports/a1_roll_pitch_targeted_reproduction.md)
+11. [next_phase_decision_layer.md](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer/reports/next_phase_decision_layer.md)
+12. [PX4 scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/reports/scenario_generalization.md)
+13. [ArduPilot scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/scenario_generalization.md)
+14. [ArduPilot sparsity_overlap.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/sparsity_overlap.md)
 
 ## 当前研究口径
 
@@ -219,8 +236,12 @@ source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
 如果要直接复现 next-phase narrowing study：
 
 ```bash
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh
 /home/car/autopilot_lab/scripts/run_ardupilot_a2_target_scout.sh
 /home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_evaluation.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_campaign.sh
 /home/car/autopilot_lab/scripts/run_px4_a1_target_scout.sh
 /home/car/autopilot_lab/scripts/run_px4_a1_attitude_family_readiness.sh
 /home/car/autopilot_lab/scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh
@@ -283,6 +304,10 @@ ArduPilot targeted aggregate 额外包含：
 - [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
 - [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
 - [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
+- [A2_PAIR_TARGET_ALGORITHM_SPEC.md](docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md)
+- [A2_PAIR_TARGET_EVALUATION_PROTOCOL.md](docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md)
+- [A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md](docs/A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md)
+- [A2_PAIR_TARGET_CAMPAIGN_PLAN.md](docs/A2_PAIR_TARGET_CAMPAIGN_PLAN.md)
 - [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
 - [NEXT_PHASE_DECISION_LAYER.md](docs/NEXT_PHASE_DECISION_LAYER.md)
 - [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
@@ -294,6 +319,7 @@ ArduPilot targeted aggregate 额外包含：
 
 - 如果你要推进主线实现，优先做 A2：
   - `ArduPilot / GUIDED_NOGPS / pair_imbalance_12_vs_34`
+  - 当前先过 `run_ardupilot_a2_pair_target_algorithm_evaluation.sh`，再用 `run_ardupilot_a2_pair_target_live_evaluation.sh` 和 `run_ardupilot_a2_pair_target_live_campaign.sh` 做 live evidence gate
 - 如果你要补强论文叙事和对照线，优先读 A1：
   - `PX4 A1 / future_state_roll + future_state_pitch`
 - 当前不建议再回头扩 broad analysis；最有价值的新增工作已经从“找更多 generalized combo”变成“把已选中的窄 target 变成可执行算法或复现实验”

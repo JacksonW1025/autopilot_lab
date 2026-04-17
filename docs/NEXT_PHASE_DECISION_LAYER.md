@@ -108,6 +108,24 @@
 - `boundary_catalog.csv` 专门列出 non-entry boundary/pathology 样本
 - `stable_core_watchlist.csv` 只做 generalized-supported peer 旁证，不参与主排序
 
+## 当前 canonical 引用
+
+当前 route-selection 的 canonical artifact 已刷新到：
+
+- `artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer`
+
+它当前消费的 A2 输入是：
+
+- `artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+- `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
+
+当前正式结论保持不变：
+
+- `default_entry=A2`
+- `hard_mode=A1`
+- `contrast_only=B1`
+- `boundary_candidates=C1,D1,D2`
+
 ## 如何运行
 
 自动发现最新派生 artifact：
@@ -126,6 +144,14 @@ python3 /home/car/autopilot_lab/scripts/analyze_formal_v2_next_phase_decision.py
   --a1-targeted-reproduction /home/car/autopilot_lab/artifacts/studies/<a1_dir> \
   --output-dir /home/car/autopilot_lab/artifacts/studies/<new_dir>
 ```
+
+如果只是刷新 A2 主线输入，先跑：
+
+```bash
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh
+```
+
+它会先过现有 `GUIDED_NOGPS` smoke，再串起 `a2_target_scout`、`a2_pair_target_readiness`，最后把新的 A2 artifact 喂给 decision layer。
 
 ## 如何阅读结果
 

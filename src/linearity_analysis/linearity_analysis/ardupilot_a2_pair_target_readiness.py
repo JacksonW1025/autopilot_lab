@@ -84,12 +84,17 @@ def _output_paths(output_root: Path | None) -> dict[str, Path]:
     }
 
 
-def _scenario_summary(scenario: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_pair_target_scenario(
+    scenario: str,
+    rows: list[dict[str, Any]],
+    *,
+    accepted_target: int = ACCEPTED_TARGET,
+) -> dict[str, Any]:
     attempt_count = len(rows)
     accepted_rows = [row for row in rows if bool(row.get("accepted"))]
     accepted_count = len(accepted_rows)
     blocking_reasons: list[str] = []
-    if accepted_count < ACCEPTED_TARGET:
+    if accepted_count < accepted_target:
         blocking_reasons.append("accepted_target_not_met")
 
     median_active_pair_rate = _median([_safe_float(row.get("active_pair_split_rate")) for row in accepted_rows])
@@ -145,6 +150,10 @@ def _scenario_summary(scenario: str, rows: list[dict[str, Any]]) -> dict[str, An
         "dominant_direction": dominant_direction,
         "blocking_reasons": blocking_reasons,
     }
+
+
+def _scenario_summary(scenario: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return summarize_pair_target_scenario(scenario, rows, accepted_target=ACCEPTED_TARGET)
 
 
 def _flatten_scenario_row(result: dict[str, Any]) -> dict[str, Any]:

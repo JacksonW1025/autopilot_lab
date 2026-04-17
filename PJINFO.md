@@ -82,11 +82,14 @@
   - `scripts/run_ardupilot_state_evolution_diagnostic.sh`
 
 - 当前 next-phase narrowing scripts：
+  - `scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh`
   - `scripts/run_ardupilot_a2_stabilize_readiness.sh`
   - `scripts/run_ardupilot_a2_stabilize_boundary_readiness.sh`
   - `scripts/run_ardupilot_a2_guided_nogps_boundary_readiness.sh`
   - `scripts/run_ardupilot_a2_target_scout.sh`
   - `scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh`
+  - `scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh`
+  - `scripts/run_ardupilot_a2_pair_target_live_evaluation.sh`
   - `scripts/run_px4_a1_target_scout.sh`
   - `scripts/run_px4_a1_attitude_family_readiness.sh`
   - `scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh`
@@ -136,36 +139,63 @@
   - full in-depth synthesis artifact: `artifacts/studies/20260414_064902_formal_v2_in_depth_analysis`
 - [2026-04-15] A2 readiness / boundary narrowing 已完成：
   - `STABILIZE + throttle -> mean/min actuator` 这条 collective boundary 线已经被正式排除
-- [2026-04-16] `GUIDED_NOGPS target-scout` 选中的下一个 target 是 `pair_imbalance_12_vs_34`
-- [2026-04-16] A2 当前正式状态：
-  - `artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+- [2026-04-17] real A2 端到端 pipeline 已完成并刷新 current canonical A2 chain：
+  - `artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+  - `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
+  - `artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer`
+  - `guided_nogps_smoke_passed=true`
+  - 主 capture 六个固定配置全部 `5/5 accepted`
+  - `default_entry=A2`
+- [2026-04-17] `GUIDED_NOGPS target-scout` 选中的下一个 target 仍然是 `pair_imbalance_12_vs_34`
+- [2026-04-17] A2 当前正式状态：
+  - `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
   - `ready_for_pair_attack_v1=yes`
   - `recommended_path=start_guided_nogps_pair_attack_v1`
+- [2026-04-17] A2 algorithm 进入规格化阶段：
+  - `docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md`
+  - `docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md`
+  - `scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh`
+  - 当前只支持 `offline_replay + reference_pulse_train_v1`
+- [2026-04-17] A2 minimal live gate 已实现：
+  - `scripts/run_ardupilot_a2_pair_target_live_evaluation.sh`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_live_evaluation.py`
+  - 当前 live runner 只消费既有 algorithm-evaluation 参数，不直接接 decision layer
+- [2026-04-17] A2 live campaign 已实现：
+  - `docs/A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md`
+  - `docs/A2_PAIR_TARGET_CAMPAIGN_PLAN.md`
+  - `configs/studies/ardupilot_a2_pair_target_live_campaign_medium_v1.yaml`
+  - `scripts/run_ardupilot_a2_pair_target_live_campaign.sh`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_live_campaign.py`
+  - 当前 campaign 固定为 `probe_stability x2 + micro + confirm`，总 accepted target=`40`
 - [2026-04-16] A1 当前正式状态：
   - `artifacts/studies/20260416_005450_652002_px4_a1_target_scout`
   - `artifacts/studies/20260416_005450_658923_px4_a1_family_readiness`
   - `artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction`
   - `ready_for_targeted_reproduction_v1=yes`
   - `recommended_path=lock_px4_a1_roll_pitch_targeted_scope`
-- [2026-04-16] 统一决策层已完成：
-  - `artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer`
+- [2026-04-17] 统一决策层已刷新：
+  - `artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer`
   - `default_entry=A2`
   - `hard_mode=A1`
   - `contrast_only=B1`
   - `boundary_candidates=C1,D1,D2`
-- [2026-04-16] 当前故事阶段：
+- [2026-04-17] 当前故事阶段：
   - 全项目主线：`theory -> empirical validation -> insight` 已完成
-  - A2 子线：已到 `attack algorithm` 入口
+  - A2 子线：已到 `algorithm spec + offline/live evaluation + live campaign`
   - A1 子线：已收窄成 `roll/pitch targeted reproduction`，当前仍是 reproduction/contrast line，不是 attack-ready line
+- [2026-04-17] A2 主线运行语义已收口：
+  - 默认 `headless`
+  - `quality_alignment_p95_exceeded` 不再因 `bin_* / heartbeat` 的时间基实现偏差稳定触发
+  - teardown 不再把 autoreconnect 噪声作为默认终端输出
 
 ## 当前 live TODO
 
 - A2 主线：
-  - 从 `GUIDED_NOGPS + pair_imbalance_12_vs_34` 的 readiness 进入具体 attack algorithm 设计
+  - 跑一轮 `medium robustness` live campaign，并读回 campaign artifact
 - A1 对照线：
   - 保持 `future_state_roll / future_state_pitch` 作为可复现 continuation / contrast line
 - 文档与决策口径：
-  - 默认以 `artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer` 作为当前 route-selection 入口
+  - 默认以 `artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer` 作为当前 route-selection 入口
 
 ## 已完成 / 不再作为 live TODO
 
@@ -182,7 +212,7 @@
   - ArduPilot：`commands_only` 主导的低维 direct-control 结构，stable-core=`12`
 - [2026-04-14] PX4 最可靠的 generalized-supported 证据更像 `current state + short lag -> future/summary`，不是 command-only 主导。
 - [2026-04-14] ArduPilot 最可靠的 generalized-supported 证据集中在 `commands_only -> actuator_response`，其中 `command_throttle` 对 `actuator_1~4` 的支配最稳定。
-- [2026-04-16] 上面的 A2 仍是 insight anchor，不等于最终 executable target；当前真正通过 narrowing 站住的是 pair target，而不是 collective throttle-floor。
+- [2026-04-17] 上面的 A2 仍是 insight anchor，不等于最终 executable target；当前真正通过 narrowing 站住的是 pair target，而不是 collective throttle-floor。
 - [2026-04-14] ArduPilot `commands_plus_state_history -> selected_state_subset` 这类高分路径不是“没结构”，而是被 formal boundary 卡住：
   - `C1`：stable partial mask + 极高 condition number
   - `D2`：empty mask + stable raw template
@@ -196,7 +226,7 @@
   - direct-control path 优先
   - 高分但病态路径降权
   - PX4 若继续推进，应优先考虑 state/feedback channel，不默认走 throttle
-- [2026-04-16] A2 的最新 narrowing 结论：
+- [2026-04-17] A2 的最新 narrowing 结论：
   - 可用 target 不是 collective throttle-floor，也不是 `mean(actuator_1..4)`
   - 当前最稳 target 是 `GUIDED_NOGPS + pair_imbalance_12_vs_34`
   - dominant direction 固定为 `12_gt_34`
@@ -221,19 +251,32 @@
   - `src/linearity_analysis/linearity_analysis/ardupilot_a2_boundary_readiness.py`
   - `src/linearity_analysis/linearity_analysis/ardupilot_a2_target_scout.py`
   - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_readiness.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_guided_nogps_pair_pipeline.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_algorithm_evaluation.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_live_evaluation.py`
+  - `src/linearity_analysis/linearity_analysis/ardupilot_a2_pair_target_live_campaign.py`
 - 新增 A1 narrowing analysis：
   - `src/linearity_analysis/linearity_analysis/px4_a1_target_scout.py`
   - `src/linearity_analysis/linearity_analysis/px4_a1_family_readiness.py`
   - `src/linearity_analysis/linearity_analysis/px4_a1_roll_pitch_targeted_reproduction.py`
 - 新增最新 decisive narrowing artifacts：
-  - `artifacts/studies/20260416_003634_371133_ardupilot_a2_pair_target_readiness`
+  - `artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+  - `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
   - `artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction`
 - 新增统一决策层：
   - `src/linearity_analysis/linearity_analysis/next_phase_decision_layer.py`
   - `scripts/analyze_formal_v2_next_phase_decision.py`
   - `scripts/run_formal_v2_next_phase_decision.sh`
   - `docs/NEXT_PHASE_DECISION_LAYER.md`
-  - `artifacts/studies/20260416_064841_formal_v2_next_phase_decision_layer`
+  - `artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer`
+- 新增 A2 算法规格与评估协议：
+  - `docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md`
+  - `docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md`
+- 新增 A2 主线 runtime 收尾：
+  - `GUIDED_NOGPS` / A2 pipeline 默认 headless
+  - `quality_alignment_p95_exceeded` 的 `bin_*` 对齐判读改为同一时间基
+  - `heartbeat` 不再参与 alignment 主告警
+  - teardown 阶段显式关闭 autoreconnect，避免 `Connection refused sleeping` 噪声
 
 ## 常用命令
 
@@ -276,8 +319,12 @@ targeted line 局部入口：
 next-phase narrowing 入口：
 
 ```bash
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh
 /home/car/autopilot_lab/scripts/run_ardupilot_a2_target_scout.sh
 /home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_evaluation.sh
+/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_campaign.sh
 /home/car/autopilot_lab/scripts/run_px4_a1_target_scout.sh
 /home/car/autopilot_lab/scripts/run_px4_a1_attitude_family_readiness.sh
 /home/car/autopilot_lab/scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh
