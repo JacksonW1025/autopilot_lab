@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-export AUTOPILOT_LAB_ROOT="${AUTOPILOT_LAB_ROOT:-/home/car/autopilot_lab}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_AUTOPILOT_LAB_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+export AUTOPILOT_LAB_ROOT="${AUTOPILOT_LAB_ROOT:-${DEFAULT_AUTOPILOT_LAB_ROOT}}"
 export PX4_ROOT="${PX4_ROOT:-/home/car/PX4-Autopilot}"
 export ARDUPILOT_ROOT="${ARDUPILOT_ROOT:-/home/car/ardupilot}"
 

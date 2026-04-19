@@ -8,7 +8,15 @@ def _path_from_env(name: str, default: str) -> Path:
     return Path(os.environ.get(name, default)).expanduser()
 
 
-WORKSPACE_ROOT = _path_from_env("AUTOPILOT_LAB_ROOT", "/home/car/autopilot_lab")
+def _discover_workspace_root() -> Path:
+    current = Path(__file__).resolve()
+    for candidate in (current.parent, *current.parents):
+        if (candidate / "configs" / "studies").exists() and (candidate / "scripts" / "autopilot_lab_env.sh").exists():
+            return candidate
+    return Path("/home/car/autopilot_lab")
+
+
+WORKSPACE_ROOT = _path_from_env("AUTOPILOT_LAB_ROOT", str(_discover_workspace_root()))
 PX4_ROOT = _path_from_env("PX4_ROOT", "/home/car/PX4-Autopilot")
 ARDUPILOT_ROOT = _path_from_env("ARDUPILOT_ROOT", "/home/car/ardupilot")
 

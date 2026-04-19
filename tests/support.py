@@ -89,6 +89,8 @@ def write_a2_target_run(
     anomalies: list[str] | None = None,
     study_name_prefix: str = "ardupilot_a2_guided_pair_target",
     config_profile_prefix: str = "ardupilot_a2_guided_pair_target",
+    custom_input_rows: list[dict[str, object]] | None = None,
+    custom_rcou_rows: list[dict[str, object]] | None = None,
 ) -> None:
     telemetry_dir = run_dir / "telemetry"
     telemetry_dir.mkdir(parents=True, exist_ok=True)
@@ -96,19 +98,22 @@ def write_a2_target_run(
     anomalies = list(anomalies or [])
     baseline_command = 0.55 if scenario == "nominal" else 0.60
     active_command = baseline_command + 0.02
-    input_rows = [
-        {"publish_time_ns": 1_000_000_000, "command_throttle": baseline_command, "phase": "stabilize"},
-        {"publish_time_ns": 1_100_000_000, "command_throttle": baseline_command, "phase": "stabilize"},
-        {"publish_time_ns": 1_200_000_000, "command_throttle": baseline_command, "phase": "stabilize"},
-        {"publish_time_ns": 1_300_000_000, "command_throttle": active_command, "phase": "pulse_active"},
-        {"publish_time_ns": 1_400_000_000, "command_throttle": active_command, "phase": "pulse_active"},
-        {"publish_time_ns": 1_500_000_000, "command_throttle": baseline_command, "phase": "pulse_gap"},
-        {"publish_time_ns": 1_600_000_000, "command_throttle": baseline_command, "phase": "pulse_gap"},
-        {"publish_time_ns": 1_700_000_000, "command_throttle": active_command, "phase": "pulse_active"},
-        {"publish_time_ns": 1_800_000_000, "command_throttle": active_command, "phase": "pulse_active"},
-        {"publish_time_ns": 1_900_000_000, "command_throttle": baseline_command, "phase": "recover"},
-        {"publish_time_ns": 2_000_000_000, "command_throttle": baseline_command, "phase": "recover"},
-    ]
+    input_rows = list(
+        custom_input_rows
+        or [
+            {"publish_time_ns": 1_000_000_000, "command_throttle": baseline_command, "phase": "stabilize"},
+            {"publish_time_ns": 1_100_000_000, "command_throttle": baseline_command, "phase": "stabilize"},
+            {"publish_time_ns": 1_200_000_000, "command_throttle": baseline_command, "phase": "stabilize"},
+            {"publish_time_ns": 1_300_000_000, "command_throttle": active_command, "phase": "pulse_active"},
+            {"publish_time_ns": 1_400_000_000, "command_throttle": active_command, "phase": "pulse_active"},
+            {"publish_time_ns": 1_500_000_000, "command_throttle": baseline_command, "phase": "pulse_gap"},
+            {"publish_time_ns": 1_600_000_000, "command_throttle": baseline_command, "phase": "pulse_gap"},
+            {"publish_time_ns": 1_700_000_000, "command_throttle": active_command, "phase": "pulse_active"},
+            {"publish_time_ns": 1_800_000_000, "command_throttle": active_command, "phase": "pulse_active"},
+            {"publish_time_ns": 1_900_000_000, "command_throttle": baseline_command, "phase": "recover"},
+            {"publish_time_ns": 2_000_000_000, "command_throttle": baseline_command, "phase": "recover"},
+        ]
+    )
     write_csv_rows(
         telemetry_dir / "input_trace.csv",
         [
@@ -143,35 +148,35 @@ def write_a2_target_run(
             "phase",
         ],
     )
-    relative_times = [
-        4_000_000_000,
-        4_100_000_000,
-        4_200_000_000,
-        4_300_000_000,
-        4_400_000_000,
-        4_500_000_000,
-        4_600_000_000,
-        4_700_000_000,
-        4_800_000_000,
-        4_900_000_000,
-        5_000_000_000,
-    ]
-    pwm_vectors = [
-        baseline_pwm,
-        baseline_pwm,
-        baseline_pwm,
-        active_pwm,
-        active_pwm,
-        baseline_pwm,
-        baseline_pwm,
-        active_pwm,
-        active_pwm,
-        baseline_pwm,
-        baseline_pwm,
-    ]
-    write_csv_rows(
-        telemetry_dir / "bin_rcou.csv",
-        [
+    rcou_rows = list(custom_rcou_rows or [])
+    if not rcou_rows:
+        relative_times = [
+            4_000_000_000,
+            4_100_000_000,
+            4_200_000_000,
+            4_300_000_000,
+            4_400_000_000,
+            4_500_000_000,
+            4_600_000_000,
+            4_700_000_000,
+            4_800_000_000,
+            4_900_000_000,
+            5_000_000_000,
+        ]
+        pwm_vectors = [
+            baseline_pwm,
+            baseline_pwm,
+            baseline_pwm,
+            active_pwm,
+            active_pwm,
+            baseline_pwm,
+            baseline_pwm,
+            active_pwm,
+            active_pwm,
+            baseline_pwm,
+            baseline_pwm,
+        ]
+        rcou_rows = [
             {
                 "received_time_ns": received_time_ns,
                 "c1": vector[0],
@@ -184,7 +189,10 @@ def write_a2_target_run(
                 "c8": 0,
             }
             for received_time_ns, vector in zip(relative_times, pwm_vectors, strict=True)
-        ],
+        ]
+    write_csv_rows(
+        telemetry_dir / "bin_rcou.csv",
+        rcou_rows,
         fieldnames=["received_time_ns", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"],
     )
     write_csv_rows(

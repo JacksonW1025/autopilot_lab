@@ -1,326 +1,134 @@
 # autopilot_lab
 
-`autopilot_lab` 是一个面向无人机输入到响应关系研究的实验仓库。当前正式主线仍是 `Formal V2`，但仓库状态已经不只停留在 milestone summary；截至 `2026-04-17`，基于当前 repo artifact 的 insight-phase 分析和后续 narrowing studies 都已经落盘，并至少覆盖：
+`autopilot_lab` 是一个围绕无人机输入到响应关系的研究仓库。仓库当前只保留一条中心叙事：
 
-- [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
-- [20260414_064153_formal_v2_anchor_deep_dive](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive)
-- [20260414_064902_formal_v2_in_depth_analysis](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis)
-- [20260417_001924_151397_ardupilot_a2_target_scout](/home/car/autopilot_lab/artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout)
-- [20260417_001925_356349_ardupilot_a2_pair_target_readiness](/home/car/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness)
-- [20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction)
-- [20260417_001929_formal_v2_next_phase_decision_layer](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer)
+`sparsity hypothesis -> empirical validation -> in-depth analysis -> novel attack algorithm -> evaluation`
 
-Formal V2 的基本问题仍然是：
+这里的核心对象是矩阵 `f`。项目把它看作输入到响应的稀疏导数矩阵，并围绕这张矩阵回答两个问题：
 
-> 在统一的 `X / Y schema` 口径下，验证 PX4 与 ArduPilot 是否都存在稳定、可解释的全局线性或仿射映射 `Y ≈ fX (+ b)`；并进一步检查它是否能跨 `nominal / dynamic / throttle_biased` 三档 scenario 成立，以及 ArduPilot 的 mode-isolated state-evolution 能否形成成熟结论。
+1. 这类固定线性映射是否真实存在。
+2. 这类映射里哪些稀疏结构足够稳定，能够支撑后续攻击算法。
 
-这里的重点不是比较两种飞控“谁更强”，而是回答三件事：
+## 当前仓库保留了什么
 
-1. 线性关系 `f` 本身是否成立。
-2. 它在多种 scenario 下是否还能站得住。
-3. ArduPilot 的 state-evolution 在不混 mode 时，是否已经形成成熟正结论或成熟负结论。
+仓库当前只保留三类内容：
 
-## 当前故事阶段
+- 能直接证明 stage 1 和 stage 2 结论的 study artifact
+- 能把 stage 2 insight 推进到 A2 算法与评估的脚本和源码
+- 能帮助快速进入项目状态的三份总结文档
 
-把当前仓库按 `sparsity hypothesis -> empirical validation -> insight -> attack algorithm -> evaluation` 这条故事读，可以压缩成：
+当前阅读入口：
 
-- `1. theory / hypothesis`：已完成
-- `2. empirical validation`：已完成
-- `3. in-depth analysis / insight`：已完成
-- `4. attack algorithm`
-  - A2 子线：已进入 `algorithm spec + offline/live evaluation + live campaign`
-  - A1 子线：还停在 targeted reproduction，不是 attack-ready line
-- `5. evaluation`：尚未开始
+1. [docs/STAGE1_SUMMARY.md](docs/STAGE1_SUMMARY.md)
+2. [docs/STAGE2_SUMMARY.md](docs/STAGE2_SUMMARY.md)
+3. [docs/REMATCH.md](docs/REMATCH.md)
 
-## 当前 live priorities
+## 五个阶段现在分别做了什么
 
-- 主线：A2 `GUIDED_NOGPS + pair_imbalance_12_vs_34`
-  - 当前 decision layer 已经把它锁成 default entry
-  - 当前先走 `pair_target_readiness -> algorithm_evaluation -> live_evaluation -> live_campaign`
-- 对照线：A1 `future_state_roll / future_state_pitch`
-  - 保持为 reproducible continuation / contrast line，不升格成主攻击入口
-- 当前 route-selection 入口：
-  - [next_phase_decision_layer.md](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer/reports/next_phase_decision_layer.md)
+### 1. Sparsity Hypothesis
 
-## 已完成 / 不再作为 live TODO
+项目的理论起点是：`f` 不是任意稠密矩阵，真正有解释力的结构会表现为稀疏、稳定、低维的导数模式。这个假设决定了后续所有实验的判读方式。
 
-- `NEXT.md` 里的 intervention-readiness / next-phase decision layer 构建任务已经完成，不应继续当作当前待办。
-- broad validation 扩展不是当前优先级；当前不建议回头再开更宽的 generalized-combo 搜索。
-- A2 的 collective throttle-boundary / collective actuator boundary 线已经正式排除。
+### 2. Empirical Validation
 
-## 当前正式结果
+这一阶段使用 PX4 与 ArduPilot 两套 backend，在统一 `X/Y` 口径下验证固定线性映射是否存在，并检查它是否能跨 `nominal / dynamic / throttle_biased` 三种场景成立。当前保留的主证据是四个 generalization study。
 
-当前 canonical Formal V2 artifact 是：
+### 3. In-Depth Analysis
 
-- compare artifact: [20260413_134755_px4_vs_ardupilot_compare](/home/car/autopilot_lab/artifacts/studies/20260413_134755_px4_vs_ardupilot_compare)
-- PX4 full baseline: [20260410_224818_px4_real_generalization_ablation](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation)
-- PX4 full diagnostic: [20260411_021910_px4_generalization_diagnostic_matrix](/home/car/autopilot_lab/artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix)
-- ArduPilot full baseline: [20260413_070802_ardupilot_real_generalization_ablation](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation)
-- ArduPilot full diagnostic: [20260413_091420_ardupilot_generalization_diagnostic_matrix](/home/car/autopilot_lab/artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix)
-- ArduPilot targeted validation: [20260413_134505_ardupilot_state_evolution_validation](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation)
-- latest insight memo: [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
-- latest insight aggregate: [20260414_064153_formal_v2_anchor_deep_dive](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive), [20260414_064902_formal_v2_in_depth_analysis](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis)
-- latest decision layer: [20260417_001929_formal_v2_next_phase_decision_layer](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer)
-- A2 narrowing chain:
-  - target scout: [20260417_001924_151397_ardupilot_a2_target_scout](/home/car/autopilot_lab/artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout)
-  - pair-target readiness: [20260417_001925_356349_ardupilot_a2_pair_target_readiness](/home/car/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness)
-  - algorithm spec: [A2_PAIR_TARGET_ALGORITHM_SPEC.md](docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md)
-  - evaluation protocol: [A2_PAIR_TARGET_EVALUATION_PROTOCOL.md](docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md)
-  - live protocol: [A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md](docs/A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md)
-  - campaign plan: [A2_PAIR_TARGET_CAMPAIGN_PLAN.md](docs/A2_PAIR_TARGET_CAMPAIGN_PLAN.md)
-  - live runner: [run_ardupilot_a2_pair_target_live_evaluation.sh](/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_evaluation.sh)
-  - live campaign: [run_ardupilot_a2_pair_target_live_campaign.sh](/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_campaign.sh)
-- A1 narrowing chain:
-  - target scout: [20260416_005450_652002_px4_a1_target_scout](/home/car/autopilot_lab/artifacts/studies/20260416_005450_652002_px4_a1_target_scout)
-  - family readiness: [20260416_005450_658923_px4_a1_family_readiness](/home/car/autopilot_lab/artifacts/studies/20260416_005450_658923_px4_a1_family_readiness)
-  - targeted reproduction: [20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction)
-- `2026-04-17` real A2 end-to-end refresh:
-  - `GUIDED_NOGPS` smoke passed
-  - 主 capture 的 6 个固定配置全部达到 `5/5 accepted`
-  - A2 target scout 继续锁定 `pair_imbalance_12_vs_34`
-  - A2 pair readiness 继续保持 `ready_for_pair_attack_v1=yes`
-  - decision layer 继续给出 `default_entry=A2`
+这一阶段不再停留在“能拟合”，而是继续追问“什么结构可信，什么结构只是高分假象”。当前保留的主证据是 mode-isolated state-evolution study、anchor deep dive 和 in-depth synthesis。
 
-当前最简明的结论是：
+### 4. Novel Attack Algorithm
 
-- 线性关系 `Y ≈ fX (+ b)` 已经可以作为正面结论正式汇报。
-- 两个 backend 都出现了跨 scenario 的 `generalized_supported` 组合。
-- PX4 的 generalized-supported 证据更宽，ArduPilot 的正式证据更窄但真实存在。
-- ArduPilot 的 mode-isolated targeted line 已经形成正式 artifact，但 `overall_status=mode_isolated_state_evolution_still_inconclusive`。
-- compare 当前仍然是 `baseline_stability_unresolved`，所以 backend 差异仍然不是主标题。
-- next-phase decision layer 已把当前 route selection 收束成：
-  - `A2=default entry`
-  - `A1=hard mode / backup line`
-  - `B1=contrast only`
-  - `C1/D1/D2=boundary or pathology evidence`
+这一阶段把 stage 2 的结构结论收敛成一个可执行的攻击目标。当前仓库保留的是 A2 主线，目标已经锁定为：
 
-如果只看当前 repo-state 下最重要的 insight 和 narrowing 结果，可以再压缩成下面 8 条：
+- `GUIDED_NOGPS`
+- `pair_imbalance_12_vs_34`
+- `12_gt_34`
 
-- PX4 当前最可靠的 generalized-supported 结构不是 command-only，而是 state-dominated 的短时传播结构；stable-core=`80`。
-- ArduPilot 当前最可靠的 generalized-supported 结构是 `commands_only` 主导的低维 direct-control path；stable-core=`12`。
-- ArduPilot 最适合作为后续 attack principal anchor 的是 `commands_only -> actuator_response`，尤其是 `command_throttle -> actuator_1~4`。
-- `commands_plus_state_history -> selected_state_subset` 一类高分路径不是没结构，而是被 conditioning / mask-collapse / raw-collapse 卡住，因此目前仍不能当正式主攻击基础。
-- backend-shared 的是语义输出家族，不是 support pattern 本身；shared alignment key=`9`，但 top-edge overlap 平均接近 `0`。
-- 当前已经足够支持的 design principle 是：低维优先、稳定非空 support 优先、direct-control path 优先、高分病态路径降权；PX4 若继续推进，更应考虑 state/feedback channel。
-- A2 的 collective throttle-boundary 线已经被正式排除；当前真正可用的 target 是 `GUIDED_NOGPS + pair_imbalance_12_vs_34`，并且 `ready_for_pair_attack_v1=yes`。
-- A1 当前最稳的 continuation 线已经被压缩成 `future_state_roll / future_state_pitch`；它适合作为 targeted reproduction / contrast line，而不是当前主攻击线。
+### 5. Evaluation
 
-## 建议阅读顺序
+这一阶段对 A2 做 bounded repeatability 与 live evaluation。当前保留的结论是：full-window baseline 被排除，penultimate-window confirm protocol 形成了受边界约束的正面执行证据，widened pulse family 仍然处于边界之外。
 
-如果你是第一次进仓库，按这个顺序读：
+## 当前结论的最短版本
 
-1. [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
-2. [MILESTONE_LINEAR_F_REPORT.md](docs/MILESTONE_LINEAR_F_REPORT.md)
-3. [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
-4. [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
-5. [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
-6. [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
-7. [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
-8. [docs/figures/heatmaps/README.md](docs/figures/heatmaps/README.md)
+- `Y ≈ fX (+ b)` 已经得到正面 empirical validation。
+- PX4 的稳定结构偏向 state-dominated 的短时传播。
+- ArduPilot 的稳定结构偏向 commands-only 的低维 direct-control。
+- A2 是当前最适合继续推进的攻击主线。
+- 当前 evaluation claim 只覆盖经过审查的 penultimate-window confirm protocol。
 
-如果要直接看最新正式 artifact，建议从这里开始：
-
-1. [FORMAL_V2_INSIGHT_PHASE_MEMO.md](docs/FORMAL_V2_INSIGHT_PHASE_MEMO.md)
-2. [backend_compare.md](/home/car/autopilot_lab/artifacts/studies/20260413_134755_px4_vs_ardupilot_compare/reports/backend_compare.md)
-3. [state_evolution_validation.md](/home/car/autopilot_lab/artifacts/studies/20260413_134505_ardupilot_state_evolution_validation/reports/state_evolution_validation.md)
-4. [anchor_deep_dive.json](/home/car/autopilot_lab/artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive/summary/anchor_deep_dive.json)
-5. [in_depth_analysis.json](/home/car/autopilot_lab/artifacts/studies/20260414_064902_formal_v2_in_depth_analysis/summary/in_depth_analysis.json)
-6. [a2_target_scout.md](/home/car/autopilot_lab/artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout/reports/a2_target_scout.md)
-7. [a2_pair_target_readiness.md](/home/car/autopilot_lab/artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness/reports/a2_pair_target_readiness.md)
-8. [A2_PAIR_TARGET_ALGORITHM_SPEC.md](docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md)
-9. [A2_PAIR_TARGET_EVALUATION_PROTOCOL.md](docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md)
-10. [a1_roll_pitch_targeted_reproduction.md](/home/car/autopilot_lab/artifacts/studies/20260416_010626_381143_px4_a1_roll_pitch_targeted_reproduction/reports/a1_roll_pitch_targeted_reproduction.md)
-11. [next_phase_decision_layer.md](/home/car/autopilot_lab/artifacts/studies/20260417_001929_formal_v2_next_phase_decision_layer/reports/next_phase_decision_layer.md)
-12. [PX4 scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260410_224818_px4_real_generalization_ablation/reports/scenario_generalization.md)
-13. [ArduPilot scenario_generalization.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/scenario_generalization.md)
-14. [ArduPilot sparsity_overlap.md](/home/car/autopilot_lab/artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation/reports/sparsity_overlap.md)
-
-## 当前研究口径
-
-- 正式实验线：
-  - `generalization full`：回答“线性关系是否存在，以及它是否能跨 scenario 成立”
-  - `ArduPilot targeted state-evolution validation`：回答“state-evolution 在不混 mode 时是否形成成熟正/负结论”
-- 正式 backend：`px4`、`ardupilot`
-- 正式 scenario：`nominal`、`dynamic`、`throttle_biased`
-- 正式 baseline mode：
-  - PX4: `POSCTL`、`OFFBOARD_ATTITUDE`
-  - ArduPilot: `STABILIZE`、`GUIDED_NOGPS`
-- generalization full analysis matrix：
-  - `x_schemas`: `commands_only`, `commands_plus_state`, `commands_plus_state_history`, `full_augmented`, `pooled_backend_mode_augmented`, `feature_mapped_linear`
-  - `y_schemas`: `next_raw_state`, `delta_state`, `selected_state_subset`, `future_state_horizon`, `actuator_response`, `window_summary_response`
-  - `models`: `ols_affine`, `ridge_affine`, `lasso_affine`
-  - `pooling_modes`: `pooled`, `stratified`
-- ArduPilot targeted line 只分析：
-  - `x_schemas`: `commands_plus_state_history`, `full_augmented`
-  - `y_schemas`: `next_raw_state`, `selected_state_subset`
-  - `models`: `ols_affine`, `ridge_affine`, `lasso_affine`
-  - `pooling_mode`: `pooled`
-
-## 仓库结构
+## 目录结构
 
 ```text
 autopilot_lab/
+├── AGENT.md
+├── README.md
 ├── artifacts/
-│   ├── raw/
-│   ├── px4_matrix/
-│   ├── ardupilot_matrix/
 │   └── studies/
 ├── configs/
-│   ├── ablations/
-│   └── studies/
 ├── docs/
+│   ├── STAGE1_SUMMARY.md
+│   ├── STAGE2_SUMMARY.md
+│   └── REMATCH.md
 ├── scripts/
-├── lab.lock.json
-└── src/
-    ├── linearity_core/
-    ├── linearity_analysis/
-    ├── linearity_study/
-    ├── px4_ros2_backend/
-    ├── ardupilot_mavlink_backend/
-    ├── px4_msgs/
-    └── px4_ros_com/
+├── src/
+└── tests/
 ```
 
-## Artifact 保留策略
+目录说明：
 
-- 远端 Git 只保留 current latest Formal V2 的 `artifacts/studies/**` 与正式文档。
-- `artifacts/raw/**` 继续作为本地实验产物存在，用于复现、审计和排查问题，但不再作为远端仓库的长期跟踪内容。
-- `artifacts/px4_matrix/**` 与 `artifacts/ardupilot_matrix/**` 属于临时 matrix 目录，不进入 current canonical remote 集合。
+- `artifacts/studies/`：正式证据目录。每个 study 都是一个可直接引用的阶段证据。
+- `configs/`：实验与分析配置。
+- `scripts/`：正式实验入口。
+- `src/`：拟合、分析、backend runner 和 A2 评估逻辑。
+- `tests/`：保留后的最小回归集。
 
-## 环境入口
+## 推荐阅读顺序
 
-加载环境：
+如果只想快速理解仓库状态，按下面顺序阅读：
 
-```bash
-source /home/car/autopilot_lab/scripts/autopilot_lab_env.sh
-```
+1. [docs/STAGE1_SUMMARY.md](docs/STAGE1_SUMMARY.md)
+2. [docs/STAGE2_SUMMARY.md](docs/STAGE2_SUMMARY.md)
+3. [docs/REMATCH.md](docs/REMATCH.md)
 
-环境准备：
+如果要直接看 artifact：
 
-```bash
-/home/car/autopilot_lab/scripts/bootstrap_lab.sh
-```
+1. `artifacts/studies/20260410_224818_px4_real_generalization_ablation`
+2. `artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix`
+3. `artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation`
+4. `artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix`
+5. `artifacts/studies/20260413_134505_ardupilot_state_evolution_validation`
+6. `artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive`
+7. `artifacts/studies/20260414_064902_formal_v2_in_depth_analysis`
+8. `artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
+9. `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
+10. `artifacts/studies/20260417_122519_536215_ardupilot_a2_pair_target_bounded_repeatability_campaign`
+11. `artifacts/studies/20260417_122644_564567_ardupilot_a2_pair_target_bounded_repeatability_campaign`
+12. `artifacts/studies/20260417_122621_661226_ardupilot_a2_pair_target_live_evaluation`
+13. `artifacts/studies/20260417_122622_852971_ardupilot_a2_pair_target_live_evaluation`
+14. `artifacts/studies/20260417_122623_985857_ardupilot_a2_pair_target_live_evaluation`
+15. `artifacts/studies/20260417_122625_153113_ardupilot_a2_pair_target_live_evaluation`
+16. `artifacts/studies/20260417_122626_326415_ardupilot_a2_pair_target_live_evaluation`
+17. `artifacts/studies/20260417_122627_505610_ardupilot_a2_pair_target_live_evaluation`
 
-环境体检：
+## 正式入口
 
-```bash
-/home/car/autopilot_lab/scripts/doctor_lab.sh
-```
+Stage 1:
 
-最小回归：
+- `scripts/run_px4_generalization_full.sh`
+- `scripts/run_ardupilot_generalization_full.sh`
 
-```bash
-/home/car/autopilot_lab/scripts/ci_minimal.sh
-```
+Stage 2:
 
-## 当前正式实验入口
+- `scripts/run_ardupilot_state_evolution_validation_full.sh`
+- `scripts/analyze_anchor_deep_dive.py`
+- `scripts/analyze_formal_v2_in_depth.py`
 
-当前推荐入口已经切到 Formal V2：
+A2:
 
-```bash
-/home/car/autopilot_lab/scripts/run_px4_generalization_full.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_generalization_full.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_state_evolution_validation_full.sh
-/home/car/autopilot_lab/scripts/run_formal_v2_ardupilot_refresh.sh
-```
-
-如果只想跑 targeted line 的某一段：
-
-```bash
-/home/car/autopilot_lab/scripts/run_ardupilot_state_evolution_baseline.sh --mode stabilize
-/home/car/autopilot_lab/scripts/run_ardupilot_state_evolution_diagnostic.sh --mode stabilize
-/home/car/autopilot_lab/scripts/run_ardupilot_state_evolution_baseline.sh --mode guided_nogps
-/home/car/autopilot_lab/scripts/run_ardupilot_state_evolution_diagnostic.sh --mode guided_nogps
-```
-
-如果要直接复现 next-phase narrowing study：
-
-```bash
-/home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_pipeline.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_a2_target_scout.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_evaluation.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_a2_pair_target_live_campaign.sh
-/home/car/autopilot_lab/scripts/run_px4_a1_target_scout.sh
-/home/car/autopilot_lab/scripts/run_px4_a1_attitude_family_readiness.sh
-/home/car/autopilot_lab/scripts/run_px4_a1_roll_pitch_targeted_reproduction.sh
-/home/car/autopilot_lab/scripts/run_formal_v2_next_phase_decision.sh
-```
-
-支持性和历史阶段入口仍保留，但不再进入当前正式口径：
-
-```bash
-/home/car/autopilot_lab/scripts/run_px4_visual_demos.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_visual_demos.sh --include-guided-nogps
-/home/car/autopilot_lab/scripts/run_ardupilot_guided_nogps_smoke.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_stabilize_partial_baseline.sh
-/home/car/autopilot_lab/scripts/run_ardupilot_stabilize_throttle_diagnostic.sh
-/home/car/autopilot_lab/scripts/run_cross_backend_contract_audit.sh --px4-run <accepted_px4_raw_dir> --ardupilot-run <accepted_ardupilot_raw_dir>
-```
-
-## Study 产物
-
-每个 current generalization full / targeted study 至少包含：
-
-- `prepared/sample_table.csv`
-- `prepared/schema_inventory.yaml`
-- `fits/<combo>/<model>/matrix_f.csv`
-- `fits/<combo>/<model>/bias_b.csv`
-- `fits/<combo>/<model>/sparsity_mask.csv`
-- `fits/<combo>/<model>/metrics.json`
-- `reports/summary.md`
-- `reports/schema_comparison.md`
-- `reports/baseline_stability.md`
-- `reports/diagnostic_gate.md`
-- `reports/matrix_gallery.md`
-- `reports/scenario_generalization.md`
-- `reports/sparsity_overlap.md`
-- `summary/study_summary.json`
-- `summary/baseline_stability.json`
-- `summary/diagnostic_gate.json`
-- `summary/matrix_gallery.json`
-- `summary/scenario_generalization.json`
-- `summary/sparsity_overlap.json`
-
-ArduPilot targeted study 额外包含：
-
-- `reports/state_evolution_audit.md`
-- `summary/state_evolution_audit.json`
-
-ArduPilot targeted aggregate 额外包含：
-
-- `reports/state_evolution_validation.md`
-- `summary/state_evolution_validation.json`
-
-当某个组合被判为 `supported` 时，还会自动生成：
-
-- `fits/<combo>/<model>/matrix_heatmap_abs.png`
-- `fits/<combo>/<model>/matrix_heatmap_signed.png`
-
-## 文档
-
-- [MILESTONE_LINEAR_F_REPORT.md](docs/MILESTONE_LINEAR_F_REPORT.md)
-- [MILESTONE_LINEAR_F_APPENDIX.md](docs/MILESTONE_LINEAR_F_APPENDIX.md)
-- [RESEARCH_GOAL.md](docs/RESEARCH_GOAL.md)
-- [EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md)
-- [A2_PAIR_TARGET_ALGORITHM_SPEC.md](docs/A2_PAIR_TARGET_ALGORITHM_SPEC.md)
-- [A2_PAIR_TARGET_EVALUATION_PROTOCOL.md](docs/A2_PAIR_TARGET_EVALUATION_PROTOCOL.md)
-- [A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md](docs/A2_PAIR_TARGET_LIVE_PROTOCOL_V1.md)
-- [A2_PAIR_TARGET_CAMPAIGN_PLAN.md](docs/A2_PAIR_TARGET_CAMPAIGN_PLAN.md)
-- [DATA_SCHEMA.md](docs/DATA_SCHEMA.md)
-- [NEXT_PHASE_DECISION_LAYER.md](docs/NEXT_PHASE_DECISION_LAYER.md)
-- [XY_SCHEMA_GUIDE.md](docs/XY_SCHEMA_GUIDE.md)
-- [docs/figures/heatmaps/README.md](docs/figures/heatmaps/README.md)
-
-当前里程碑汇报和附录只以 latest Formal V2 artifact 为准。`20260409` broad baseline、旧 ArduPilot full studies 和旧 compare 已经移出当前正式引用集。
-
-## 当前建议
-
-- 如果你要推进主线实现，优先做 A2：
-  - `ArduPilot / GUIDED_NOGPS / pair_imbalance_12_vs_34`
-  - 当前先过 `run_ardupilot_a2_pair_target_algorithm_evaluation.sh`，再用 `run_ardupilot_a2_pair_target_live_evaluation.sh` 和 `run_ardupilot_a2_pair_target_live_campaign.sh` 做 live evidence gate
-- 如果你要补强论文叙事和对照线，优先读 A1：
-  - `PX4 A1 / future_state_roll + future_state_pitch`
-- 当前不建议再回头扩 broad analysis；最有价值的新增工作已经从“找更多 generalized combo”变成“把已选中的窄 target 变成可执行算法或复现实验”
-- 如果你只是要判断“现在先做什么”，不要再从 `NEXT.md` 开始，直接看 decision layer 报告
+- `scripts/run_ardupilot_a2_target_scout.sh`
+- `scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh`
+- `scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh`
+- `scripts/run_ardupilot_a2_pair_target_bounded_repeatability_campaign.sh`
+- `scripts/run_ardupilot_a2_pair_target_live_evaluation.sh`
+- `scripts/run_ardupilot_a2_pair_target_live_campaign.sh`

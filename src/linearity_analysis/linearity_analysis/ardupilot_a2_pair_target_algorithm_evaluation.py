@@ -11,6 +11,15 @@ from linearity_core.io import ensure_study_directories, read_rows_csv, read_yaml
 
 import linearity_analysis.ardupilot_a2_pair_target_readiness as pair_readiness
 import linearity_analysis.ardupilot_a2_target_scout as target_scout
+from linearity_analysis.family_method_contract import (
+    ROLE_EXECUTION_FAMILY,
+    STAGE_STATUS_FAILED,
+    STAGE_STATUS_NOT_RUN,
+    STAGE_STATUS_PASSED,
+    attach_family_method_contract,
+    claim_scope,
+    stage_result,
+)
 
 STUDY_NAME = "ardupilot_a2_pair_target_algorithm_evaluation"
 TARGET_MODE = "GUIDED_NOGPS"
@@ -669,6 +678,56 @@ def run_ardupilot_a2_pair_target_algorithm_evaluation(
     }
 
     paths = _output_paths(output_root.expanduser().resolve() if output_root else None)
+    payload = attach_family_method_contract(
+        payload,
+        family_id="A2",
+        backend="ardupilot",
+        combo_signature="commands_only | actuator_response | ridge_affine | pooled",
+        mechanism_family="direct_control",
+        role=ROLE_EXECUTION_FAMILY,
+        stage_results={
+            "scout": stage_result(
+                status=STAGE_STATUS_PASSED,
+                artifact_dir=str(target_scout_dir),
+                summary_path=pair_readiness._relative_workspace_path(target_scout_dir / "summary" / "a2_target_scout.json"),
+                report_path=pair_readiness._relative_workspace_path(target_scout_dir / "reports" / "a2_target_scout.md"),
+                recommended_next_step=TARGET_READY_STEP,
+            ),
+            "readiness": stage_result(
+                status=STAGE_STATUS_PASSED,
+                artifact_dir=str(pair_target_dir),
+                summary_path=pair_readiness._relative_workspace_path(pair_target_dir / "summary" / "a2_pair_target_readiness.json"),
+                report_path=pair_readiness._relative_workspace_path(pair_target_dir / "reports" / "a2_pair_target_readiness.md"),
+                recommended_next_step=PAIR_READY_PATH,
+            ),
+            "algorithm_evaluation": stage_result(
+                status=STAGE_STATUS_PASSED if offline_ready_for_live_eval_v1 else STAGE_STATUS_FAILED,
+                artifact_dir=str(paths["base_dir"]),
+                summary_path=pair_readiness._relative_workspace_path(paths["summary_path"]),
+                report_path=pair_readiness._relative_workspace_path(paths["report_path"]),
+                recommended_next_step=recommended_next_step,
+                blocking_reasons=sorted(set(blocking_reasons)),
+            ),
+            "live_evaluation": stage_result(status=STAGE_STATUS_NOT_RUN),
+            "final_review": stage_result(status=STAGE_STATUS_NOT_RUN),
+        },
+        terminal_outcome="execution_family_offline_ready" if offline_ready_for_live_eval_v1 else "execution_family_algorithm_blocked",
+        recommended_next_step=recommended_next_step,
+        blocking_reasons=sorted(set(blocking_reasons)),
+        claim_scope_payload=claim_scope(
+            summary="A2 algorithm evaluation only upgrades A2 to offline-ready inside the canonical pulse-train family.",
+            allowed_claims=[
+                "A2 can advance from readiness into live evaluation when the canonical offline replay contract passes.",
+            ],
+            blocked_claims=[
+                "Offline replay proves live success.",
+                "The winning offline pulse family is already robust under arbitrary protocol widening.",
+            ],
+        ),
+        residuals=[
+            "A2 still requires live evaluation and final review for a live-backed claim.",
+        ],
+    )
     paths["report_path"].write_text(
         render_ardupilot_a2_pair_target_algorithm_evaluation_markdown(payload),
         encoding="utf-8",

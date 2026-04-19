@@ -96,6 +96,79 @@ def _build_live_matrix_dir(
     return matrix_dir
 
 
+def _build_spillover_matrix_dir(base_dir: Path, *, repeats_per_scenario: int = 5, tier: str = "probe") -> Path:
+    matrix_dir = base_dir / "matrix"
+    rows: list[dict[str, object]] = []
+    run_index = 0
+    baseline_command = 0.60
+    active_command = 0.70
+    input_rows: list[dict[str, object]] = []
+    publish_time_ns = 1_000_000_000
+    for _ in range(3):
+        input_rows.append({"publish_time_ns": publish_time_ns, "command_throttle": baseline_command, "phase": "stabilize"})
+        publish_time_ns += 100_000_000
+    for _pulse_index in range(5):
+        for _ in range(3):
+            input_rows.append({"publish_time_ns": publish_time_ns, "command_throttle": active_command, "phase": "pulse_active"})
+            publish_time_ns += 100_000_000
+        for _ in range(3):
+            input_rows.append({"publish_time_ns": publish_time_ns, "command_throttle": baseline_command, "phase": "pulse_gap"})
+            publish_time_ns += 100_000_000
+    for _ in range(2):
+        input_rows.append({"publish_time_ns": publish_time_ns, "command_throttle": baseline_command, "phase": "recover"})
+        publish_time_ns += 100_000_000
+
+    baseline_pwm = (1588, 1588, 1588, 1588)
+    active_pwm = (1550, 1550, 1350, 1350)
+    pwm_vectors = [baseline_pwm for _ in input_rows]
+    pulse_four_start = 3 + 3 * 6
+    for offset in (0, 1, 2):
+        pwm_vectors[pulse_four_start + offset] = active_pwm
+    for offset in (3, 4, 5):
+        pwm_vectors[pulse_four_start + offset] = active_pwm
+    rcou_rows = [
+        {
+            "received_time_ns": 4_000_000_000 + index * 100_000_000,
+            "c1": vector[0],
+            "c2": vector[1],
+            "c3": vector[2],
+            "c4": vector[3],
+            "c5": 0,
+            "c6": 0,
+            "c7": 0,
+            "c8": 0,
+        }
+        for index, vector in enumerate(pwm_vectors)
+    ]
+
+    for scenario in ("nominal", "throttle_biased"):
+        for repeat_index in range(1, repeats_per_scenario + 1):
+            run_dir = base_dir / "raw" / f"spillover_{scenario}_{repeat_index}"
+            write_a2_target_run(
+                run_dir,
+                run_id=f"spillover_{scenario}_{repeat_index}",
+                scenario=scenario,
+                tier=tier,
+                baseline_pwm=baseline_pwm,
+                active_pwm=active_pwm,
+                study_name_prefix="ardupilot_a2_pair_target_live_evaluation",
+                config_profile_prefix="ardupilot_a2_pair_target_live_evaluation",
+                custom_input_rows=input_rows,
+                custom_rcou_rows=rcou_rows,
+            )
+            rows.append(
+                build_runs_manifest_row(
+                    run_index,
+                    artifact_dir=run_dir,
+                    config_name=f"ardupilot_a2_pair_target_live_evaluation_{scenario}_{tier}.yaml",
+                    accepted_count_for_config=repeat_index,
+                )
+            )
+            run_index += 1
+    write_runs_manifest(matrix_dir / "runs.csv", rows)
+    return matrix_dir
+
+
 def _build_algorithm_eval_artifact(
     tmp_path: Path,
     *,
@@ -164,10 +237,12 @@ def test_live_evaluation_skip_capture_success(
     assert payload["matrix_dir"] == str(matrix_dir.resolve())
     assert payload["live_pair_target_success_v1"] == "true"
     assert summary["overall_decision"]["live_pair_target_success_v1"] is True
+    assert summary["overall_decision"]["phase_spillover_detected"] is False
     assert summary["overall_decision"]["recommended_next_step"] == "promote_live_artifact_for_review"
     assert (study_dir / "reports" / "a2_pair_target_live_evaluation.md").exists()
     assert (study_dir / "tables" / "scenario_live_matrix.csv").exists()
     assert (study_dir / "tables" / "run_level_live_metrics.csv").exists()
+    assert (study_dir / "tables" / "phase_pair_split_diagnostics.csv").exists()
     assert (study_dir / "tables" / "generated_schedule.csv").exists()
 
 
@@ -236,8 +311,121 @@ def test_live_evaluation_capture_regression_writes_failure_artifact(
     assert result["live_pair_target_success_v1"] is False
     assert summary["overall_decision"]["live_pair_target_success_v1"] is False
     assert summary["overall_decision"]["hard_regression_detected"] is True
+    assert summary["overall_decision"]["phase_spillover_detected"] is False
     assert summary["overall_decision"]["recommended_next_step"] == "fix_live_protocol_or_capture"
     assert any("scenario_direction_mismatch" in reason for reason in summary["blocking_reasons"])
+
+
+def test_live_evaluation_contract_refresh_upgrades_legacy_summary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target_dir, pair_dir, source_runs_manifest = _build_ready_artifacts(tmp_path, monkeypatch)
+    algorithm_eval_dir = _build_algorithm_eval_artifact(
+        tmp_path,
+        a2_target_scout_dir=target_dir,
+        a2_pair_target_dir=pair_dir,
+        runs_manifest=source_runs_manifest,
+    )
+    matrix_dir = _build_live_matrix_dir(
+        tmp_path / "legacy_capture",
+        baseline_pwm=(1588, 1588, 1588, 1588),
+        active_pwm=(1550, 1550, 1350, 1350),
+    )
+
+    legacy_result = live_eval.run_ardupilot_a2_pair_target_live_evaluation(
+        a2_target_scout_dir=target_dir,
+        a2_pair_target_dir=pair_dir,
+        a2_algorithm_eval_dir=algorithm_eval_dir,
+        skip_smoke=True,
+        skip_capture=True,
+        matrix_dir=matrix_dir,
+        output_root=tmp_path / "legacy_live_eval",
+    )
+    legacy_dir = Path(legacy_result["live_evaluation_dir"])
+
+    def _mutate_legacy(payload: dict[str, Any]) -> None:
+        for key in (
+            "family_id",
+            "backend",
+            "combo_signature",
+            "mechanism_family",
+            "role",
+            "stage_results",
+            "terminal_outcome",
+            "recommended_next_step",
+            "claim_scope",
+            "residuals",
+        ):
+            payload.pop(key, None)
+
+    _rewrite_summary(legacy_dir, "a2_pair_target_live_evaluation.json", _mutate_legacy)
+
+    refreshed = live_eval.run_ardupilot_a2_pair_target_live_evaluation_contract_refresh(
+        legacy_live_eval_dir=legacy_dir,
+        output_root=tmp_path / "refreshed_live_eval",
+    )
+    refreshed_dir = Path(refreshed["live_evaluation_dir"])
+    summary = json.loads((refreshed_dir / "summary" / "a2_pair_target_live_evaluation.json").read_text(encoding="utf-8"))
+
+    assert summary["family_id"] == "A2"
+    assert summary["role"] == "execution_family"
+    assert summary["terminal_outcome"] == "live_backed_execution_family"
+    assert summary["stage_results"]["live_evaluation"]["status"] == "passed"
+    assert summary["stage_results"]["final_review"]["status"] == "documented"
+    assert summary["source_artifacts"]["legacy_live_eval_dir"] == str(legacy_dir.resolve())
+    assert (refreshed_dir / "reports" / "a2_pair_target_live_evaluation.md").exists()
+    assert (refreshed_dir / "tables" / "scenario_live_matrix.csv").exists()
+
+
+def test_live_evaluation_penultimate_window_variant_recovers_phase_spillover(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target_dir, pair_dir, source_runs_manifest = _build_ready_artifacts(tmp_path, monkeypatch)
+    algorithm_eval_dir = _build_algorithm_eval_artifact(
+        tmp_path,
+        a2_target_scout_dir=target_dir,
+        a2_pair_target_dir=pair_dir,
+        runs_manifest=source_runs_manifest,
+    )
+    matrix_dir = _build_spillover_matrix_dir(tmp_path / "spillover_capture")
+
+    baseline_result = live_eval.run_ardupilot_a2_pair_target_live_evaluation(
+        a2_target_scout_dir=target_dir,
+        a2_pair_target_dir=pair_dir,
+        a2_algorithm_eval_dir=algorithm_eval_dir,
+        skip_smoke=True,
+        skip_capture=True,
+        matrix_dir=matrix_dir,
+        output_root=tmp_path / "baseline_live_eval",
+    )
+    baseline_summary = json.loads(
+        (Path(baseline_result["live_evaluation_dir"]) / "summary" / "a2_pair_target_live_evaluation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    variant_result = live_eval.run_ardupilot_a2_pair_target_live_evaluation(
+        a2_target_scout_dir=target_dir,
+        a2_pair_target_dir=pair_dir,
+        a2_algorithm_eval_dir=algorithm_eval_dir,
+        skip_smoke=True,
+        skip_capture=True,
+        matrix_dir=matrix_dir,
+        output_root=tmp_path / "variant_live_eval",
+        analysis_variant=live_eval.PENULTIMATE_WINDOW_ANALYSIS_VARIANT,
+    )
+    variant_summary = json.loads(
+        (Path(variant_result["live_evaluation_dir"]) / "summary" / "a2_pair_target_live_evaluation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    assert baseline_summary["overall_decision"]["live_pair_target_success_v1"] is False
+    assert variant_summary["study_scope"]["analysis_variant"] == live_eval.PENULTIMATE_WINDOW_ANALYSIS_VARIANT
+    assert variant_summary["overall_decision"]["live_pair_target_success_v1"] is True
+    assert variant_summary["overall_decision"]["recommended_next_step"] == "promote_live_artifact_for_review"
 
 
 def test_live_evaluation_smoke_failure_stops_before_capture(
@@ -279,3 +467,31 @@ def test_live_evaluation_smoke_failure_stops_before_capture(
             a2_algorithm_eval_dir=algorithm_eval_dir,
             output_root=tmp_path / "live_eval",
         )
+
+
+def test_generate_live_capture_configs_extends_duration_to_fit_pulse_train(tmp_path: Path) -> None:
+    algorithm_summary = {
+        "algorithm_spec": {
+            "scenario_scope": ["nominal"],
+            "reference_tier": "probe",
+            "pulse_amplitude": 0.05,
+            "pulse_count": 5,
+            "pulse_width_s": 0.50,
+            "pulse_gap_s": 1.20,
+            "bias_by_scenario": {"nominal": 0.0},
+            "direction": "12_gt_34",
+            "strategy": algorithm_eval.STRATEGY_NAME,
+        }
+    }
+
+    config_paths = live_eval._generate_live_capture_configs(
+        tmp_path,
+        algorithm_summary=algorithm_summary,
+        algorithm_eval_dir=tmp_path / "algorithm_eval",
+    )
+
+    config_payload = read_yaml(config_paths[0])
+    expected_duration = live_eval._pulse_train_duration_s(pulse_count=5, pulse_width_s=0.50, pulse_gap_s=1.20)
+
+    assert config_payload["duration_s"] == pytest.approx(expected_duration)
+    assert config_payload["extras"]["train_duration_s"] == pytest.approx(expected_duration)

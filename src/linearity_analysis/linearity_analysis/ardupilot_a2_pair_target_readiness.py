@@ -9,6 +9,15 @@ from typing import Any
 
 from linearity_core.io import ensure_study_directories, read_rows_csv, write_json, write_rows_csv, write_yaml
 
+from .family_method_contract import (
+    ROLE_EXECUTION_FAMILY,
+    STAGE_STATUS_FAILED,
+    STAGE_STATUS_NOT_RUN,
+    STAGE_STATUS_PASSED,
+    attach_family_method_contract,
+    claim_scope,
+    stage_result,
+)
 from .ardupilot_a2_readiness import _format_metric, _median, _relative_workspace_path, _safe_float, _safe_str_list
 from .ardupilot_a2_target_scout import _analyze_attempt, _tier_range
 
@@ -278,6 +287,49 @@ def run_ardupilot_a2_pair_target_readiness(
     }
 
     paths = _output_paths(output_root.expanduser().resolve() if output_root else None)
+    readiness_passed = bool(overall_decision["ready_for_pair_attack_v1"])
+    payload = attach_family_method_contract(
+        payload,
+        family_id="A2",
+        backend="ardupilot",
+        combo_signature="commands_only | actuator_response | ridge_affine | pooled",
+        mechanism_family="direct_control",
+        role=ROLE_EXECUTION_FAMILY,
+        stage_results={
+            "scout": stage_result(
+                status=STAGE_STATUS_PASSED,
+                recommended_next_step="guided_nogps_pair_target_readiness",
+                notes="This readiness artifact assumes the canonical A2 scout remains locked on GUIDED_NOGPS + pair_imbalance_12_vs_34.",
+            ),
+            "readiness": stage_result(
+                status=STAGE_STATUS_PASSED if readiness_passed else STAGE_STATUS_FAILED,
+                artifact_dir=str(paths["base_dir"]),
+                summary_path=_relative_workspace_path(paths["summary_path"]),
+                report_path=_relative_workspace_path(paths["report_path"]),
+                recommended_next_step=overall_decision["recommended_path"],
+                blocking_reasons=blocking_reasons,
+            ),
+            "algorithm_evaluation": stage_result(status=STAGE_STATUS_NOT_RUN),
+            "live_evaluation": stage_result(status=STAGE_STATUS_NOT_RUN),
+            "final_review": stage_result(status=STAGE_STATUS_NOT_RUN),
+        },
+        terminal_outcome="execution_family_ready" if readiness_passed else "execution_family_readiness_blocked",
+        recommended_next_step=overall_decision["recommended_path"],
+        blocking_reasons=blocking_reasons,
+        claim_scope_payload=claim_scope(
+            summary="A2 readiness only claims canonical pair-target readiness inside the GUIDED_NOGPS direct-control family.",
+            allowed_claims=[
+                "A2 is pair-target-ready for the canonical GUIDED_NOGPS pair target when both tracked scenarios preserve 12_gt_34.",
+            ],
+            blocked_claims=[
+                "A2 readiness alone proves live success.",
+                "A2 is already generalized across widened live protocols.",
+            ],
+        ),
+        residuals=[
+            "A2 still needs algorithm evaluation, live evaluation, and final review before the family can be treated as final-review-complete.",
+        ],
+    )
     report_text = render_ardupilot_a2_pair_target_readiness_markdown(payload)
     run_level_rows = []
     for row in filtered_attempts:

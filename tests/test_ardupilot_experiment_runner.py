@@ -8,6 +8,7 @@ from pymavlink import mavutil
 
 from ardupilot_mavlink_backend import experiment_runner
 from ardupilot_mavlink_backend.session import wait_for_mode
+from linearity_core.config import RunConfig
 from linearity_core.io import write_rows_csv
 
 
@@ -360,3 +361,102 @@ def test_arm_vehicle_guided_nogps_tolerates_prearm_stabilize_confirmation_flake(
         ("set", "GUIDED_NOGPS"),
         ("wait", "GUIDED_NOGPS"),
     ]
+
+
+def test_run_capture_disables_autoreconnect(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    class _FakeProfile:
+        total_duration_s = 0.0
+
+    class _FakeConnectedMaster:
+        def __init__(self) -> None:
+            self.autoreconnect = False
+
+        def close(self) -> None:
+            captured["closed"] = True
+
+    def _fake_connect(uri: str, tlog_path: Path, timeout_s: float, *, autoreconnect: bool):
+        captured["uri"] = uri
+        captured["tlog_path"] = tlog_path
+        captured["timeout_s"] = timeout_s
+        captured["autoreconnect"] = autoreconnect
+        tlog_path.parent.mkdir(parents=True, exist_ok=True)
+        tlog_path.write_bytes(b"")
+        return _FakeConnectedMaster()
+
+    monkeypatch.setattr(experiment_runner, "ARDUPILOT_RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(experiment_runner, "ARDUPILOT_ROOT", tmp_path / "ardupilot")
+    monkeypatch.setattr(experiment_runner, "ExcitationGenerator", lambda config: _FakeProfile())
+    monkeypatch.setattr(experiment_runner, "connect", _fake_connect)
+    monkeypatch.setattr(experiment_runner, "cleanup_residual_processes", lambda: None)
+    monkeypatch.setattr(experiment_runner, "_wait_for_vehicle_ready", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_prepare_parameters", lambda *args, **kwargs: ({}, {}, []))
+    monkeypatch.setattr(experiment_runner, "_prepare_runtime_arming", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_arm_vehicle", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_append_message_rows", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "_land_vehicle", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "stop_process", lambda process: None)
+    monkeypatch.setattr(experiment_runner, "finalize_visualization_report", lambda process: {})
+    monkeypatch.setattr(experiment_runner, "capture_host_snapshot", lambda: {})
+    monkeypatch.setattr(experiment_runner, "_snapshot_logs", lambda *args, **kwargs: {})
+    monkeypatch.setattr(experiment_runner, "_apply_bin_canonical_fallback", lambda *args, **kwargs: {})
+    monkeypatch.setattr(
+        experiment_runner,
+        "_ardupilot_data_quality",
+        lambda *args, **kwargs: {
+            "topic_presence": {"missing_topics": []},
+            "quality_flags": {
+                "non_monotonic_streams": [],
+                "alignment_p95_exceeded_streams": [],
+            },
+            "acceptance": experiment_runner.build_acceptance_block(
+                experiment_started=True,
+                active_phase_present=True,
+                expected_active_samples=0,
+                active_sample_count=0,
+                active_nonzero_command_samples=0,
+                failsafe_during_experiment=False,
+                missing_topics_blocking=[],
+                accepted=True,
+            ),
+        },
+    )
+
+    config = RunConfig.from_dict(
+        {
+            "study_name": "unit_test",
+            "backend": "ardupilot",
+            "flight_mode": "GUIDED_NOGPS",
+            "scenario": "connect_override",
+            "config_profile": "test",
+            "seed": 1,
+            "repeat_count": 1,
+            "sampling_rate_hz": 10.0,
+            "x_schema": "state_minimal_v1",
+            "input_type": "manual",
+            "axis": "throttle",
+            "profile_type": "pulse_train",
+            "duration_s": 0.0,
+            "extras": {
+                "ardupilot_tail_s": -1.0,
+            },
+        }
+    )
+
+    exit_code, artifact_dir = experiment_runner.run_capture(
+        config,
+        start_sitl=False,
+        master_uri="tcp:127.0.0.1:5760",
+        connect_timeout_s=3.5,
+    )
+
+    assert exit_code == 0
+    assert artifact_dir.exists()
+    assert captured == {
+        "uri": "tcp:127.0.0.1:5760",
+        "tlog_path": artifact_dir / "telemetry" / "ardupilot.tlog",
+        "timeout_s": 3.5,
+        "autoreconnect": False,
+        "closed": True,
+    }

@@ -509,7 +509,7 @@ def _write_px4_acceptance_fixture(
 
 
 def _acceptance_test_config():
-    config = load_study_config(ROOT / "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml")
+    config = load_study_config(ROOT / "configs/studies/px4_real_generalization_ablation_analysis.yaml")
     config.sampling_rate_hz = 8.0
     config.duration_s = 1.0
     return config
@@ -584,7 +584,7 @@ def test_px4_dataset_actuator_response_available_after_backfill(tmp_path: Path, 
             "px4_log_path": str(ulog_path),
         },
     )
-    config = load_study_config(ROOT / "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml")
+    config = load_study_config(ROOT / "configs/studies/px4_real_generalization_ablation_analysis.yaml")
     table, inventory = build_prepared_sample_table([run_dir], config)
     matrices = build_schema_matrices(table, config, "commands_plus_state", "actuator_response")
     full_augmented_matrices = build_schema_matrices(table, config, "full_augmented", "actuator_response")
@@ -613,7 +613,7 @@ def test_px4_data_quality_uses_backfilled_topic_counts(tmp_path: Path, monkeypat
     monkeypatch.setattr(ulog_backfill, "ULog", _FakeULog)
     ulog_backfill.backfill_px4_ulog_topics(telemetry_dir, ulog_path=ulog_path)
 
-    config = load_study_config(ROOT / "configs/studies/px4_real_nominal_broad_ablation_analysis.yaml")
+    config = load_study_config(ROOT / "configs/studies/px4_real_generalization_ablation_analysis.yaml")
     data_quality = _px4_data_quality(
         {
             "telemetry_dir": telemetry_dir,

@@ -1057,7 +1057,7 @@ def run_capture(
                 enable_visualization=enable_visualization,
             )
 
-        master = connect(master_uri, tlog_path, connect_timeout_s)
+        master = connect(master_uri, tlog_path, connect_timeout_s, autoreconnect=False)
         if process is not None:
             process = start_visualizer(process, master_uri)
         readiness_anomalies = _wait_for_vehicle_ready(master, timeout_s=float(config.extras.get("ardupilot_ready_timeout_s", 20.0)))

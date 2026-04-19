@@ -80,11 +80,17 @@ def test_invalid_output_semantics_raises(tmp_path: Path) -> None:
         load_study_config(path)
 
 
-def test_research_tier_parses_from_px4_configs() -> None:
+def test_research_tier_parses_from_active_configs(tmp_path: Path) -> None:
     authoritative = load_study_config(ROOT / "configs/studies/px4_real_nominal_posctl_capture.yaml")
-    demo = load_study_config(ROOT / "configs/studies/px4_visual_demo_offboard_roll_sweep_capture.yaml")
     diagnostic = load_study_config(ROOT / "configs/studies/px4_diagnostic_posctl_axis_capture.yaml")
     throttle = load_study_config(ROOT / "configs/studies/px4_diagnostic_posctl_throttle_capture.yaml")
+    demo = load_study_config(
+        write_synthetic_config(
+            tmp_path,
+            filename="demo_only_config.json",
+            research_tier="demo_only",
+        )
+    )
     assert authoritative.research_tier == "authoritative_research"
     assert demo.research_tier == "demo_only"
     assert diagnostic.research_tier == "diagnostic_research"
@@ -165,9 +171,10 @@ def test_ardupilot_attitude_defaults_to_guided_nogps() -> None:
 
 def test_active_ardupilot_configs_and_scripts_no_longer_use_guided_attitude() -> None:
     active_paths = [
-        ROOT / "scripts/run_ardupilot_visual_demos.sh",
-        ROOT / "scripts/run_ardupilot_broad_ablation.sh",
-        ROOT / "scripts/run_ardupilot_diagnostic_matrix.sh",
+        ROOT / "scripts/run_ardupilot_generalization_baseline.sh",
+        ROOT / "scripts/run_ardupilot_generalization_diagnostic.sh",
+        ROOT / "scripts/run_ardupilot_state_evolution_baseline.sh",
+        ROOT / "scripts/run_ardupilot_state_evolution_diagnostic.sh",
         ROOT / "configs/studies/ardupilot_real_nominal_guided_nogps_capture.yaml",
         ROOT / "configs/studies/ardupilot_diagnostic_guided_nogps_axis_capture.yaml",
         ROOT / "configs/studies/ardupilot_diagnostic_guided_nogps_throttle_capture.yaml",

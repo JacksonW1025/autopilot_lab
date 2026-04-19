@@ -66,6 +66,10 @@ def test_algorithm_evaluation_real_canonical_artifacts(tmp_path: Path) -> None:
     pair_dir = root / "artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness"
     if not target_dir.exists() or not pair_dir.exists():
         pytest.skip("canonical A2 artifacts are not available")
+    target_manifest = read_yaml(target_dir / "manifest.yaml")
+    runs_manifest_value = target_manifest.get("runs_manifest", "")
+    if not runs_manifest_value or not Path(str(runs_manifest_value)).expanduser().resolve().exists():
+        pytest.skip("canonical A2 artifacts require an external runs_manifest that is not retained in the lightweight repo state")
 
     study_dir = algorithm_eval.run_ardupilot_a2_pair_target_algorithm_evaluation(
         a2_target_scout_dir=target_dir,
