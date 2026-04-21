@@ -16,7 +16,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--study-dir", type=Path, help="包含多个 raw run 子目录的目录。")
     parser.add_argument("--runs-manifest", type=Path, help="CSV manifest；至少包含 run_dir 列。")
     parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--include-rejected-runs", action="store_true", help="调试时包含 rejected/legacy raw runs。")
+    parser.add_argument("--include-rejected-runs", action="store_true", help="调试时包含 rejected/outdated raw runs。")
     args = parser.parse_args(argv)
 
     config = load_study_config(args.config)

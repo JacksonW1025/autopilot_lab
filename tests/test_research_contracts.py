@@ -58,7 +58,7 @@ def test_manifest_research_contract_sets_required_fields() -> None:
     assert ardupilot_payload["data_quality"]["acceptance"]["experiment_started"] is None
 
 
-def test_analysis_filters_rejected_and_legacy_runs_by_default(tmp_path: Path) -> None:
+def test_analysis_filters_rejected_and_outdated_runs_by_default(tmp_path: Path) -> None:
     config = _tiny_synthetic_config(tmp_path)
     run_dirs = generate_synthetic_raw_runs(config, output_root=tmp_path / "raw")
 
@@ -70,20 +70,20 @@ def test_analysis_filters_rejected_and_legacy_runs_by_default(tmp_path: Path) ->
     rejected_manifest["data_quality"]["acceptance"]["rejection_reasons"] = ["failsafe_during_experiment"]
     write_yaml(run_dirs[1] / "manifest.yaml", rejected_manifest)
 
-    legacy_manifest = read_yaml(run_dirs[2] / "manifest.yaml")
-    legacy_manifest["raw_schema_version"] = 1
-    legacy_manifest.pop("research_acceptance", None)
-    legacy_manifest.pop("research_rejection_reasons", None)
-    legacy_manifest.pop("research_tier", None)
-    legacy_manifest["data_quality"] = {}
-    write_yaml(run_dirs[2] / "manifest.yaml", legacy_manifest)
+    outdated_manifest = read_yaml(run_dirs[2] / "manifest.yaml")
+    outdated_manifest["raw_schema_version"] = 1
+    outdated_manifest.pop("research_acceptance", None)
+    outdated_manifest.pop("research_rejection_reasons", None)
+    outdated_manifest.pop("research_tier", None)
+    outdated_manifest["data_quality"] = {}
+    write_yaml(run_dirs[2] / "manifest.yaml", outdated_manifest)
 
     study_dir = run_analysis(run_dirs, config, output_root=tmp_path / "studies")
     inventory = read_yaml(study_dir / "prepared" / "schema_inventory.yaml")
     assert inventory["run_count"] == 1
     assert inventory["runs"][0]["run_id"] == accepted_manifest["run_id"]
     assert len(inventory["excluded_runs"]) == 2
-    assert {item["filter_reason"] for item in inventory["excluded_runs"]} == {"research_rejected", "legacy_manifest"}
+    assert {item["filter_reason"] for item in inventory["excluded_runs"]} == {"research_rejected", "outdated_manifest"}
 
     study_dir_all = run_analysis(run_dirs, config, output_root=tmp_path / "studies_all", include_rejected_runs=True)
     inventory_all = read_yaml(study_dir_all / "prepared" / "schema_inventory.yaml")

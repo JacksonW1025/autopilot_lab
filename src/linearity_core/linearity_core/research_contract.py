@@ -78,5 +78,5 @@ def manifest_acceptance_state(manifest: dict[str, Any]) -> str:
     raw_schema_version = int(manifest.get("raw_schema_version", 0) or 0)
     state = str(manifest.get("research_acceptance", "")).strip().lower()
     if raw_schema_version < 2 or state not in {"accepted", "rejected"}:
-        return "legacy"
+        return "outdated"
     return state

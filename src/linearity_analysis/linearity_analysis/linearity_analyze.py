@@ -83,7 +83,7 @@ def _filter_run_dirs(
                 "backend": manifest.get("backend", ""),
                 "research_tier": manifest.get("research_tier", ""),
                 "research_acceptance": manifest.get("research_acceptance", ""),
-                "filter_reason": "legacy_manifest" if acceptance_state == "legacy" else "research_rejected",
+                "filter_reason": "outdated_manifest" if acceptance_state == "outdated" else "research_rejected",
                 "research_rejection_reasons": list(manifest.get("research_rejection_reasons", []) or []),
             }
         )
@@ -279,7 +279,7 @@ def run_analysis(
         raise ValueError("没有可分析的 run_dirs")
     filtered_run_dirs, excluded_runs = _filter_run_dirs(run_dirs, include_rejected_runs=include_rejected_runs)
     if not filtered_run_dirs:
-        raise ValueError("没有可分析的 accepted run_dirs；如需调试 rejected/legacy runs，请显式开启 include_rejected_runs。")
+        raise ValueError("没有可分析的 accepted run_dirs；如需调试 rejected/outdated runs，请显式开启 include_rejected_runs。")
 
     study_name = ablation_plan.output_study_name if ablation_plan and ablation_plan.output_study_name else config.study_name
     study_id = f"{datetime.now(timezone.utc).astimezone():%Y%m%d_%H%M%S}_{study_name}"
@@ -474,7 +474,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--runs-manifest", type=Path, help="CSV manifest；至少包含 run_dir 列。")
     parser.add_argument("--ablation-plan", type=Path, help="可选 ablation plan YAML。")
     parser.add_argument("--output-root", type=Path, default=None)
-    parser.add_argument("--include-rejected-runs", action="store_true", help="调试时包含 rejected/legacy raw runs。")
+    parser.add_argument("--include-rejected-runs", action="store_true", help="调试时包含 rejected/outdated raw runs。")
     args = parser.parse_args(argv)
 
     config = load_study_config(args.config)
