@@ -104,7 +104,6 @@ def ensure_study_directories(study_id: str, root: Path | None = None) -> dict[st
         "scenario_generalization_report_path": reports_dir / "scenario_generalization.md",
         "sparsity_overlap_report_path": reports_dir / "sparsity_overlap.md",
         "contract_audit_report_path": reports_dir / "contract_audit.md",
-        "backend_compare_report_path": reports_dir / "backend_compare.md",
         "summary_json_path": summary_dir / "study_summary.json",
         "baseline_stability_json_path": summary_dir / "baseline_stability.json",
         "diagnostic_gate_json_path": summary_dir / "diagnostic_gate.json",
@@ -113,5 +112,4 @@ def ensure_study_directories(study_id: str, root: Path | None = None) -> dict[st
         "scenario_generalization_json_path": summary_dir / "scenario_generalization.json",
         "sparsity_overlap_json_path": summary_dir / "sparsity_overlap.json",
         "contract_audit_json_path": summary_dir / "contract_audit.json",
-        "backend_compare_json_path": summary_dir / "backend_compare.json",
     }

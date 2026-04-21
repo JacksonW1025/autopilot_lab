@@ -1,134 +1,97 @@
 # autopilot_lab
 
-`autopilot_lab` 是一个围绕无人机输入到响应关系的研究仓库。仓库当前只保留一条中心叙事：
+`autopilot_lab` 当前只保留两段正式研究链：
 
-`sparsity hypothesis -> empirical validation -> in-depth analysis -> novel attack algorithm -> evaluation`
+`sparsity hypothesis -> empirical validation -> stage-2 common-cause synthesis`
 
-这里的核心对象是矩阵 `f`。项目把它看作输入到响应的稀疏导数矩阵，并围绕这张矩阵回答两个问题：
+仓库现在不保留旧 Stage 4/5 execution chain。Stage 4/5 已删除，后续将基于新的 Stage 2 重新设计。
 
-1. 这类固定线性映射是否真实存在。
-2. 这类映射里哪些稀疏结构足够稳定，能够支撑后续攻击算法。
+## Source Of Truth
 
-## 当前仓库保留了什么
+当前 repo-level canonical 文档只有三份：
 
-仓库当前只保留三类内容：
+1. `README.md`
+2. `docs/STAGE1_SUMMARY.md`
+3. `docs/STAGE2_SUMMARY.md`
 
-- 能直接证明 stage 1 和 stage 2 结论的 study artifact
-- 能把 stage 2 insight 推进到 A2 算法与评估的脚本和源码
-- 能帮助快速进入项目状态的三份总结文档
+## 当前保留范围
 
-当前阅读入口：
+- Stage 1：四个 generalization study，负责证明 `Y ≈ fX (+ b)` 在 PX4 与 ArduPilot 上都存在可重复的线性证据。
+- Stage 2：一个新的六线共同成因 study，负责把 retained evidence 组织成统一的机制账本、类比结构和 `USDTA` 设计约束。
+- Stage 4/5：已清空，不保留任何旧 execution reference、bounded claim 或 live claim。
 
-1. [docs/STAGE1_SUMMARY.md](docs/STAGE1_SUMMARY.md)
-2. [docs/STAGE2_SUMMARY.md](docs/STAGE2_SUMMARY.md)
-3. [docs/REMATCH.md](docs/REMATCH.md)
+## Stage 1
 
-## 五个阶段现在分别做了什么
-
-### 1. Sparsity Hypothesis
-
-项目的理论起点是：`f` 不是任意稠密矩阵，真正有解释力的结构会表现为稀疏、稳定、低维的导数模式。这个假设决定了后续所有实验的判读方式。
-
-### 2. Empirical Validation
-
-这一阶段使用 PX4 与 ArduPilot 两套 backend，在统一 `X/Y` 口径下验证固定线性映射是否存在，并检查它是否能跨 `nominal / dynamic / throttle_biased` 三种场景成立。当前保留的主证据是四个 generalization study。
-
-### 3. In-Depth Analysis
-
-这一阶段不再停留在“能拟合”，而是继续追问“什么结构可信，什么结构只是高分假象”。当前保留的主证据是 mode-isolated state-evolution study、anchor deep dive 和 in-depth synthesis。
-
-### 4. Novel Attack Algorithm
-
-这一阶段把 stage 2 的结构结论收敛成一个可执行的攻击目标。当前仓库保留的是 A2 主线，目标已经锁定为：
-
-- `GUIDED_NOGPS`
-- `pair_imbalance_12_vs_34`
-- `12_gt_34`
-
-### 5. Evaluation
-
-这一阶段对 A2 做 bounded repeatability 与 live evaluation。当前保留的结论是：full-window baseline 被排除，penultimate-window confirm protocol 形成了受边界约束的正面执行证据，widened pulse family 仍然处于边界之外。
-
-## 当前结论的最短版本
-
-- `Y ≈ fX (+ b)` 已经得到正面 empirical validation。
-- PX4 的稳定结构偏向 state-dominated 的短时传播。
-- ArduPilot 的稳定结构偏向 commands-only 的低维 direct-control。
-- A2 是当前最适合继续推进的攻击主线。
-- 当前 evaluation claim 只覆盖经过审查的 penultimate-window confirm protocol。
-
-## 目录结构
-
-```text
-autopilot_lab/
-├── AGENT.md
-├── README.md
-├── artifacts/
-│   └── studies/
-├── configs/
-├── docs/
-│   ├── STAGE1_SUMMARY.md
-│   ├── STAGE2_SUMMARY.md
-│   └── REMATCH.md
-├── scripts/
-├── src/
-└── tests/
-```
-
-目录说明：
-
-- `artifacts/studies/`：正式证据目录。每个 study 都是一个可直接引用的阶段证据。
-- `configs/`：实验与分析配置。
-- `scripts/`：正式实验入口。
-- `src/`：拟合、分析、backend runner 和 A2 评估逻辑。
-- `tests/`：保留后的最小回归集。
-
-## 推荐阅读顺序
-
-如果只想快速理解仓库状态，按下面顺序阅读：
-
-1. [docs/STAGE1_SUMMARY.md](docs/STAGE1_SUMMARY.md)
-2. [docs/STAGE2_SUMMARY.md](docs/STAGE2_SUMMARY.md)
-3. [docs/REMATCH.md](docs/REMATCH.md)
-
-如果要直接看 artifact：
+当前保留的 Stage 1 artifact：
 
 1. `artifacts/studies/20260410_224818_px4_real_generalization_ablation`
 2. `artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix`
 3. `artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation`
 4. `artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix`
-5. `artifacts/studies/20260413_134505_ardupilot_state_evolution_validation`
-6. `artifacts/studies/20260414_064153_formal_v2_anchor_deep_dive`
-7. `artifacts/studies/20260414_064902_formal_v2_in_depth_analysis`
-8. `artifacts/studies/20260417_001924_151397_ardupilot_a2_target_scout`
-9. `artifacts/studies/20260417_001925_356349_ardupilot_a2_pair_target_readiness`
-10. `artifacts/studies/20260417_122519_536215_ardupilot_a2_pair_target_bounded_repeatability_campaign`
-11. `artifacts/studies/20260417_122644_564567_ardupilot_a2_pair_target_bounded_repeatability_campaign`
-12. `artifacts/studies/20260417_122621_661226_ardupilot_a2_pair_target_live_evaluation`
-13. `artifacts/studies/20260417_122622_852971_ardupilot_a2_pair_target_live_evaluation`
-14. `artifacts/studies/20260417_122623_985857_ardupilot_a2_pair_target_live_evaluation`
-15. `artifacts/studies/20260417_122625_153113_ardupilot_a2_pair_target_live_evaluation`
-16. `artifacts/studies/20260417_122626_326415_ardupilot_a2_pair_target_live_evaluation`
-17. `artifacts/studies/20260417_122627_505610_ardupilot_a2_pair_target_live_evaluation`
+
+当前关键数字：
+
+- PX4 baseline `accepted_run_count = 30`, `generalized_supported = 80`
+- PX4 diagnostic `accepted_run_count = 48`, `generalized_supported = 111`
+- ArduPilot baseline `accepted_run_count = 30`, `generalized_supported = 12`
+- ArduPilot diagnostic `accepted_run_count = 48`, `generalized_supported = 12`
+
+## Stage 2
+
+新的 Stage 2 不再筛选单条赢家线。它把六条 retained evidence 组织成六个带仿真器信息的机制代号：
+
+- `PX-STC`: PX4 State Transport Continuation
+- `PX-STD`: PX4 State Transport Differential
+- `AP-DAB`: ArduPilot Direct Actuator Bundle
+- `AP-HTM`: ArduPilot History Transport MixedMode
+- `AP-HTS`: ArduPilot History Transport STABILIZE
+- `AP-HTG`: ArduPilot History Transport GUIDED_NOGPS
+
+当前 canonical Stage 2 study：
+
+- `artifacts/studies/20260421_090255_stage2_six_line_common_cause_analysis`
+
+新的 Stage 2 只回答三类问题：
+
+- 哪些低维 `X` 子空间稳定映射到紧凑 `Y` bundle
+- 哪些 `state / direct / history transport` 机制在不同 backend 与 regime 中复现
+- 哪些边界真正由 leakage、conditioning 与 regime shift 主导
+
+它直接导出 `USDTA` 的设计约束，但不再保留任何旧 Stage 4/5 target/readiness/evaluation/live 协议。
+
+## 当前结论
+
+- `Y ≈ fX (+ b)` 的 empirical validation 已成立。
+- 六条 retained lines 现在按机制统一命名，不再按 winner/ranking 组织。
+- `PX-STC/PX-STD` 共同定义 PX4 的 state-transport 家族。
+- `AP-DAB` 是 ArduPilot 的 direct-transport 实例。
+- `AP-HTM/AP-HTS/AP-HTG` 共同定义 history-transport 家族，其中边界主要由 conditioning、mask collapse 和 regime split 决定。
+- 新 Stage 2 的目标是为统一算法 `USDTA` 提供设计指导，而不是把某一条线升级成默认执行主线。
+
+## 阅读顺序
+
+1. `README.md`
+2. `docs/STAGE1_SUMMARY.md`
+3. `docs/STAGE2_SUMMARY.md`
+4. `artifacts/studies/20260421_090255_stage2_six_line_common_cause_analysis/reports/stage2_six_line_common_cause.md`
 
 ## 正式入口
 
-Stage 1:
+Stage 1：
 
 - `scripts/run_px4_generalization_full.sh`
 - `scripts/run_ardupilot_generalization_full.sh`
+- `scripts/visualize_fit_matrices.py`
 
-Stage 2:
+Stage 2：
 
-- `scripts/run_ardupilot_state_evolution_validation_full.sh`
-- `scripts/analyze_anchor_deep_dive.py`
-- `scripts/analyze_formal_v2_in_depth.py`
+- `scripts/analyze_stage2_six_line_common_cause.py`
 
-A2:
+## 目录
 
-- `scripts/run_ardupilot_a2_target_scout.sh`
-- `scripts/run_ardupilot_a2_guided_nogps_pair_target_readiness.sh`
-- `scripts/run_ardupilot_a2_pair_target_algorithm_evaluation.sh`
-- `scripts/run_ardupilot_a2_pair_target_bounded_repeatability_campaign.sh`
-- `scripts/run_ardupilot_a2_pair_target_live_evaluation.sh`
-- `scripts/run_ardupilot_a2_pair_target_live_campaign.sh`
+- `artifacts/studies/`: 正式 study artifact
+- `configs/`: Stage 1 retained config
+- `docs/`: Stage 1/Stage 2 canonical summary
+- `scripts/`: 当前正式入口
+- `src/`: retained analysis code
+- `tests/`: 保留后的最小回归集

@@ -173,8 +173,7 @@ def test_active_ardupilot_configs_and_scripts_no_longer_use_guided_attitude() ->
     active_paths = [
         ROOT / "scripts/run_ardupilot_generalization_baseline.sh",
         ROOT / "scripts/run_ardupilot_generalization_diagnostic.sh",
-        ROOT / "scripts/run_ardupilot_state_evolution_baseline.sh",
-        ROOT / "scripts/run_ardupilot_state_evolution_diagnostic.sh",
+        ROOT / "scripts/analyze_stage2_six_line_common_cause.py",
         ROOT / "configs/studies/ardupilot_real_nominal_guided_nogps_capture.yaml",
         ROOT / "configs/studies/ardupilot_diagnostic_guided_nogps_axis_capture.yaml",
         ROOT / "configs/studies/ardupilot_diagnostic_guided_nogps_throttle_capture.yaml",

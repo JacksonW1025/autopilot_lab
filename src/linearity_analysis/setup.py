@@ -22,17 +22,10 @@ setup(
     entry_points={
         "console_scripts": [
             "linearity_analyze = linearity_analysis.linearity_analyze:main",
-            "linearity_ardupilot_a2_pair_target_algorithm_evaluation = linearity_analysis.ardupilot_a2_pair_target_algorithm_evaluation:main",
-            "linearity_ardupilot_a2_pair_target_bounded_repeatability_campaign = linearity_analysis.ardupilot_a2_pair_target_bounded_repeatability_campaign:main",
-            "linearity_ardupilot_a2_pair_target_live_campaign = linearity_analysis.ardupilot_a2_pair_target_live_campaign:main",
-            "linearity_ardupilot_a2_pair_target_live_evaluation = linearity_analysis.ardupilot_a2_pair_target_live_evaluation:main",
-            "linearity_ardupilot_a2_boundary_readiness = linearity_analysis.ardupilot_a2_boundary_readiness:main",
-            "linearity_ardupilot_a2_pair_target_readiness = linearity_analysis.ardupilot_a2_pair_target_readiness:main",
-            "linearity_ardupilot_a2_target_scout = linearity_analysis.ardupilot_a2_target_scout:main",
             "linearity_compare_schemas = linearity_analysis.linearity_compare_schemas:main",
-            "linearity_ardupilot_a2_readiness = linearity_analysis.ardupilot_a2_readiness:main",
             "linearity_matrix_gallery = linearity_analysis.matrix_gallery:main",
             "linearity_stage_checks = linearity_analysis.stage_checks:main",
+            "linearity_stage2_six_line_common_cause = linearity_analysis.stage2_six_line_common_cause:main",
         ],
     },
 )
