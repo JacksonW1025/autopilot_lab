@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import rclpy
+from linearity_core.attack_eval import attack_trace_fieldnames
 from linearity_core.io import capture_host_snapshot, read_rows_csv, write_rows_csv, write_yaml
 from linearity_core.mav_params import close_mavlink, connect_mavlink, set_parameters, snapshot_parameters
 from linearity_core.research_contract import apply_manifest_research_contract, build_acceptance_block
@@ -449,6 +450,8 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
     recorder.write_csvs(paths["telemetry_dir"])
     command_trace = injector.command_trace()
     write_rows_csv(paths["input_trace_path"], command_trace, INPUT_TRACE_FIELDS)
+    attack_trace = injector.attack_trace()
+    write_rows_csv(paths["attack_trace_path"], attack_trace, attack_trace_fieldnames())
     recorder_summary = recorder.summary()
     injector_report = injector.report()
     anomalies.extend(injector_report.get("anomalies", []))
@@ -500,6 +503,7 @@ def run_capture(config: RunConfig) -> tuple[int, Path]:
         "recorder_summary": recorder_summary,
         "telemetry_backfill": telemetry_backfill,
         "injector_report": injector_report,
+        "attack_summary": injector_report.get("attack_summary", {}),
         "data_quality": data_quality,
         "anomaly_summary": sorted(dict.fromkeys(anomalies)),
         "telemetry_files": sorted(path.name for path in paths["telemetry_dir"].glob("*.csv")),

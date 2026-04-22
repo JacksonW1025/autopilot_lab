@@ -73,6 +73,7 @@ def ensure_raw_run_directories(backend: str, run_id: str, root: Path | None = No
         "manifest_path": base_dir / "manifest.yaml",
         "notes_path": base_dir / "notes.md",
         "input_trace_path": telemetry_dir / "input_trace.csv",
+        "attack_trace_path": telemetry_dir / "attack_trace.csv",
         "canonical_samples_path": analysis_inputs_dir / "canonical_samples.csv",
     }
 

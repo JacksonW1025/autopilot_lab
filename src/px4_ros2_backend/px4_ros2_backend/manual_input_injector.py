@@ -3,25 +3,41 @@ from __future__ import annotations
 import argparse
 import math
 import time
+from collections import deque
 from pathlib import Path
 from threading import Lock
 from typing import Any
 
+import numpy as np
 import rclpy
 from px4_msgs.msg import (
+    ActuatorMotors,
+    ControlAllocatorStatus,
     ManualControlSetpoint,
     OffboardControlMode,
     TrajectorySetpoint,
+    VehicleAngularVelocity,
+    VehicleAttitude,
+    VehicleAttitudeSetpoint,
     VehicleCommand,
     VehicleControlMode,
     VehicleLocalPosition,
+    VehicleRatesSetpoint,
     VehicleStatus,
 )
 from rclpy.clock import Clock, ClockType
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 
-from .common import RunConfig, clamp, load_run_config, px4_qos_profile
+from linearity_core.attack_eval import (
+    apply_attack_to_command,
+    build_attack_controller_from_config,
+    make_attack_trace_row,
+    summarize_attack_trace,
+)
+from linearity_core.attack_runtime import AttackContext, AttackDelta
+
+from .common import RunConfig, clamp, load_run_config, px4_qos_profile, quaternion_to_euler
 from .profiles import CommandSample, ProfileGenerator
 
 
@@ -52,10 +68,19 @@ class ManualInputInjector(Node):
         self._disarm_command_time_ns: int | None = None
         self._completion_time_ns: int | None = None
         self._command_trace: list[dict[str, Any]] = []
+        self._attack_trace: list[dict[str, Any]] = []
         self._anomalies: list[str] = []
+        self._attack_controller = build_attack_controller_from_config(config)
         self._vehicle_status = VehicleStatus()
         self._vehicle_control_mode = VehicleControlMode()
         self._vehicle_local_position = VehicleLocalPosition()
+        self._vehicle_attitude = VehicleAttitude()
+        self._vehicle_angular_velocity = VehicleAngularVelocity()
+        self._vehicle_attitude_setpoint = VehicleAttitudeSetpoint()
+        self._vehicle_rates_setpoint = VehicleRatesSetpoint()
+        self._control_allocator_status = ControlAllocatorStatus()
+        self._actuator_motors = ActuatorMotors()
+        self._state_history_snapshots: deque[dict[str, float]] = deque(maxlen=3)
         self._timer_clock = Clock(clock_type=ClockType.SYSTEM_TIME)
 
         qos = px4_qos_profile()
@@ -80,6 +105,32 @@ class ManualInputInjector(Node):
             self._vehicle_local_position_callback,
             qos,
         )
+        self.create_subscription(VehicleAttitude, "/fmu/out/vehicle_attitude", self._vehicle_attitude_callback, qos)
+        self.create_subscription(
+            VehicleAngularVelocity,
+            "/fmu/out/vehicle_angular_velocity",
+            self._vehicle_angular_velocity_callback,
+            qos,
+        )
+        self.create_subscription(
+            VehicleAttitudeSetpoint,
+            "/fmu/out/vehicle_attitude_setpoint",
+            self._vehicle_attitude_setpoint_callback,
+            qos,
+        )
+        self.create_subscription(
+            VehicleRatesSetpoint,
+            "/fmu/out/vehicle_rates_setpoint",
+            self._vehicle_rates_setpoint_callback,
+            qos,
+        )
+        self.create_subscription(
+            ControlAllocatorStatus,
+            "/fmu/out/control_allocator_status",
+            self._control_allocator_status_callback,
+            qos,
+        )
+        self.create_subscription(ActuatorMotors, "/fmu/out/actuator_motors", self._actuator_motors_callback, qos)
 
         # Drive setpoint publication from wall-clock time so simulator /clock stalls do not interrupt OFFBOARD streaming.
         self._timer = self.create_timer(self._config.period_s, self._timer_callback, clock=self._timer_clock)
@@ -97,6 +148,30 @@ class ManualInputInjector(Node):
     def _vehicle_local_position_callback(self, msg: VehicleLocalPosition) -> None:
         with self._lock:
             self._vehicle_local_position = msg
+
+    def _vehicle_attitude_callback(self, msg: VehicleAttitude) -> None:
+        with self._lock:
+            self._vehicle_attitude = msg
+
+    def _vehicle_angular_velocity_callback(self, msg: VehicleAngularVelocity) -> None:
+        with self._lock:
+            self._vehicle_angular_velocity = msg
+
+    def _vehicle_attitude_setpoint_callback(self, msg: VehicleAttitudeSetpoint) -> None:
+        with self._lock:
+            self._vehicle_attitude_setpoint = msg
+
+    def _vehicle_rates_setpoint_callback(self, msg: VehicleRatesSetpoint) -> None:
+        with self._lock:
+            self._vehicle_rates_setpoint = msg
+
+    def _control_allocator_status_callback(self, msg: ControlAllocatorStatus) -> None:
+        with self._lock:
+            self._control_allocator_status = msg
+
+    def _actuator_motors_callback(self, msg: ActuatorMotors) -> None:
+        with self._lock:
+            self._actuator_motors = msg
 
     def _append_anomaly(self, text: str) -> None:
         if text not in self._anomalies:
@@ -124,7 +199,11 @@ class ManualInputInjector(Node):
             self._disarm_command_time_ns = None
             self._completion_time_ns = None
             self._command_trace.clear()
+            self._attack_trace.clear()
             self._anomalies.clear()
+            self._state_history_snapshots.clear()
+            if self._attack_controller is not None:
+                self._attack_controller.reset()
 
     def is_completed(self) -> bool:
         with self._lock:
@@ -134,8 +213,22 @@ class ManualInputInjector(Node):
         with self._lock:
             return list(self._command_trace)
 
+    def attack_trace(self) -> list[dict[str, Any]]:
+        with self._lock:
+            return list(self._attack_trace)
+
     def report(self) -> dict[str, Any]:
         with self._lock:
+            attack_summary = {}
+            if self._attack_controller is not None:
+                trace_summary = summarize_attack_trace(self._attack_trace)
+                attack_summary = {
+                    "enabled": True,
+                    "method_name": self._attack_controller.method_spec.method_name,
+                    "line_code": self._attack_controller.method_spec.line_code,
+                    "candidate_id": self._attack_controller.method_spec.candidate_id,
+                    **trace_summary,
+                }
             return {
                 "offboard_command_time_ns": self._offboard_command_time_ns,
                 "arm_command_time_ns": self._arm_command_time_ns,
@@ -148,6 +241,7 @@ class ManualInputInjector(Node):
                 "completion_time_ns": self._completion_time_ns,
                 "completion_reason": self._completion_reason,
                 "anomalies": list(self._anomalies),
+                "attack_summary": attack_summary,
             }
 
     def _is_flight_mode(self) -> bool:
@@ -221,18 +315,197 @@ class ManualInputInjector(Node):
         yaw: float,
         throttle: float,
         phase: str,
+        *,
+        command_roll: float | None = None,
+        command_pitch: float | None = None,
+        command_yaw: float | None = None,
+        command_throttle: float | None = None,
     ) -> None:
         sample = CommandSample(
             publish_time_ns=publish_time_ns,
             elapsed_s=elapsed_s,
             profile_value=profile_value,
-            roll_body=roll,
-            pitch_body=pitch,
-            yaw_body=yaw,
-            thrust_z=throttle,
+            roll_body=command_roll if command_roll is not None else roll,
+            pitch_body=command_pitch if command_pitch is not None else pitch,
+            yaw_body=command_yaw if command_yaw is not None else yaw,
+            thrust_z=command_throttle if command_throttle is not None else throttle,
             phase=phase,
         )
         self._command_trace.append(sample.to_row())
+
+    def _current_state_snapshot(self) -> dict[str, float]:
+        roll, pitch, yaw = quaternion_to_euler(list(self._vehicle_attitude.q))
+        heading = float(self._vehicle_local_position.heading)
+        if math.isnan(heading):
+            heading = yaw
+        altitude = -float(self._vehicle_local_position.z) if bool(self._vehicle_local_position.z_valid) else 0.0
+        vertical_speed = -float(self._vehicle_local_position.vz) if bool(self._vehicle_local_position.v_z_valid) else 0.0
+        return {
+            "roll": float(roll),
+            "pitch": float(pitch),
+            "yaw": float(yaw),
+            "roll_rate": float(self._vehicle_angular_velocity.xyz[0]),
+            "pitch_rate": float(self._vehicle_angular_velocity.xyz[1]),
+            "yaw_rate": float(self._vehicle_angular_velocity.xyz[2]),
+            "position_x": float(self._vehicle_local_position.x) if bool(self._vehicle_local_position.xy_valid) else 0.0,
+            "position_y": float(self._vehicle_local_position.y) if bool(self._vehicle_local_position.xy_valid) else 0.0,
+            "position_z": float(self._vehicle_local_position.z) if bool(self._vehicle_local_position.z_valid) else 0.0,
+            "velocity_x": float(self._vehicle_local_position.vx) if bool(self._vehicle_local_position.v_xy_valid) else 0.0,
+            "velocity_y": float(self._vehicle_local_position.vy) if bool(self._vehicle_local_position.v_xy_valid) else 0.0,
+            "velocity_z": float(self._vehicle_local_position.vz) if bool(self._vehicle_local_position.v_z_valid) else 0.0,
+            "altitude": altitude,
+            "vertical_speed": vertical_speed,
+            "heading": float(heading),
+        }
+
+    def _state_delta_snapshot(self, current_state: dict[str, float]) -> dict[str, float]:
+        previous_state = self._state_history_snapshots[0] if self._state_history_snapshots else {}
+        return {
+            name: float(current_state.get(name, 0.0)) - float(previous_state.get(name, 0.0))
+            for name in current_state
+        }
+
+    def _tracking_error_snapshot(self, current_state: dict[str, float]) -> dict[str, float]:
+        return {
+            "roll": float(self._vehicle_attitude_setpoint.roll_body) - float(current_state.get("roll", 0.0)),
+            "pitch": float(self._vehicle_attitude_setpoint.pitch_body) - float(current_state.get("pitch", 0.0)),
+            "yaw": float(self._vehicle_attitude_setpoint.yaw_body) - float(current_state.get("yaw", 0.0)),
+            "roll_rate": float(self._vehicle_rates_setpoint.roll) - float(current_state.get("roll_rate", 0.0)),
+            "pitch_rate": float(self._vehicle_rates_setpoint.pitch) - float(current_state.get("pitch_rate", 0.0)),
+            "yaw_rate": float(self._vehicle_rates_setpoint.yaw) - float(current_state.get("yaw_rate", 0.0)),
+        }
+
+    def _attitude_error_snapshot(self, current_state: dict[str, float]) -> dict[str, float]:
+        tracking = self._tracking_error_snapshot(current_state)
+        return {
+            "roll": float(tracking["roll"]),
+            "pitch": float(tracking["pitch"]),
+            "yaw": float(tracking["yaw"]),
+        }
+
+    def _boundary_stress_value(self) -> float:
+        allocator_stress = getattr(self._control_allocator_status, "max_actuator_saturation", None)
+        if allocator_stress is not None:
+            allocator_stress_value = float(allocator_stress)
+            if math.isfinite(allocator_stress_value):
+                normalized = allocator_stress_value / 2.0 if abs(allocator_stress_value) > 1.0 else allocator_stress_value
+                return max(0.0, min(1.0, abs(normalized)))
+        saturation_states = getattr(self._control_allocator_status, "actuator_saturation", None)
+        if saturation_states is not None:
+            finite_states = [abs(float(value)) for value in list(saturation_states) if math.isfinite(float(value))]
+            if finite_states:
+                return max(0.0, min(1.0, max(finite_states) / 2.0))
+        finite_controls = [abs(float(value)) for value in list(getattr(self._actuator_motors, "control", [])) if math.isfinite(float(value))]
+        return max(finite_controls, default=0.0)
+
+    def _recovery_cost_value(self, state_delta: dict[str, float]) -> float:
+        values = [abs(float(state_delta.get(name, 0.0))) for name in ("roll", "pitch", "yaw", "roll_rate", "pitch_rate", "yaw_rate")]
+        baseline = float(np.mean(values)) if values else 0.0
+        return max(0.0, min(1.0, baseline + (0.25 * self._boundary_stress_value())))
+
+    def _current_mode_name(self) -> str:
+        if self._vehicle_status.nav_state == VehicleStatus.NAVIGATION_STATE_POSCTL:
+            return "POSCTL"
+        return self._config.mode_under_test_for_backend("px4")
+
+    def _record_attack_placeholder(
+        self,
+        *,
+        publish_time_ns: int,
+        elapsed_s: float,
+        phase: str,
+        nominal_command: tuple[float, float, float, float],
+        attacked_command: tuple[float, float, float, float],
+        note: str,
+    ) -> None:
+        if self._attack_controller is None:
+            return
+        delta = AttackDelta(
+            line_code=self._attack_controller.method_spec.line_code,
+            family_name=self._attack_controller.method_spec.method_name,
+            active=False,
+            delta_command=(0.0, 0.0, 0.0, 0.0),
+            pre_projection_command=(0.0, 0.0, 0.0, 0.0),
+            objective_terms={
+                "bundle_gain": 0.0,
+                "tracking_deviation": 0.0,
+                "attitude_deviation": 0.0,
+                "boundary_stress": 0.0,
+                "recovery_cost": 0.0,
+                "off_target_leakage": 0.0,
+                "conditioning": 0.0,
+                "budget": 0.0,
+            },
+            objective_score=0.0,
+            budget_terms={"cumulative_energy": 0.0, "energy_limit": 0.0, "budget_usage": 0.0},
+            context_features={},
+            notes=(note,),
+        )
+        self._attack_trace.append(
+            make_attack_trace_row(
+                publish_time_ns=publish_time_ns,
+                elapsed_s=elapsed_s,
+                phase=phase,
+                nominal_command=nominal_command,
+                attacked_command=attacked_command,
+                delta=delta,
+                method_spec=self._attack_controller.method_spec,
+            )
+        )
+
+    def _apply_attack(
+        self,
+        *,
+        publish_time_ns: int,
+        elapsed_s: float,
+        phase: str,
+        nominal_command: tuple[float, float, float, float],
+        attack_enabled: bool,
+    ) -> tuple[float, float, float, float]:
+        if self._attack_controller is None:
+            return nominal_command
+        if not attack_enabled:
+            self._record_attack_placeholder(
+                publish_time_ns=publish_time_ns,
+                elapsed_s=elapsed_s,
+                phase=phase,
+                nominal_command=nominal_command,
+                attacked_command=nominal_command,
+                note="inactive_phase",
+            )
+            return nominal_command
+        current_state = self._current_state_snapshot()
+        state_delta = self._state_delta_snapshot(current_state)
+        tracking_error = self._tracking_error_snapshot(current_state)
+        attitude_error = self._attitude_error_snapshot(current_state)
+        context = AttackContext(
+            backend="PX4",
+            mode=self._current_mode_name(),
+            current_state=current_state,
+            state_delta=state_delta,
+            state_history=list(self._state_history_snapshots),
+            current_command=nominal_command,
+            tracking_error=tracking_error,
+            attitude_error=attitude_error,
+            boundary_stress=self._boundary_stress_value(),
+            recovery_cost=self._recovery_cost_value(state_delta),
+            elapsed_fraction=max(0.0, min(1.0, elapsed_s / max(self._profile.total_duration_s, 1e-6))),
+        )
+        delta = self._attack_controller.generate(context)
+        attacked_command = apply_attack_to_command(nominal_command, delta)
+        self._attack_trace.append(
+            make_attack_trace_row(
+                publish_time_ns=publish_time_ns,
+                elapsed_s=elapsed_s,
+                phase=phase,
+                nominal_command=nominal_command,
+                attacked_command=attacked_command,
+                delta=delta,
+                method_spec=self._attack_controller.method_spec,
+            )
+        )
+        self._state_history_snapshots.appendleft(current_state)
+        return attacked_command
 
     def _publish_manual_input(
         self,
@@ -313,6 +586,14 @@ class ManualInputInjector(Node):
         if self._warmup_counter < self._config.warmup_cycles:
             self._publish_manual_zero(now_us)
             self._record_command(now_ns, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "warmup_manual")
+            self._record_attack_placeholder(
+                publish_time_ns=now_ns,
+                elapsed_s=0.0,
+                phase="warmup_manual",
+                nominal_command=(0.0, 0.0, 0.0, 0.0),
+                attacked_command=(0.0, 0.0, 0.0, 0.0),
+                note="inactive_phase",
+            )
             self._warmup_counter += 1
             if self._warmup_counter == self._config.warmup_cycles:
                 self._experiment_start_time_ns = now_ns
@@ -322,9 +603,29 @@ class ManualInputInjector(Node):
             self._experiment_start_time_ns = now_ns
 
         elapsed_s = (now_ns - self._experiment_start_time_ns) / 1e9
-        profile_value, roll, pitch, yaw, throttle, phase = self._profile.manual_targets_at(elapsed_s)
-        self._publish_manual_input(now_us, now_us, roll, pitch, yaw, throttle)
-        self._record_command(now_ns, elapsed_s, profile_value, roll, pitch, yaw, throttle, phase)
+        profile_value, nominal_roll, nominal_pitch, nominal_yaw, nominal_throttle, phase = self._profile.manual_targets_at(elapsed_s)
+        attacked_command = self._apply_attack(
+            publish_time_ns=now_ns,
+            elapsed_s=elapsed_s,
+            phase=phase,
+            nominal_command=(nominal_roll, nominal_pitch, nominal_yaw, nominal_throttle),
+            attack_enabled=True,
+        )
+        self._publish_manual_input(now_us, now_us, *attacked_command)
+        self._record_command(
+            now_ns,
+            elapsed_s,
+            profile_value,
+            nominal_roll,
+            nominal_pitch,
+            nominal_yaw,
+            nominal_throttle,
+            phase,
+            command_roll=attacked_command[0],
+            command_pitch=attacked_command[1],
+            command_yaw=attacked_command[2],
+            command_throttle=attacked_command[3],
+        )
 
         if elapsed_s >= self._profile.total_duration_s:
             self._completed = True
@@ -345,6 +646,14 @@ class ManualInputInjector(Node):
             )
             self._publish_manual_zero(now_us)
             self._record_command(now_ns, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, "warmup_position")
+            self._record_attack_placeholder(
+                publish_time_ns=now_ns,
+                elapsed_s=0.0,
+                phase="warmup_position",
+                nominal_command=(0.0, 0.0, 0.0, 0.0),
+                attacked_command=(0.0, 0.0, 0.0, 0.0),
+                note="inactive_phase",
+            )
             self._warmup_counter += 1
             if self._warmup_counter == self._config.warmup_cycles:
                 self._initialize_takeoff_target()
@@ -374,6 +683,14 @@ class ManualInputInjector(Node):
 
             self._publish_manual_zero(now_us)
             self._record_command(now_ns, takeoff_elapsed_s, 0.0, 0.0, 0.0, 0.0, 0.0, "takeoff_position_hold")
+            self._record_attack_placeholder(
+                publish_time_ns=now_ns,
+                elapsed_s=takeoff_elapsed_s,
+                phase="takeoff_position_hold",
+                nominal_command=(0.0, 0.0, 0.0, 0.0),
+                attacked_command=(0.0, 0.0, 0.0, 0.0),
+                note="inactive_phase",
+            )
 
             if self._manual_mode_engaged():
                 self._experiment_start_time_ns = now_ns
@@ -435,9 +752,29 @@ class ManualInputInjector(Node):
 
         elapsed_s = (now_ns - self._experiment_start_time_ns) / 1e9
         if not self._landing_sent:
-            profile_value, roll, pitch, yaw, throttle, phase = self._profile.manual_targets_at(elapsed_s)
-            self._publish_manual_input(now_us, now_us, roll, pitch, yaw, throttle)
-            self._record_command(now_ns, elapsed_s, profile_value, roll, pitch, yaw, throttle, phase)
+            profile_value, nominal_roll, nominal_pitch, nominal_yaw, nominal_throttle, phase = self._profile.manual_targets_at(elapsed_s)
+            attacked_command = self._apply_attack(
+                publish_time_ns=now_ns,
+                elapsed_s=elapsed_s,
+                phase=phase,
+                nominal_command=(nominal_roll, nominal_pitch, nominal_yaw, nominal_throttle),
+                attack_enabled=True,
+            )
+            self._publish_manual_input(now_us, now_us, *attacked_command)
+            self._record_command(
+                now_ns,
+                elapsed_s,
+                profile_value,
+                nominal_roll,
+                nominal_pitch,
+                nominal_yaw,
+                nominal_throttle,
+                phase,
+                command_roll=attacked_command[0],
+                command_pitch=attacked_command[1],
+                command_yaw=attacked_command[2],
+                command_throttle=attacked_command[3],
+            )
 
             if not self._manual_mode_engaged() and elapsed_s > 1.0:
                 self._append_anomaly("manual_mode_not_held")
@@ -457,6 +794,14 @@ class ManualInputInjector(Node):
 
         if self._landing_sent:
             self._publish_manual_zero(now_us)
+            self._record_attack_placeholder(
+                publish_time_ns=now_ns,
+                elapsed_s=elapsed_s,
+                phase="landing_hold",
+                nominal_command=(0.0, 0.0, 0.0, 0.0),
+                attacked_command=(0.0, 0.0, 0.0, 0.0),
+                note="inactive_phase",
+            )
             if self._vehicle_status.arming_state == VehicleStatus.ARMING_STATE_DISARMED:
                 self._completed = True
                 self._completion_time_ns = now_ns
