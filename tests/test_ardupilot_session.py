@@ -15,12 +15,12 @@ def test_visualization_defaults_to_gui_when_display_is_available(monkeypatch) ->
     assert session._visualization_enabled() is True
 
 
-def test_visualization_respects_headless_override(monkeypatch) -> None:
+def test_visualization_defaults_to_enabled_even_when_headless(monkeypatch) -> None:
     monkeypatch.setenv("AUTOPILOT_LAB_HEADLESS", "1")
     monkeypatch.setenv("DISPLAY", ":1")
 
     assert session._headless_enabled() is True
-    assert session._visualization_enabled() is False
+    assert session._visualization_enabled() is True
 
 
 def test_visualization_explicit_false_overrides_display(monkeypatch) -> None:
@@ -35,10 +35,18 @@ def test_visualization_explicit_false_overrides_display(monkeypatch) -> None:
 def test_visualizer_command_includes_map_when_supported(monkeypatch) -> None:
     monkeypatch.setattr(session, "_mavproxy_executable", lambda: "/usr/bin/mavproxy.py")
 
-    command = session._visualizer_command("tcp:127.0.0.1:5760")
+    command = session._visualizer_command(
+        "tcp:127.0.0.1:5760",
+        output_uri="tcpin:127.0.0.1:5770",
+    )
 
     assert command is not None
-    assert "--console --map" in command[-1]
+    assert "--force-connected" in command[-1]
+    assert "--non-interactive" in command[-1]
+    assert "--nowait" in command[-1]
+    assert "--map" in command[-1]
+    assert "--console" not in command[-1]
+    assert "--out=tcpin:127.0.0.1:5770" in command[-1]
 
 
 def test_finalize_visualization_report_detects_loaded_map(tmp_path: Path) -> None:
@@ -176,6 +184,7 @@ def test_start_visualizer_launches_after_connection(tmp_path: Path, monkeypatch)
             return None
 
     monkeypatch.setattr(session, "_mavproxy_executable", lambda: "/usr/bin/mavproxy.py")
+    monkeypatch.setattr(session, "_allocate_control_bridge_uri", lambda: "tcp:127.0.0.1:5770")
     monkeypatch.setattr(session, "_visualizer_command", lambda *args, **kwargs: ["bash", "-lc", "echo ok"])
     monkeypatch.setattr(session.subprocess, "Popen", lambda *args, **kwargs: _FakeProcess())
     monkeypatch.setattr(session.time, "sleep", lambda _seconds: None)
@@ -187,6 +196,7 @@ def test_start_visualizer_launches_after_connection(tmp_path: Path, monkeypatch)
     assert updated.visualization is not None
     assert updated.visualization.mavproxy_started is True
     assert updated.visualization.map_requested is True
+    assert updated.control_master_uri == "tcp:127.0.0.1:5770"
 
 
 def test_connect_allows_autoreconnect_override(monkeypatch, tmp_path: Path) -> None:

@@ -78,9 +78,14 @@ class ExcitationGenerator:
         aggregate = float(sum(values.values()) / max(len(values), 1))
         return values, aggregate, "multi_broad_active"
 
-    def _multi_broad_axis_bias(self, axis: str) -> float:
-        axis_bias = self._config.extras.get("multi_broad_axis_bias", {}) or {}
-        return float(axis_bias.get(str(axis).strip().lower(), 0.0))
+    def _axis_bias(self, axis: str) -> float:
+        axis_key = str(axis).strip().lower()
+        bias = 0.0
+        for key in ("composite_axis_bias", "multi_broad_axis_bias"):
+            axis_bias = self._config.extras.get(key, {}) or {}
+            if axis_key in axis_bias:
+                bias = float(axis_bias[axis_key])
+        return bias
 
     def profile_value_at(self, elapsed_s: float) -> tuple[float, str]:
         config = self._config
@@ -179,7 +184,7 @@ class ExcitationGenerator:
             active_elapsed = elapsed_s - config.start_after_s
             if active_elapsed >= config.duration_s:
                 return config.bias, "recover"
-            value = self._multi_broad_axis_signal(config.axis, active_elapsed) + self._multi_broad_axis_bias(config.axis)
+            value = self._multi_broad_axis_signal(config.axis, active_elapsed) + self._axis_bias(config.axis)
             return value, "multi_broad_active"
 
         raise ValueError(f"不支持的 profile_type: {config.profile_type}")
@@ -189,23 +194,23 @@ class ExcitationGenerator:
         if config.profile_type == "multi_broad" and config.axis == "composite":
             values, aggregate, phase = self._multi_broad_values(elapsed_s)
             roll_body = clamp(
-                values["roll"] * float(config.extras.get("roll_amplitude", 1.0)) + self._multi_broad_axis_bias("roll"),
+                values["roll"] * float(config.extras.get("roll_amplitude", 1.0)) + self._axis_bias("roll"),
                 -1.0,
                 1.0,
             )
             pitch_body = clamp(
-                values["pitch"] * float(config.extras.get("pitch_amplitude", 0.7)) + self._multi_broad_axis_bias("pitch"),
+                values["pitch"] * float(config.extras.get("pitch_amplitude", 0.7)) + self._axis_bias("pitch"),
                 -1.0,
                 1.0,
             )
             yaw_body = clamp(
-                values["yaw"] * float(config.extras.get("yaw_amplitude", 0.5)) + self._multi_broad_axis_bias("yaw"),
+                values["yaw"] * float(config.extras.get("yaw_amplitude", 0.5)) + self._axis_bias("yaw"),
                 -1.0,
                 1.0,
             )
             thrust_delta = (
                 values["throttle"] * float(config.extras.get("thrust_delta", 0.3))
-                + self._multi_broad_axis_bias("throttle")
+                + self._axis_bias("throttle")
             )
             thrust_z = clamp(config.hover_thrust - thrust_delta, -1.0, 1.0)
             return aggregate, roll_body, pitch_body, yaw_body, thrust_z, phase
@@ -224,10 +229,10 @@ class ExcitationGenerator:
         elif config.axis == "throttle":
             thrust_z = clamp(config.hover_thrust - profile_value, -1.0, 1.0)
         elif config.axis == "composite":
-            roll_body = clamp(profile_value * float(config.extras.get("roll_amplitude", 1.0)), -1.0, 1.0)
-            pitch_body = clamp(profile_value * float(config.extras.get("pitch_amplitude", 0.7)), -1.0, 1.0)
-            yaw_body = clamp(profile_value * float(config.extras.get("yaw_amplitude", 0.5)), -1.0, 1.0)
-            thrust_delta = profile_value * float(config.extras.get("thrust_delta", 0.3))
+            roll_body = clamp(profile_value * float(config.extras.get("roll_amplitude", 1.0)) + self._axis_bias("roll"), -1.0, 1.0)
+            pitch_body = clamp(profile_value * float(config.extras.get("pitch_amplitude", 0.7)) + self._axis_bias("pitch"), -1.0, 1.0)
+            yaw_body = clamp(profile_value * float(config.extras.get("yaw_amplitude", 0.5)) + self._axis_bias("yaw"), -1.0, 1.0)
+            thrust_delta = (profile_value * float(config.extras.get("thrust_delta", 0.3))) + self._axis_bias("throttle")
             thrust_z = clamp(config.hover_thrust - thrust_delta, -1.0, 1.0)
         return profile_value, roll_body, pitch_body, yaw_body, thrust_z, phase
 
@@ -236,22 +241,22 @@ class ExcitationGenerator:
         if config.profile_type == "multi_broad" and config.axis == "composite":
             values, aggregate, phase = self._multi_broad_values(elapsed_s)
             roll = clamp(
-                values["roll"] * float(config.extras.get("roll_amplitude", 1.0)) + self._multi_broad_axis_bias("roll"),
+                values["roll"] * float(config.extras.get("roll_amplitude", 1.0)) + self._axis_bias("roll"),
                 -1.0,
                 1.0,
             )
             pitch = clamp(
-                values["pitch"] * float(config.extras.get("pitch_amplitude", 0.7)) + self._multi_broad_axis_bias("pitch"),
+                values["pitch"] * float(config.extras.get("pitch_amplitude", 0.7)) + self._axis_bias("pitch"),
                 -1.0,
                 1.0,
             )
             yaw = clamp(
-                values["yaw"] * float(config.extras.get("yaw_amplitude", 0.5)) + self._multi_broad_axis_bias("yaw"),
+                values["yaw"] * float(config.extras.get("yaw_amplitude", 0.5)) + self._axis_bias("yaw"),
                 -1.0,
                 1.0,
             )
             throttle = clamp(
-                values["throttle"] * float(config.extras.get("throttle_amplitude", 0.4)) + self._multi_broad_axis_bias("throttle"),
+                values["throttle"] * float(config.extras.get("throttle_amplitude", 0.4)) + self._axis_bias("throttle"),
                 -1.0,
                 1.0,
             )
@@ -271,10 +276,10 @@ class ExcitationGenerator:
         elif config.axis == "throttle":
             throttle = clamp(profile_value, -1.0, 1.0)
         elif config.axis == "composite":
-            roll = clamp(profile_value * float(config.extras.get("roll_amplitude", 1.0)), -1.0, 1.0)
-            pitch = clamp(profile_value * float(config.extras.get("pitch_amplitude", 0.7)), -1.0, 1.0)
-            yaw = clamp(profile_value * float(config.extras.get("yaw_amplitude", 0.5)), -1.0, 1.0)
-            throttle = clamp(profile_value * float(config.extras.get("throttle_amplitude", 0.4)), -1.0, 1.0)
+            roll = clamp(profile_value * float(config.extras.get("roll_amplitude", 1.0)) + self._axis_bias("roll"), -1.0, 1.0)
+            pitch = clamp(profile_value * float(config.extras.get("pitch_amplitude", 0.7)) + self._axis_bias("pitch"), -1.0, 1.0)
+            yaw = clamp(profile_value * float(config.extras.get("yaw_amplitude", 0.5)) + self._axis_bias("yaw"), -1.0, 1.0)
+            throttle = clamp(profile_value * float(config.extras.get("throttle_amplitude", 0.4)) + self._axis_bias("throttle"), -1.0, 1.0)
         return profile_value, roll, pitch, yaw, throttle, phase
 
     def rate_targets_at(self, elapsed_s: float) -> tuple[float, float, float, float, float, str]:
@@ -282,23 +287,23 @@ class ExcitationGenerator:
         if config.profile_type == "multi_broad" and config.axis == "composite":
             values, aggregate, phase = self._multi_broad_values(elapsed_s)
             roll_rate = clamp(
-                values["roll"] * float(config.extras.get("roll_rate_amplitude", 1.5)) + self._multi_broad_axis_bias("roll"),
+                values["roll"] * float(config.extras.get("roll_rate_amplitude", 1.5)) + self._axis_bias("roll"),
                 -4.0,
                 4.0,
             )
             pitch_rate = clamp(
-                values["pitch"] * float(config.extras.get("pitch_rate_amplitude", 1.2)) + self._multi_broad_axis_bias("pitch"),
+                values["pitch"] * float(config.extras.get("pitch_rate_amplitude", 1.2)) + self._axis_bias("pitch"),
                 -4.0,
                 4.0,
             )
             yaw_rate = clamp(
-                values["yaw"] * float(config.extras.get("yaw_rate_amplitude", 0.8)) + self._multi_broad_axis_bias("yaw"),
+                values["yaw"] * float(config.extras.get("yaw_rate_amplitude", 0.8)) + self._axis_bias("yaw"),
                 -4.0,
                 4.0,
             )
             thrust_delta = (
                 values["throttle"] * float(config.extras.get("thrust_delta", 0.3))
-                + self._multi_broad_axis_bias("throttle")
+                + self._axis_bias("throttle")
             )
             thrust_z = clamp(config.hover_thrust - thrust_delta, -1.0, 1.0)
             return aggregate, roll_rate, pitch_rate, yaw_rate, thrust_z, phase
@@ -317,9 +322,9 @@ class ExcitationGenerator:
         elif config.axis == "throttle":
             thrust_z = clamp(config.hover_thrust - profile_value, -1.0, 1.0)
         elif config.axis == "composite":
-            roll_rate = clamp(profile_value * float(config.extras.get("roll_rate_amplitude", 1.5)), -4.0, 4.0)
-            pitch_rate = clamp(profile_value * float(config.extras.get("pitch_rate_amplitude", 1.2)), -4.0, 4.0)
-            yaw_rate = clamp(profile_value * float(config.extras.get("yaw_rate_amplitude", 0.8)), -4.0, 4.0)
-            thrust_delta = profile_value * float(config.extras.get("thrust_delta", 0.3))
+            roll_rate = clamp(profile_value * float(config.extras.get("roll_rate_amplitude", 1.5)) + self._axis_bias("roll"), -4.0, 4.0)
+            pitch_rate = clamp(profile_value * float(config.extras.get("pitch_rate_amplitude", 1.2)) + self._axis_bias("pitch"), -4.0, 4.0)
+            yaw_rate = clamp(profile_value * float(config.extras.get("yaw_rate_amplitude", 0.8)) + self._axis_bias("yaw"), -4.0, 4.0)
+            thrust_delta = (profile_value * float(config.extras.get("thrust_delta", 0.3))) + self._axis_bias("throttle")
             thrust_z = clamp(config.hover_thrust - thrust_delta, -1.0, 1.0)
         return profile_value, roll_rate, pitch_rate, yaw_rate, thrust_z, phase

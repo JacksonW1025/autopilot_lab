@@ -29,7 +29,7 @@ from rclpy.clock import Clock, ClockType
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 
-from linearity_core.attack_eval import (
+from linearity_core.attack_injection import (
     apply_attack_to_command,
     build_attack_controller_from_config,
     make_attack_trace_row,

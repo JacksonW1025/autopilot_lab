@@ -8,8 +8,9 @@ from pymavlink import mavutil
 
 from ardupilot_mavlink_backend import experiment_runner
 from ardupilot_mavlink_backend.session import wait_for_mode
+from linearity_core.attack_runtime import AttackDelta
 from linearity_core.config import RunConfig
-from linearity_core.io import write_rows_csv
+from linearity_core.io import read_yaml, write_rows_csv
 
 
 class _FakeMav:
@@ -460,3 +461,328 @@ def test_run_capture_disables_autoreconnect(monkeypatch, tmp_path: Path) -> None
         "autoreconnect": False,
         "closed": True,
     }
+
+
+def test_run_capture_uses_visualizer_bridge_uri_when_visualization_enabled(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    class _FakeProfile:
+        total_duration_s = 0.0
+
+    class _FakeConnectedMaster:
+        def __init__(self) -> None:
+            self.autoreconnect = False
+
+        def close(self) -> None:
+            captured["closed"] = True
+
+    def _fake_connect(uri: str, tlog_path: Path, timeout_s: float, *, autoreconnect: bool):
+        captured["uri"] = uri
+        captured["tlog_path"] = tlog_path
+        captured["timeout_s"] = timeout_s
+        captured["autoreconnect"] = autoreconnect
+        tlog_path.parent.mkdir(parents=True, exist_ok=True)
+        tlog_path.write_bytes(b"")
+        return _FakeConnectedMaster()
+
+    def _fake_start_sitl(*args, **kwargs):  # noqa: ANN002,ANN003
+        del args, kwargs
+        return SimpleNamespace(
+            sitl_process=None,
+            sitl_log_path=tmp_path / "ardupilot_sitl.log",
+            visualizer_process=None,
+            visualizer_log_path=None,
+            visualization=SimpleNamespace(requested=True),
+            control_master_uri="tcp:127.0.0.1:5760",
+        )
+
+    def _fake_start_visualizer(process, master_uri):  # noqa: ANN001
+        captured["visualizer_master_uri"] = master_uri
+        process.control_master_uri = "tcp:127.0.0.1:5770"
+        return process
+
+    monkeypatch.setattr(experiment_runner, "ARDUPILOT_RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(experiment_runner, "ARDUPILOT_ROOT", tmp_path / "ardupilot")
+    monkeypatch.setattr(experiment_runner, "ExcitationGenerator", lambda config: _FakeProfile())
+    monkeypatch.setattr(experiment_runner, "start_sitl_process", _fake_start_sitl)
+    monkeypatch.setattr(experiment_runner, "start_visualizer", _fake_start_visualizer)
+    monkeypatch.setattr(experiment_runner, "connect", _fake_connect)
+    monkeypatch.setattr(experiment_runner, "cleanup_residual_processes", lambda: None)
+    monkeypatch.setattr(experiment_runner, "_wait_for_vehicle_ready", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_prepare_parameters", lambda *args, **kwargs: ({}, {}, []))
+    monkeypatch.setattr(experiment_runner, "_prepare_runtime_arming", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_arm_vehicle", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_append_message_rows", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "_land_vehicle", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "stop_process", lambda process: None)
+    monkeypatch.setattr(experiment_runner, "finalize_visualization_report", lambda process: {})
+    monkeypatch.setattr(experiment_runner, "capture_host_snapshot", lambda: {})
+    monkeypatch.setattr(experiment_runner, "_snapshot_logs", lambda *args, **kwargs: {})
+    monkeypatch.setattr(experiment_runner, "_apply_bin_canonical_fallback", lambda *args, **kwargs: {})
+    monkeypatch.setattr(
+        experiment_runner,
+        "_ardupilot_data_quality",
+        lambda *args, **kwargs: {
+            "topic_presence": {"missing_topics": []},
+            "quality_flags": {
+                "non_monotonic_streams": [],
+                "alignment_p95_exceeded_streams": [],
+            },
+            "acceptance": experiment_runner.build_acceptance_block(
+                experiment_started=True,
+                active_phase_present=True,
+                expected_active_samples=0,
+                active_sample_count=0,
+                active_nonzero_command_samples=0,
+                failsafe_during_experiment=False,
+                missing_topics_blocking=[],
+                accepted=True,
+            ),
+        },
+    )
+
+    config = RunConfig.from_dict(
+        {
+            "study_name": "visualizer_bridge_unit",
+            "backend": "ardupilot",
+            "flight_mode": "GUIDED_NOGPS",
+            "scenario": "bridge",
+            "config_profile": "bridge",
+            "seed": 2,
+            "repeat_count": 1,
+            "sampling_rate_hz": 10.0,
+            "x_schema": "state_minimal_v1",
+            "input_type": "manual",
+            "axis": "throttle",
+            "profile_type": "pulse_train",
+            "duration_s": 0.0,
+            "extras": {"ardupilot_tail_s": -1.0},
+        }
+    )
+
+    exit_code, artifact_dir = experiment_runner.run_capture(
+        config,
+        start_sitl=True,
+        master_uri="tcp:127.0.0.1:5760",
+        connect_timeout_s=3.5,
+    )
+
+    assert exit_code == 0
+    assert artifact_dir.exists()
+    assert captured["visualizer_master_uri"] == "tcp:127.0.0.1:5760"
+    assert captured["uri"] == "tcp:127.0.0.1:5770"
+
+
+def test_run_capture_writes_attack_trace_when_attack_injection_is_enabled(tmp_path: Path, monkeypatch) -> None:
+    class _ManualMav:
+        def __init__(self) -> None:
+            self.manual_control_calls: list[tuple[int, int, int, int, int, int]] = []
+
+        def manual_control_send(self, *args):  # noqa: ANN001
+            self.manual_control_calls.append(args)
+
+    class _ManualMaster:
+        def __init__(self) -> None:
+            self.target_system = 1
+            self.target_component = 1
+            self.mav = _ManualMav()
+            self.autoreconnect = False
+            self.closed = False
+
+        def close(self) -> None:
+            self.closed = True
+
+    class _FakeAttackController:
+        def __init__(self) -> None:
+            self.method_spec = SimpleNamespace(
+                method_name="family_aware_usdta_v1",
+                line_code="AP-DAB",
+                candidate_id="winner_01",
+                search_iteration=1,
+            )
+
+        def reset(self) -> None:
+            return None
+
+        def generate(self, context):  # noqa: ANN001
+            del context
+            return AttackDelta(
+                line_code="AP-DAB",
+                family_name="family_aware_usdta_v1",
+                active=True,
+                delta_command=(0.05, 0.0, 0.0, 0.02),
+                pre_projection_command=(0.06, 0.0, 0.0, 0.03),
+                objective_terms={
+                    "bundle_gain": 0.18,
+                    "tracking_deviation": 0.08,
+                    "attitude_deviation": 0.05,
+                    "boundary_stress": 0.12,
+                    "recovery_cost": 0.03,
+                    "off_target_leakage": 0.10,
+                    "conditioning": 0.12,
+                    "budget": 0.22,
+                },
+                objective_score=0.16,
+                budget_terms={
+                    "cumulative_energy": 0.04,
+                    "energy_limit": 0.35,
+                    "budget_usage": 0.22,
+                },
+                context_features={
+                    "context_drive": 0.26,
+                    "bundle_drive": 0.30,
+                    "temporal_mean": 0.18,
+                    "temporal_slope": 0.10,
+                    "temporal_curvature": 0.07,
+                    "temporal_energy": 0.20,
+                    "schedule": 0.90,
+                    "conditioning_factor": 0.80,
+                    "leakage_factor": 0.82,
+                    "recovery_factor": 0.88,
+                },
+                notes=(),
+            )
+
+    fake_master = _ManualMaster()
+    monotonic_values = iter([0.0, 0.01, 0.02, 0.20])
+
+    monkeypatch.setattr(experiment_runner, "ARDUPILOT_RAW_ROOT", tmp_path / "raw")
+    monkeypatch.setattr(experiment_runner, "cleanup_residual_processes", lambda: None)
+    monkeypatch.setattr(experiment_runner, "connect", lambda *args, **kwargs: fake_master)
+    monkeypatch.setattr(experiment_runner, "_wait_for_vehicle_ready", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_prepare_parameters", lambda *args, **kwargs: ({}, {}, []))
+    monkeypatch.setattr(experiment_runner, "_prepare_runtime_arming", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_arm_vehicle", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "_land_vehicle", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "_restore_parameters", lambda *args, **kwargs: [])
+    monkeypatch.setattr(experiment_runner, "stop_process", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "finalize_visualization_report", lambda *args, **kwargs: {})
+    monkeypatch.setattr(experiment_runner, "_snapshot_logs", lambda *args, **kwargs: {})
+    monkeypatch.setattr(experiment_runner, "_resolve_latest_file", lambda *args, **kwargs: None)
+    monkeypatch.setattr(experiment_runner, "capture_host_snapshot", lambda: {"uptime": "test", "loadavg": "0 0 0"})
+    monkeypatch.setattr(experiment_runner, "_apply_bin_canonical_fallback", lambda *args, **kwargs: {})
+    monkeypatch.setattr(
+        experiment_runner,
+        "_ardupilot_data_quality",
+        lambda *args, **kwargs: {
+            "topic_presence": {"missing_topics": []},
+            "quality_flags": {
+                "non_monotonic_streams": [],
+                "alignment_p95_exceeded_streams": [],
+            },
+            "acceptance": experiment_runner.build_acceptance_block(
+                experiment_started=True,
+                active_phase_present=True,
+                expected_active_samples=1,
+                active_sample_count=1,
+                active_nonzero_command_samples=1,
+                failsafe_during_experiment=False,
+                missing_topics_blocking=[],
+                accepted=True,
+            ),
+        },
+    )
+    monkeypatch.setattr(experiment_runner, "build_attack_controller_from_config", lambda *args, **kwargs: _FakeAttackController())
+    monkeypatch.setattr(experiment_runner.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(experiment_runner.time, "monotonic", lambda: next(monotonic_values))
+
+    def _append_message_rows(master, attitude_rows, position_rows, heartbeat_rows, status_rows, position_origin):  # noqa: ANN001
+        del master
+        timestamp = 1_000_000_000 + len(attitude_rows)
+        attitude_rows.append(
+            {
+                "received_time_ns": timestamp,
+                "roll": 0.10,
+                "pitch": -0.02,
+                "yaw": 0.03,
+                "rollspeed": 0.05,
+                "pitchspeed": -0.01,
+                "yawspeed": 0.02,
+            }
+        )
+        position_rows.append(
+            {
+                "received_time_ns": timestamp,
+                "x": 0.0,
+                "y": 0.0,
+                "z": -1.2,
+                "vx": 0.0,
+                "vy": 0.0,
+                "vz": -0.05,
+            }
+        )
+        heartbeat_rows.append(
+            {
+                "received_time_ns": timestamp,
+                "base_mode": 0,
+                "custom_mode": 0,
+                "system_status": 0,
+            }
+        )
+        status_rows.append(
+            {
+                "received_time_ns": timestamp,
+                "voltage_battery": 12000,
+                "current_battery": 100,
+                "battery_remaining": 95,
+                "drop_rate_comm": 0,
+            }
+        )
+        return position_origin
+
+    monkeypatch.setattr(experiment_runner, "_append_message_rows", _append_message_rows)
+
+    config = RunConfig.from_dict(
+        {
+            "study_name": "attack_trace_unit",
+            "backend": "ardupilot",
+            "flight_mode": "STABILIZE",
+            "scenario": "nominal",
+            "config_profile": "attack_trace_unit",
+            "seed": 7,
+            "repeat_count": 1,
+            "sampling_rate_hz": 10.0,
+            "x_schema": "commands_plus_state",
+            "input_type": "manual",
+            "axis": "composite",
+            "profile_type": "pulse",
+            "start_after_s": 0.0,
+            "duration_s": 0.1,
+            "hold_s": 0.0,
+            "extras": {
+                "ardupilot_tail_s": 0.0,
+            },
+        }
+    )
+
+    exit_code, artifact_dir = experiment_runner.run_capture(
+        config,
+        start_sitl=False,
+        master_uri="tcp:127.0.0.1:5760",
+    )
+
+    assert exit_code == 0
+    attack_trace_path = artifact_dir / "telemetry" / "attack_trace.csv"
+    manifest_path = artifact_dir / "manifest.yaml"
+    input_trace_path = artifact_dir / "telemetry" / "input_trace.csv"
+    assert attack_trace_path.exists()
+    assert manifest_path.exists()
+    assert input_trace_path.exists()
+
+    with attack_trace_path.open("r", encoding="utf-8", newline="") as handle:
+        attack_rows = list(csv.DictReader(handle))
+    assert len(attack_rows) == 1
+    assert attack_rows[0]["method_name"] == "family_aware_usdta_v1"
+    assert float(attack_rows[0]["delta_roll"]) > 0.0
+    assert float(attack_rows[0]["delta_throttle"]) > 0.0
+
+    with input_trace_path.open("r", encoding="utf-8", newline="") as handle:
+        input_rows = list(csv.DictReader(handle))
+    assert len(input_rows) == 1
+    assert float(input_rows[0]["command_roll"]) > 0.20
+    assert float(input_rows[0]["command_throttle"]) > 0.20
+
+    manifest = read_yaml(manifest_path)
+    assert manifest["runtime_report"]["attack_summary"]["method_name"] == "family_aware_usdta_v1"
+    assert manifest["runtime_report"]["attack_summary"]["line_code"] == "AP-DAB"
+    assert manifest["runtime_report"]["attack_summary"]["row_count"] == 1

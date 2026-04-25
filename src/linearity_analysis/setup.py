@@ -27,7 +27,6 @@ setup(
             "linearity_stage_checks = linearity_analysis.stage_checks:main",
             "linearity_stage2_six_line_common_cause = linearity_analysis.stage2_six_line_common_cause:main",
             "linearity_stage3_attack_design = linearity_analysis.stage3_attack_design:main",
-            "linearity_stage4_px4_pilot = linearity_analysis.stage4_px4_pilot:main",
         ],
     },
 )

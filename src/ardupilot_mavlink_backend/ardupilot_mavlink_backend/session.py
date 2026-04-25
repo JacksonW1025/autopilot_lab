@@ -4,6 +4,7 @@ import os
 import shlex
 import shutil
 import signal
+import socket
 import subprocess
 import time
 from dataclasses import dataclass
@@ -29,6 +30,7 @@ class ManagedSession:
     visualizer_process: subprocess.Popen[str] | None = None
     visualizer_log_path: Path | None = None
     visualization: "VisualizationReport" | None = None
+    control_master_uri: str = "tcp:127.0.0.1:5760"
 
 
 @dataclass(slots=True)
@@ -74,7 +76,8 @@ def _mavproxy_map_supported() -> bool:
 def _visualization_enabled(enable_visualization: bool | None = None) -> bool:
     if enable_visualization is not None:
         return bool(enable_visualization)
-    return not _headless_enabled()
+    # ArduPilot runs are expected to expose the live MAVProxy map by default.
+    return True
 
 
 def _sitl_command(run_id: str, vehicle: str, frame: str) -> list[str]:
@@ -89,13 +92,33 @@ def _sitl_command(run_id: str, vehicle: str, frame: str) -> list[str]:
     ]
 
 
-def _visualizer_command(master_uri: str, *, executable: str | None = None, request_map: bool = True) -> list[str] | None:
+def _allocate_control_bridge_uri(host: str = "127.0.0.1") -> str:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as handle:
+        handle.bind((host, 0))
+        return f"tcp:{host}:{int(handle.getsockname()[1])}"
+
+
+def _bridge_output_uri(control_master_uri: str) -> str:
+    if not control_master_uri.startswith("tcp:"):
+        raise ValueError(f"Unsupported control bridge URI: {control_master_uri}")
+    return f"tcpin:{control_master_uri[4:]}"
+
+
+def _visualizer_command(
+    master_uri: str,
+    *,
+    executable: str | None = None,
+    request_map: bool = True,
+    output_uri: str | None = None,
+) -> list[str] | None:
     executable = executable or _mavproxy_executable()
     if executable is None:
         return None
-    modules = ["--console"]
+    modules: list[str] = ["--force-connected", "--non-interactive", "--nowait"]
     if request_map:
         modules.append("--map")
+    if output_uri:
+        modules.append(f"--out={shlex.quote(output_uri)}")
     joined = " ".join(modules)
     return [
         "bash",
@@ -230,6 +253,7 @@ def start_sitl(
         visualizer_process=None,
         visualizer_log_path=None,
         visualization=visualization,
+        control_master_uri=master_uri,
     )
 
 
@@ -247,7 +271,13 @@ def start_visualizer(session: ManagedSession, master_uri: str) -> ManagedSession
         session.visualization.failure_reason = "mavproxy_missing"
         return session
 
-    visualizer_command = _visualizer_command(master_uri, executable=executable, request_map=True)
+    bridge_master_uri = _allocate_control_bridge_uri()
+    visualizer_command = _visualizer_command(
+        master_uri,
+        executable=executable,
+        request_map=True,
+        output_uri=_bridge_output_uri(bridge_master_uri),
+    )
     if visualizer_command is None:
         session.visualization.failure_reason = "mavproxy_missing"
         return session
@@ -265,6 +295,7 @@ def start_visualizer(session: ManagedSession, master_uri: str) -> ManagedSession
     if session.visualizer_process.poll() is None:
         session.visualization.mavproxy_started = True
         session.visualization.failure_reason = ""
+        session.control_master_uri = bridge_master_uri
     else:
         session.visualization.failure_reason = _visualizer_log_failure_reason(_read_visualizer_log(session.visualizer_log_path))
     return session
@@ -303,6 +334,8 @@ def finalize_visualization_report(process: ManagedSession | None) -> dict[str, A
         report.map_loaded = True
     if report.requested and not report.mavproxy_started and not report.failure_reason:
         report.failure_reason = _visualizer_log_failure_reason(log_text)
+    if "link 1 down" in log_text.lower() and not report.failure_reason:
+        report.failure_reason = "mavproxy_connection_failed"
     if report.requested and report.map_requested and not report.map_loaded and not report.failure_reason:
         if not _mavproxy_map_supported():
             report.failure_reason = "map_module_unavailable"

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import rclpy
-from linearity_core.attack_eval import attack_trace_fieldnames
+from linearity_core.attack_injection import attack_trace_fieldnames
 from linearity_core.io import capture_host_snapshot, read_rows_csv, write_rows_csv, write_yaml
 from linearity_core.mav_params import close_mavlink, connect_mavlink, set_parameters, snapshot_parameters
 from linearity_core.research_contract import apply_manifest_research_contract, build_acceptance_block
@@ -182,16 +182,39 @@ def _command_row_has_nonzero_command(row: dict[str, Any], *, epsilon: float = 1e
     return any(abs(float(row.get(name, 0.0) or 0.0)) > epsilon for name in ("command_roll", "command_pitch", "command_yaw", "command_throttle"))
 
 
-def _expected_active_sample_count(config: RunConfig) -> int:
+def _expected_active_duration_s(config: RunConfig) -> float:
     duration_s = max(0.0, float(config.duration_s))
+    profile_type = str(config.profile_type or "").strip().lower()
+    if profile_type == "pulse":
+        pulse_width_s = max(1e-6, float(config.extras.get("pulse_width_s", min(duration_s, 0.2))))
+        return min(duration_s, pulse_width_s)
+    if profile_type in {"pulse_train", "alternating_pulse_train"}:
+        pulse_width_s = max(1e-6, float(config.extras.get("pulse_width_s", min(duration_s, 0.2))))
+        pulse_gap_s = max(0.0, float(config.extras.get("pulse_gap_s", pulse_width_s)))
+        pulse_count = max(1, int(config.extras.get("pulse_count", 3)))
+        cycle_s = pulse_width_s + pulse_gap_s
+        active_duration_s = 0.0
+        for pulse_index in range(pulse_count):
+            pulse_start_s = pulse_index * cycle_s
+            if pulse_start_s >= duration_s:
+                break
+            pulse_end_s = min(duration_s, pulse_start_s + pulse_width_s)
+            active_duration_s += max(0.0, pulse_end_s - pulse_start_s)
+        return active_duration_s
+    return duration_s
+
+
+def _expected_active_sample_count(config: RunConfig) -> int:
+    duration_s = _expected_active_duration_s(config)
     sampling_rate_hz = max(0.0, float(config.sampling_rate_hz))
     return int(math.ceil(duration_s * sampling_rate_hz))
 
 
 def _minimum_active_nonzero_samples(config: RunConfig) -> int:
-    duration_s = max(0.0, float(config.duration_s))
-    sampling_rate_hz = max(0.0, float(config.sampling_rate_hz))
-    return max(10, int(math.ceil(0.25 * duration_s * sampling_rate_hz)))
+    expected_active_samples = _expected_active_sample_count(config)
+    if expected_active_samples <= 0:
+        return 0
+    return min(expected_active_samples, max(10, int(math.ceil(0.25 * expected_active_samples))))
 
 
 def _failsafe_after_experiment_start(status_rows: list[dict[str, Any]], injector_report: dict[str, Any]) -> bool:

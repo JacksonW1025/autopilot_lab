@@ -139,7 +139,7 @@ def test_ardupilot_acceptance_marks_valid_pulse_train_run_accepted(tmp_path: Pat
     assert set(acceptance.keys()) == EXPECTED_ACCEPTANCE_KEYS
     assert acceptance["accepted"] is True
     assert acceptance["rejection_reasons"] == []
-    assert acceptance["expected_active_samples"] == 120
+    assert acceptance["expected_active_samples"] == 35
     assert acceptance["active_nonzero_command_samples"] == 35
 
 
@@ -186,10 +186,7 @@ def test_ardupilot_acceptance_rejects_failsafe_truncation(tmp_path: Path) -> Non
     acceptance = quality["acceptance"]
 
     assert acceptance["accepted"] is False
-    assert set(acceptance["rejection_reasons"]) == {
-        "experiment_truncated_before_expected_active_samples",
-        "failsafe_during_experiment",
-    }
+    assert acceptance["rejection_reasons"] == ["failsafe_during_experiment"]
     assert acceptance["failsafe_during_experiment"] is True
 
 
@@ -215,6 +212,28 @@ def test_ardupilot_acceptance_accepts_alternating_pulse_train_active_phases(tmp_
     assert acceptance["accepted"] is True
     assert acceptance["active_phase_present"] is True
     assert acceptance["active_nonzero_command_samples"] == 35
+    assert acceptance["rejection_reasons"] == []
+
+
+def test_ardupilot_acceptance_accepts_stage4_short_pulse_train_profile(tmp_path: Path) -> None:
+    paths, command_trace, config, runtime_report = _write_ardupilot_acceptance_fixture(
+        tmp_path,
+        active_nonzero_samples=18,
+        experiment_started=True,
+    )
+    config.profile_type = "pulse_train"
+    config.sampling_rate_hz = 20.0
+    config.duration_s = 6.0
+    config.extras["pulse_width_s"] = 0.18
+    config.extras["pulse_gap_s"] = 0.14
+    config.extras["pulse_count"] = 5
+
+    quality = _ardupilot_data_quality(paths, command_trace, config, runtime_report, "completed")
+    acceptance = quality["acceptance"]
+
+    assert acceptance["accepted"] is True
+    assert acceptance["expected_active_samples"] == 18
+    assert acceptance["active_nonzero_command_samples"] == 18
     assert acceptance["rejection_reasons"] == []
 
 

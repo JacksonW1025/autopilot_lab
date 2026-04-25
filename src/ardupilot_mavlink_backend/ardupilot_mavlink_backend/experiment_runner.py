@@ -5,10 +5,19 @@ import csv
 import math
 import shutil
 import time
+from collections import deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from linearity_core.attack_injection import (
+    apply_attack_to_command,
+    attack_trace_fieldnames,
+    build_attack_controller_from_config,
+    make_attack_trace_row,
+    summarize_attack_trace,
+)
+from linearity_core.attack_runtime import AttackContext, AttackDelta
 from linearity_core.config import RunConfig, clamp, euler_to_quaternion, load_run_config
 from linearity_core.excitation import ExcitationGenerator
 from linearity_core.io import capture_host_snapshot, ensure_raw_run_directories, write_rows_csv, write_yaml
@@ -775,16 +784,39 @@ def _command_row_has_nonzero_command(row: dict[str, Any], *, epsilon: float = 1e
     return any(abs(float(row.get(name, 0.0) or 0.0)) > epsilon for name in ("command_roll", "command_pitch", "command_yaw", "command_throttle"))
 
 
-def _expected_active_sample_count(config: RunConfig) -> int:
+def _expected_active_duration_s(config: RunConfig) -> float:
     duration_s = max(0.0, float(config.duration_s))
+    profile_type = str(config.profile_type or "").strip().lower()
+    if profile_type == "pulse":
+        pulse_width_s = max(1e-6, float(config.extras.get("pulse_width_s", min(duration_s, 0.2))))
+        return min(duration_s, pulse_width_s)
+    if profile_type in {"pulse_train", "alternating_pulse_train"}:
+        pulse_width_s = max(1e-6, float(config.extras.get("pulse_width_s", min(duration_s, 0.2))))
+        pulse_gap_s = max(0.0, float(config.extras.get("pulse_gap_s", pulse_width_s)))
+        pulse_count = max(1, int(config.extras.get("pulse_count", 3)))
+        cycle_s = pulse_width_s + pulse_gap_s
+        active_duration_s = 0.0
+        for pulse_index in range(pulse_count):
+            pulse_start_s = pulse_index * cycle_s
+            if pulse_start_s >= duration_s:
+                break
+            pulse_end_s = min(duration_s, pulse_start_s + pulse_width_s)
+            active_duration_s += max(0.0, pulse_end_s - pulse_start_s)
+        return active_duration_s
+    return duration_s
+
+
+def _expected_active_sample_count(config: RunConfig) -> int:
+    duration_s = _expected_active_duration_s(config)
     sampling_rate_hz = max(0.0, float(config.sampling_rate_hz))
     return int(math.ceil(duration_s * sampling_rate_hz))
 
 
 def _minimum_active_nonzero_samples(config: RunConfig) -> int:
-    duration_s = max(0.0, float(config.duration_s))
-    sampling_rate_hz = max(0.0, float(config.sampling_rate_hz))
-    return max(10, int(math.ceil(0.25 * duration_s * sampling_rate_hz)))
+    expected_active_samples = _expected_active_sample_count(config)
+    if expected_active_samples <= 0:
+        return 0
+    return min(expected_active_samples, max(10, int(math.ceil(0.25 * expected_active_samples))))
 
 
 def _failsafe_after_experiment_start(heartbeat_rows: list[dict[str, Any]], runtime_report: dict[str, Any]) -> bool:
@@ -807,6 +839,215 @@ def _failsafe_after_experiment_start(heartbeat_rows: list[dict[str, Any]], runti
 def _completion_reason_indicates_truncation(completion_reason: str) -> bool:
     normalized = str(completion_reason or "").strip().lower()
     return normalized not in {"profile_completed", "completed"}
+
+
+def _ardupilot_current_state_snapshot(
+    attitude_rows: list[dict[str, Any]],
+    position_rows: list[dict[str, Any]],
+) -> dict[str, float]:
+    attitude = attitude_rows[-1] if attitude_rows else {}
+    position = position_rows[-1] if position_rows else {}
+    altitude = -_safe_float(position.get("z"), 0.0)
+    vertical_speed = -_safe_float(position.get("vz"), 0.0)
+    return {
+        "roll": _safe_float(attitude.get("roll"), 0.0),
+        "pitch": _safe_float(attitude.get("pitch"), 0.0),
+        "yaw": _safe_float(attitude.get("yaw"), 0.0),
+        "roll_rate": _safe_float(attitude.get("rollspeed"), 0.0),
+        "pitch_rate": _safe_float(attitude.get("pitchspeed"), 0.0),
+        "yaw_rate": _safe_float(attitude.get("yawspeed"), 0.0),
+        "position_x": _safe_float(position.get("x"), 0.0),
+        "position_y": _safe_float(position.get("y"), 0.0),
+        "position_z": _safe_float(position.get("z"), 0.0),
+        "velocity_x": _safe_float(position.get("vx"), 0.0),
+        "velocity_y": _safe_float(position.get("vy"), 0.0),
+        "velocity_z": _safe_float(position.get("vz"), 0.0),
+        "altitude": altitude,
+        "vertical_speed": vertical_speed,
+        "heading": _safe_float(attitude.get("yaw"), 0.0),
+    }
+
+
+def _ardupilot_state_delta_snapshot(
+    current_state: dict[str, float],
+    state_history_snapshots: deque[dict[str, float]],
+) -> dict[str, float]:
+    previous_state = state_history_snapshots[0] if state_history_snapshots else {}
+    return {
+        name: float(current_state.get(name, 0.0)) - float(previous_state.get(name, 0.0))
+        for name in current_state
+    }
+
+
+def _ardupilot_tracking_error_snapshot(
+    current_state: dict[str, float],
+    nominal_command: tuple[float, float, float, float],
+    *,
+    input_type: str,
+) -> dict[str, float]:
+    if input_type == "rate":
+        return {
+            "roll": 0.0,
+            "pitch": 0.0,
+            "yaw": 0.0,
+            "roll_rate": float(nominal_command[0]) - float(current_state.get("roll_rate", 0.0)),
+            "pitch_rate": float(nominal_command[1]) - float(current_state.get("pitch_rate", 0.0)),
+            "yaw_rate": float(nominal_command[2]) - float(current_state.get("yaw_rate", 0.0)),
+        }
+    return {
+        "roll": float(nominal_command[0]) - float(current_state.get("roll", 0.0)),
+        "pitch": float(nominal_command[1]) - float(current_state.get("pitch", 0.0)),
+        "yaw": float(nominal_command[2]) - float(current_state.get("yaw", 0.0)),
+        "roll_rate": float(nominal_command[0]) - float(current_state.get("roll_rate", 0.0)),
+        "pitch_rate": float(nominal_command[1]) - float(current_state.get("pitch_rate", 0.0)),
+        "yaw_rate": float(nominal_command[2]) - float(current_state.get("yaw_rate", 0.0)),
+    }
+
+
+def _ardupilot_attitude_error_snapshot(
+    current_state: dict[str, float],
+    nominal_command: tuple[float, float, float, float],
+) -> dict[str, float]:
+    return {
+        "roll": float(nominal_command[0]) - float(current_state.get("roll", 0.0)),
+        "pitch": float(nominal_command[1]) - float(current_state.get("pitch", 0.0)),
+        "yaw": float(nominal_command[2]) - float(current_state.get("yaw", 0.0)),
+    }
+
+
+def _ardupilot_boundary_stress_value(
+    nominal_command: tuple[float, float, float, float],
+    status_rows: list[dict[str, Any]],
+) -> float:
+    command_stress = max(abs(float(value)) for value in nominal_command)
+    latest_status = status_rows[-1] if status_rows else {}
+    battery_remaining = _safe_float(latest_status.get("battery_remaining"), 100.0)
+    battery_penalty = 0.0
+    if math.isfinite(battery_remaining):
+        battery_penalty = max(0.0, min(1.0, (30.0 - battery_remaining) / 30.0))
+    return max(0.0, min(1.0, max(command_stress, battery_penalty)))
+
+
+def _ardupilot_recovery_cost_value(state_delta: dict[str, float], boundary_stress: float) -> float:
+    values = [abs(float(state_delta.get(name, 0.0))) for name in ("roll", "pitch", "yaw", "roll_rate", "pitch_rate", "yaw_rate")]
+    baseline = float(sum(values) / len(values)) if values else 0.0
+    return max(0.0, min(1.0, baseline + (0.25 * boundary_stress)))
+
+
+def _inactive_attack_delta(method_spec: Any, note: str) -> AttackDelta:
+    return AttackDelta(
+        line_code=str(method_spec.line_code),
+        family_name=str(method_spec.method_name),
+        active=False,
+        delta_command=(0.0, 0.0, 0.0, 0.0),
+        pre_projection_command=(0.0, 0.0, 0.0, 0.0),
+        objective_terms={
+            "bundle_gain": 0.0,
+            "tracking_deviation": 0.0,
+            "attitude_deviation": 0.0,
+            "boundary_stress": 0.0,
+            "recovery_cost": 0.0,
+            "off_target_leakage": 0.0,
+            "conditioning": 0.0,
+            "budget": 0.0,
+        },
+        objective_score=0.0,
+        budget_terms={"cumulative_energy": 0.0, "energy_limit": 0.0, "budget_usage": 0.0},
+        context_features={},
+        notes=(note,),
+    )
+
+
+def _record_attack_placeholder(
+    attack_trace_rows: list[dict[str, Any]],
+    attack_controller: Any,
+    *,
+    publish_time_ns: int,
+    elapsed_s: float,
+    phase: str,
+    nominal_command: tuple[float, float, float, float],
+    attacked_command: tuple[float, float, float, float],
+    note: str,
+) -> None:
+    if attack_controller is None:
+        return
+    attack_trace_rows.append(
+        make_attack_trace_row(
+            publish_time_ns=publish_time_ns,
+            elapsed_s=elapsed_s,
+            phase=phase,
+            nominal_command=nominal_command,
+            attacked_command=attacked_command,
+            delta=_inactive_attack_delta(attack_controller.method_spec, note),
+            method_spec=attack_controller.method_spec,
+        )
+    )
+
+
+def _apply_attack(
+    attack_trace_rows: list[dict[str, Any]],
+    attack_controller: Any,
+    state_history_snapshots: deque[dict[str, float]],
+    *,
+    publish_time_ns: int,
+    elapsed_s: float,
+    phase: str,
+    nominal_command: tuple[float, float, float, float],
+    attack_enabled: bool,
+    mode_name: str,
+    input_type: str,
+    total_duration_s: float,
+    attitude_rows: list[dict[str, Any]],
+    position_rows: list[dict[str, Any]],
+    status_rows: list[dict[str, Any]],
+) -> tuple[float, float, float, float]:
+    if attack_controller is None:
+        return nominal_command
+    if not attack_enabled:
+        _record_attack_placeholder(
+            attack_trace_rows,
+            attack_controller,
+            publish_time_ns=publish_time_ns,
+            elapsed_s=elapsed_s,
+            phase=phase,
+            nominal_command=nominal_command,
+            attacked_command=nominal_command,
+            note="inactive_phase",
+        )
+        return nominal_command
+    current_state = _ardupilot_current_state_snapshot(attitude_rows, position_rows)
+    state_delta = _ardupilot_state_delta_snapshot(current_state, state_history_snapshots)
+    tracking_error = _ardupilot_tracking_error_snapshot(current_state, nominal_command, input_type=input_type)
+    attitude_error = _ardupilot_attitude_error_snapshot(current_state, nominal_command)
+    boundary_stress = _ardupilot_boundary_stress_value(nominal_command, status_rows)
+    context = AttackContext(
+        backend="ArduPilot",
+        mode=mode_name,
+        current_state=current_state,
+        state_delta=state_delta,
+        state_history=list(state_history_snapshots),
+        current_command=nominal_command,
+        tracking_error=tracking_error,
+        attitude_error=attitude_error,
+        boundary_stress=boundary_stress,
+        recovery_cost=_ardupilot_recovery_cost_value(state_delta, boundary_stress),
+        elapsed_fraction=max(0.0, min(1.0, elapsed_s / max(total_duration_s, 1e-6))),
+    )
+    delta = attack_controller.generate(context)
+    attacked_command = apply_attack_to_command(nominal_command, delta)
+    attack_trace_rows.append(
+        make_attack_trace_row(
+            publish_time_ns=publish_time_ns,
+            elapsed_s=elapsed_s,
+            phase=phase,
+            nominal_command=nominal_command,
+            attacked_command=attacked_command,
+            delta=delta,
+            method_spec=attack_controller.method_spec,
+        )
+    )
+    state_history_snapshots.appendleft(current_state)
+    return attacked_command
 
 
 def _prediction_constructibility_metrics(command_trace: list[dict[str, Any]], topic_counts: dict[str, int], config: RunConfig) -> dict[str, float]:
@@ -1002,6 +1243,7 @@ def run_capture(
     frame: str = "quad",
     master_uri: str = DEFAULT_MASTER,
     start_sitl: bool = True,
+    owns_session: bool = True,
     connect_timeout_s: float = 60.0,
     sitl_log_path: Path | None = None,
     enable_visualization: bool | None = None,
@@ -1017,12 +1259,15 @@ def run_capture(
     host_start = capture_host_snapshot()
     anomalies: list[str] = []
     input_profile_rows: list[dict[str, Any]] = []
+    attack_trace_rows: list[dict[str, Any]] = []
     attitude_rows: list[dict[str, Any]] = []
     position_rows: list[dict[str, Any]] = []
     heartbeat_rows: list[dict[str, Any]] = []
     status_rows: list[dict[str, Any]] = []
     profile = ExcitationGenerator(config)
     position_origin: dict[str, float] | None = None
+    attack_controller = build_attack_controller_from_config(config)
+    state_history_snapshots: deque[dict[str, float]] = deque(maxlen=3)
 
     process = None
     master: mavutil.mavfile | None = None
@@ -1045,8 +1290,13 @@ def run_capture(
             "failure_reason": "",
         },
     }
+    desired_mode = config.mode_under_test_for_backend("ardupilot")
+    current_phase = "not_started"
+    effective_master_uri = master_uri
 
     try:
+        if attack_controller is not None:
+            attack_controller.reset()
         if start_sitl:
             cleanup_residual_processes()
             process = start_sitl_process(
@@ -1056,10 +1306,11 @@ def run_capture(
                 resolved_sitl_log_path,
                 enable_visualization=enable_visualization,
             )
+            if process is not None and bool(getattr(getattr(process, "visualization", None), "requested", False)):
+                process = start_visualizer(process, master_uri)
+                effective_master_uri = str(getattr(process, "control_master_uri", master_uri))
 
-        master = connect(master_uri, tlog_path, connect_timeout_s, autoreconnect=False)
-        if process is not None:
-            process = start_visualizer(process, master_uri)
+        master = connect(effective_master_uri, tlog_path, connect_timeout_s, autoreconnect=False)
         readiness_anomalies = _wait_for_vehicle_ready(master, timeout_s=float(config.extras.get("ardupilot_ready_timeout_s", 20.0)))
         anomalies.extend(readiness_anomalies)
 
@@ -1068,7 +1319,6 @@ def run_capture(
         anomalies.extend(_prepare_runtime_arming(master, parameter_snapshot_after))
 
         if status == "completed":
-            desired_mode = config.mode_under_test_for_backend("ardupilot")
             arming_anomalies = _arm_vehicle(master, desired_mode)
             anomalies.extend(arming_anomalies)
             if arming_anomalies:
@@ -1096,58 +1346,115 @@ def run_capture(
                 throttle_norm = manual_bias
                 if config.axis in {"throttle", "composite"}:
                     throttle_norm = clamp(manual_bias + (throttle * manual_scale), 0.0, 1.0)
-                _send_manual_control(master, roll, pitch, yaw, throttle_norm)
+                nominal_command = (roll, pitch, yaw, throttle_norm)
+                publish_time_ns = time.time_ns()
+                attacked_roll, attacked_pitch, attacked_yaw, attacked_throttle = _apply_attack(
+                    attack_trace_rows,
+                    attack_controller,
+                    state_history_snapshots,
+                    publish_time_ns=publish_time_ns,
+                    elapsed_s=elapsed_s,
+                    phase=phase,
+                    nominal_command=nominal_command,
+                    attack_enabled=_phase_is_active(phase),
+                    mode_name=config.mode_under_test_for_backend("ardupilot"),
+                    input_type=config.input_type,
+                    total_duration_s=profile.total_duration_s,
+                    attitude_rows=attitude_rows,
+                    position_rows=position_rows,
+                    status_rows=status_rows,
+                )
+                _send_manual_control(master, attacked_roll, attacked_pitch, attacked_yaw, attacked_throttle)
+                current_phase = phase
                 input_profile_rows.append(
                     {
-                        "publish_time_ns": time.time_ns(),
+                        "publish_time_ns": publish_time_ns,
                         "elapsed_s": round(elapsed_s, 6),
                         "profile_value": profile_value,
-                        "roll_body": roll,
-                        "pitch_body": pitch,
-                        "yaw_body": yaw,
-                        "thrust_z": throttle_norm,
-                        "command_roll": roll,
-                        "command_pitch": pitch,
-                        "command_yaw": yaw,
-                        "command_throttle": throttle_norm,
+                        "roll_body": attacked_roll,
+                        "pitch_body": attacked_pitch,
+                        "yaw_body": attacked_yaw,
+                        "thrust_z": attacked_throttle,
+                        "command_roll": attacked_roll,
+                        "command_pitch": attacked_pitch,
+                        "command_yaw": attacked_yaw,
+                        "command_throttle": attacked_throttle,
                         "phase": phase,
                     }
                 )
             elif config.input_type == "attitude":
                 profile_value, roll_body, pitch_body, yaw_body, thrust_z, phase = profile.attitude_targets_at(elapsed_s)
-                _send_attitude_target(master, roll_body, pitch_body, yaw_body, thrust_z)
+                nominal_command = (roll_body, pitch_body, yaw_body, thrust_z)
+                publish_time_ns = time.time_ns()
+                attacked_roll, attacked_pitch, attacked_yaw, attacked_throttle = _apply_attack(
+                    attack_trace_rows,
+                    attack_controller,
+                    state_history_snapshots,
+                    publish_time_ns=publish_time_ns,
+                    elapsed_s=elapsed_s,
+                    phase=phase,
+                    nominal_command=nominal_command,
+                    attack_enabled=_phase_is_active(phase),
+                    mode_name=config.mode_under_test_for_backend("ardupilot"),
+                    input_type=config.input_type,
+                    total_duration_s=profile.total_duration_s,
+                    attitude_rows=attitude_rows,
+                    position_rows=position_rows,
+                    status_rows=status_rows,
+                )
+                _send_attitude_target(master, attacked_roll, attacked_pitch, attacked_yaw, attacked_throttle)
+                current_phase = phase
                 input_profile_rows.append(
                     {
-                        "publish_time_ns": time.time_ns(),
+                        "publish_time_ns": publish_time_ns,
                         "elapsed_s": round(elapsed_s, 6),
                         "profile_value": profile_value,
-                        "roll_body": roll_body,
-                        "pitch_body": pitch_body,
-                        "yaw_body": yaw_body,
-                        "thrust_z": thrust_z,
-                        "command_roll": roll_body,
-                        "command_pitch": pitch_body,
-                        "command_yaw": yaw_body,
-                        "command_throttle": thrust_z,
+                        "roll_body": attacked_roll,
+                        "pitch_body": attacked_pitch,
+                        "yaw_body": attacked_yaw,
+                        "thrust_z": attacked_throttle,
+                        "command_roll": attacked_roll,
+                        "command_pitch": attacked_pitch,
+                        "command_yaw": attacked_yaw,
+                        "command_throttle": attacked_throttle,
                         "phase": phase,
                     }
                 )
             else:
                 profile_value, roll_rate, pitch_rate, yaw_rate, thrust_z, phase = profile.rate_targets_at(elapsed_s)
-                _send_rate_target(master, roll_rate, pitch_rate, yaw_rate, thrust_z)
+                nominal_command = (roll_rate, pitch_rate, yaw_rate, thrust_z)
+                publish_time_ns = time.time_ns()
+                attacked_roll, attacked_pitch, attacked_yaw, attacked_throttle = _apply_attack(
+                    attack_trace_rows,
+                    attack_controller,
+                    state_history_snapshots,
+                    publish_time_ns=publish_time_ns,
+                    elapsed_s=elapsed_s,
+                    phase=phase,
+                    nominal_command=nominal_command,
+                    attack_enabled=_phase_is_active(phase),
+                    mode_name=config.mode_under_test_for_backend("ardupilot"),
+                    input_type=config.input_type,
+                    total_duration_s=profile.total_duration_s,
+                    attitude_rows=attitude_rows,
+                    position_rows=position_rows,
+                    status_rows=status_rows,
+                )
+                _send_rate_target(master, attacked_roll, attacked_pitch, attacked_yaw, attacked_throttle)
+                current_phase = phase
                 input_profile_rows.append(
                     {
-                        "publish_time_ns": time.time_ns(),
+                        "publish_time_ns": publish_time_ns,
                         "elapsed_s": round(elapsed_s, 6),
                         "profile_value": profile_value,
-                        "roll_body": roll_rate,
-                        "pitch_body": pitch_rate,
-                        "yaw_body": yaw_rate,
-                        "thrust_z": thrust_z,
-                        "command_roll": roll_rate,
-                        "command_pitch": pitch_rate,
-                        "command_yaw": yaw_rate,
-                        "command_throttle": thrust_z,
+                        "roll_body": attacked_roll,
+                        "pitch_body": attacked_pitch,
+                        "yaw_body": attacked_yaw,
+                        "thrust_z": attacked_throttle,
+                        "command_roll": attacked_roll,
+                        "command_pitch": attacked_pitch,
+                        "command_yaw": attacked_yaw,
+                        "command_throttle": attacked_throttle,
                         "phase": phase,
                     }
                 )
@@ -1175,15 +1482,17 @@ def run_capture(
                 master.close()
             except Exception:
                 pass
-        stop_process(process)
+        if owns_session:
+            stop_process(process)
         runtime_report["visualization"] = finalize_visualization_report(process)
-        if process is not None and getattr(process, "visualizer_log_path", None):
+        if owns_session and process is not None and getattr(process, "visualizer_log_path", None):
             source_log_path = Path(process.visualizer_log_path)
             if source_log_path.exists():
                 destination_log_path = paths["logs_dir"] / "ardupilot_mavproxy.log"
                 if source_log_path.resolve() != destination_log_path.resolve():
                     shutil.copy2(source_log_path, destination_log_path)
-        cleanup_residual_processes()
+        if owns_session:
+            cleanup_residual_processes()
     if runtime_report.get("completion_time_ns") in ("", None):
         runtime_report["completion_time_ns"] = time.time_ns()
 
@@ -1208,12 +1517,21 @@ def run_capture(
     _write_telemetry_csv(paths["telemetry_dir"] / "heartbeat.csv", heartbeat_rows, HEARTBEAT_FIELDNAMES)
     _write_telemetry_csv(paths["telemetry_dir"] / "sys_status.csv", status_rows, STATUS_FIELDNAMES)
     write_rows_csv(paths["input_trace_path"], input_profile_rows, INPUT_TRACE_FIELDNAMES)
+    write_rows_csv(paths["attack_trace_path"], attack_trace_rows, attack_trace_fieldnames())
     runtime_report["telemetry_sources"] = _apply_bin_canonical_fallback(
         paths,
         runtime_report,
         input_profile_rows,
         capture_start_time_ns,
     )
+    if attack_controller is not None:
+        runtime_report["attack_summary"] = {
+            "enabled": True,
+            "method_name": attack_controller.method_spec.method_name,
+            "line_code": attack_controller.method_spec.line_code,
+            "candidate_id": attack_controller.method_spec.candidate_id,
+            **summarize_attack_trace(attack_trace_rows),
+        }
     runtime_report["anomalies"] = sorted(dict.fromkeys(anomalies))
     data_quality = _ardupilot_data_quality(paths, input_profile_rows, config, runtime_report, status)
     if data_quality["topic_presence"]["missing_topics"]:
@@ -1276,7 +1594,12 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--frame", default="quad", help="SITL frame，默认 quad。")
     parser.add_argument("--master", default=DEFAULT_MASTER, help="MAVLink master URI，默认 tcp:127.0.0.1:5760。")
     parser.add_argument("--skip-sitl", action="store_true", help="连接已有实例，不启动 sim_vehicle.py。")
-    parser.add_argument("--enable-visualization", action="store_true", help="显式启用 MAVProxy/map 可视化。默认关闭。")
+    parser.add_argument(
+        "--enable-visualization",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="控制 MAVProxy/map 可视化。ArduPilot 默认启用，可用 --no-enable-visualization 显式关闭。",
+    )
     args = parser.parse_args(argv)
 
     config = load_run_config(args.config)

@@ -37,6 +37,8 @@ PREPARED_SAMPLE_IDENTITY_COLUMNS = [
     "logical_step",
 ]
 
+_ROW_TIME_CACHE: dict[tuple[int, str], list[int]] = {}
+
 
 def _float_value(value: Any, default: float = math.nan) -> float:
     if value in ("", None):
@@ -59,7 +61,11 @@ def _int_value(value: Any, default: int = 0) -> int:
 def _nearest_row(rows: list[dict[str, Any]], time_key: str, target_ns: int) -> dict[str, Any] | None:
     if not rows:
         return None
-    times = [_int_value(row.get(time_key), 0) for row in rows]
+    cache_key = (id(rows), time_key)
+    times = _ROW_TIME_CACHE.get(cache_key)
+    if times is None or len(times) != len(rows):
+        times = [_int_value(row.get(time_key), 0) for row in rows]
+        _ROW_TIME_CACHE[cache_key] = times
     index = bisect.bisect_left(times, target_ns)
     candidates: list[dict[str, Any]] = []
     if index < len(rows):

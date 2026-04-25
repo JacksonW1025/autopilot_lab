@@ -874,6 +874,45 @@ def test_px4_acceptance_accepts_alternating_pulse_train_active_phases(tmp_path: 
     assert acceptance["rejection_reasons"] == []
 
 
+def test_px4_acceptance_accepts_stage4_short_pulse_train_profile(tmp_path: Path) -> None:
+    telemetry_dir = tmp_path / "stage4_short_pulse_train" / "telemetry"
+    telemetry_dir.mkdir(parents=True, exist_ok=True)
+    input_trace_path = telemetry_dir / "input_trace.csv"
+    phases = ["pulse_active"] * 18 + ["pulse_gap"] * 12
+    injector_report = _write_px4_acceptance_fixture(
+        telemetry_dir,
+        input_trace_path,
+        phases=phases,
+        experiment_started=True,
+        completion_reason="disarmed_after_land",
+        nonzero_active_count=18,
+    )
+    config = _acceptance_test_config()
+    config.profile_type = "pulse_train"
+    config.sampling_rate_hz = 20.0
+    config.duration_s = 6.0
+    config.extras["pulse_width_s"] = 0.18
+    config.extras["pulse_gap_s"] = 0.14
+    config.extras["pulse_count"] = 5
+    data_quality = _px4_data_quality(
+        {
+            "telemetry_dir": telemetry_dir,
+            "input_trace_path": input_trace_path,
+        },
+        {"message_counts": {"vehicle_attitude": 30, "vehicle_angular_velocity": 30, "vehicle_local_position": 30, "vehicle_status": 30, "vehicle_control_mode": 30, "actuator_motors": 30}},
+        ulog_backfill.read_rows_csv(input_trace_path),
+        config,
+        injector_report,
+        "completed",
+    )
+
+    acceptance = data_quality["acceptance"]
+    assert acceptance["accepted"] is True
+    assert acceptance["expected_active_samples"] == 18
+    assert acceptance["active_nonzero_command_samples"] == 18
+    assert acceptance["rejection_reasons"] == []
+
+
 def test_fit_summary_reports_raw_and_effective_conditioning(tmp_path: Path) -> None:
     rng = np.random.default_rng(7)
     sample_count = 32
