@@ -1,126 +1,100 @@
 # autopilot_lab
 
-`autopilot_lab` 当前保留三段正式研究链，外加一段 exploratory Stage 4 起步层：
+`autopilot_lab` 当前保留的是一条已经完成到 `USDTA v1` 正式评估、并开始进入 `USDTA v2` 重设计的研究链：
 
-`sparsity hypothesis -> empirical validation -> stage-2 common-cause synthesis -> stage-3 attack design -> stage-4 exploratory pilot`
+`sparsity hypothesis -> empirical validation -> stage-2 common-cause synthesis -> stage-3 USDTA v1 attack design -> stage-4 official USDTA v1 evaluation -> USDTA v2 redesign checklist`
+
+## Docs Layout
+
+- `docs/v1/`: 当前已经冻结的 `USDTA v1` 文档链，覆盖 Stage 1 到 Stage 4 official 结果。
+- `docs/v2/`: 下一版方法的修改清单与后续设计入口。
 
 ## Source Of Truth
 
-当前 repo-level canonical 文档只有三份：
+当前 repo-level source of truth 按优先级看这几份：
 
 1. `README.md`
-2. `docs/STAGE1_SUMMARY.md`
-3. `docs/STAGE2_SUMMARY.md`
+2. `docs/v1/STAGE1_SUMMARY_v1.md`
+3. `docs/v1/STAGE2_SUMMARY_v1.md`
+4. `docs/v1/STAGE4_EVALUATION_v1.md`
 
 扩展分析/设计文档：
 
-- `docs/STAGE2_DEEP_ANALYSIS.md`
-- `docs/STAGE3_REFERENCE.md`
-- `docs/STAGE3_ATTACK_DESIGN.md`
-- `docs/STAGE4_START.md`
+- `docs/v1/STAGE2_DEEP_ANALYSIS_v1.md`
+- `docs/v1/STAGE2_MATHEVIDENCE_v1.md`
+- `docs/v1/STAGE3_REFERENCE_v1.md`
+- `docs/v1/STAGE3_ATTACK_DESIGN_v1.md`
+- `docs/v1/STAGE4_PLAN_v1.md`
+- `docs/v1/STAGE4_PART1_v1.md`
+- `docs/v1/STAGE4_PART2_v1.md`
+- `docs/v1/STAGE4_PART3_v1.md`
+- `docs/v1/STAGE4_PART4_v1.md`
+- `docs/v2/USDTA_V2_CHECKLIST.md`
 
 说明：
 
-- `docs/STAGE2_DEEP_ANALYSIS.md` 用于保存较深的解释框架、研究假说与后续分析建议。
-- 它不是新的 canonical source of truth，不替代上面的三份文档。
-- `docs/STAGE3_REFERENCE.md` 是 Stage 3 启动前的参考筛选结果。
-- `docs/STAGE3_ATTACK_DESIGN.md` 是 Stage 3 design layer 文档，用于固定 `USDTA` 的算法设计与接口，不是新的 evidence summary。
-- `docs/STAGE4_START.md` 是 Stage 4 exploratory kickoff 文档，用于说明第一轮 `PX-STC @ POSCTL` pilot 为什么这样开始、会看什么、不会宣称什么。
+- `docs/v1/` 下的文档默认都只对应 `USDTA v1`。
+- `docs/v2/` 下的文档只代表下一版设计方向，不代表已经完成的实验结果。
+- 代码里的规范方法名是 `family_aware_usdta_v1`；`family_aware_usdta` 只作为历史兼容别名保留。
 
-## 当前保留范围
+## Current Status
 
-- Stage 1：四个 generalization study，负责证明 `Y ≈ fX (+ b)` 在 PX4 与 ArduPilot 上都存在可重复的线性证据。
-- Stage 2：一个六线共同成因 study，负责把机制证据组织成统一的机制账本、类比结构和 `USDTA` 设计约束。
-- Stage 3：一个 attack design study，负责把 Stage 2 的 six-line / three-family 证据编译成统一 `USDTA` attack algorithm 的 family-aware 设计、runtime API 和 machine-readable contract。
-- Stage 4：一个 exploratory PX4 pilot，负责把 `PX-STC` 的 Stage 3 contract 接到真实 rollout 链路中，先观察效果、失败模式和评估问题。
+- Stage 1 已完成：建立了 `Y ≈ fX (+ b)` 在 PX4 和 ArduPilot 上都可复现的线性 evidence。
+- Stage 2 已完成：把六条机制线整理为统一的 six-line / three-family 结构，并给出 `USDTA` 设计约束。
+- Stage 3 已完成：把 `USDTA v1` 固定成 design layer、runtime API 和 machine-readable contract。
+- Stage 4 official 已完成：四个 part 全部闭环，正式结果已经写入 `docs/v1/STAGE4_EVALUATION_v1.md`。
+- 当前工作重心已经转到 `USDTA v2`，入口文档是 `docs/v2/USDTA_V2_CHECKLIST.md`。
 
-## Stage 1
+## Current Conclusions
 
-当前保留的 Stage 1 artifact：
+- `bounded_noise` 是当前 official Stage 4 的全局 winner，拿下 `27` 个 official cells 里的 `17` 个。
+- `family_aware_usdta_v1` 不是全局冠军，只拿下 `10 / 27`，但在 `AP-HTM` 和 `AP-HTG` 上给出了稳定正证据。
+- `family_aware_usdta_v1` 没有建立 global transfer superiority，也没有建立 official crash superiority。
+- 当前 `USDTA v1` 更像一个对特定 history-transport witness 有效的结构化攻击器，而不是能全域压过随机噪声基线的统一方法。
+- `USDTA v2` 的目标不是微调现有低维 latent，而是补齐 weak lines 上缺失的表达力，尤其是 `PX-STC`、`PX-STD`、`AP-DAB`、`AP-HTS`。
+
+## Retained Studies
+
+Stage 1 retained studies：
 
 1. `artifacts/studies/20260410_224818_px4_real_generalization_ablation`
 2. `artifacts/studies/20260411_021910_px4_generalization_diagnostic_matrix`
 3. `artifacts/studies/20260413_070802_ardupilot_real_generalization_ablation`
 4. `artifacts/studies/20260413_091420_ardupilot_generalization_diagnostic_matrix`
 
-当前关键数字：
+Stage 2 retained study：
 
-- PX4 baseline `accepted_run_count = 30`, `generalized_supported = 80`
-- PX4 diagnostic `accepted_run_count = 48`, `generalized_supported = 111`
-- ArduPilot baseline `accepted_run_count = 30`, `generalized_supported = 12`
-- ArduPilot diagnostic `accepted_run_count = 48`, `generalized_supported = 12`
+1. `artifacts/studies/20260421_090255_stage2_six_line_common_cause_analysis`
 
-## Stage 2
+Stage 3 retained study：
 
-当前 Stage 2 把六条机制线组织成六个带仿真器信息的机制代号：
+1. `artifacts/studies/20260421_115334_stage3_attack_design`
 
-- `PX-STC`: PX4 State Transport Continuation
-- `PX-STD`: PX4 State Transport Differential
-- `AP-DAB`: ArduPilot Direct Actuator Bundle
-- `AP-HTM`: ArduPilot History Transport MixedMode
-- `AP-HTS`: ArduPilot History Transport STABILIZE
-- `AP-HTG`: ArduPilot History Transport GUIDED_NOGPS
+Stage 4 official retained studies：
 
-当前 canonical Stage 2 study：
+1. `artifacts/studies/20260423_074820_stage4_part1_official_eval`
+2. `artifacts/studies/20260423_133429_stage4_part2_official_eval`
+3. `artifacts/studies/20260424_083814_stage4_part3_official_eval`
+4. `artifacts/studies/20260424_132931_stage4_part4_official_eval`
 
-- `artifacts/studies/20260421_090255_stage2_six_line_common_cause_analysis`
-
-新的 Stage 2 只回答三类问题：
-
-- 哪些低维 `X` 子空间稳定映射到紧凑 `Y` bundle
-- 哪些 `state / direct / history transport` 机制在不同 backend 与 regime 中复现
-- 哪些边界真正由 leakage、conditioning 与 regime shift 主导
-
-它直接导出 `USDTA` 的设计约束。
-
-## Stage 3
-
-当前 Stage 3 将 `USDTA` 正式落成 design layer：
-
-- family-aware attack algorithm
-- online runtime API
-- offline design compiler
-- machine-readable objective / regime / budget contract
-
-当前 canonical Stage 3 study：
-
-- `artifacts/studies/20260421_115334_stage3_attack_design`
-
-当前 Stage 3 只回答三类问题：
-
-- 如何把 `PX-STC/PX-STD/AP-DAB/AP-HTM/AP-HTS/AP-HTG` 统一编译成三类 family 下的六条 instantiation
-- 如何把 `bundle / leakage / conditioning / regime / budget` 固定为 machine-readable attack contract
-- 如何把 runtime 输出严格限制为 4 通道 command delta，同时把 state/history 只保留为 context
-
-## 当前结论
-
-- `Y ≈ fX (+ b)` 的 empirical validation 已成立。
-- 六条机制线现在按统一代号组织。
-- `PX-STC/PX-STD` 共同定义 PX4 的 state-transport 家族。
-- PX4 当前最关键的 retained 信号来自把当前状态并入 `X`；history 的额外收益很小，因此更像短时闭环状态传播，而不是长记忆模板。
-- `AP-DAB` 是 ArduPilot 的 direct-transport 实例。
-- `AP-DAB` 仍是 ArduPilot 当前最干净、最稳的 retained direct line；代表组合仍是 `commands_only -> actuator_response -> ridge_affine -> pooled`。
-- `AP-HTM/AP-HTS/AP-HTG` 共同定义 history-transport 家族，其中边界主要由 conditioning、mask collapse 和 regime split 决定。
-- ArduPilot 的 history/state-evolution 路径不是没有线性，而是长期被 `conditioning` 或 `mixed` 阻塞；当前问题首先是可识别性和稳定性，而不只是 `R²`。
-- 当前 Stage 2 的目标是为统一算法 `USDTA` 提供设计指导。
-- 当前 Stage 3 已经把 `USDTA` 落成统一 runtime 公式：`δu_t = Π_budget(A_line ψ_family(z, q_t))`。
-- 当前 Stage 3 明确规定 runtime 只能输出 4 通道 command delta；state/history 只能作为 context 进入 family generator。
-- 当前 Stage 3 的产物是 design contract，不是 Stage 4 评估结果。
-- 当前 Stage 4 只启动了 `PX-STC @ POSCTL` 的 exploratory pilot；它的目标是发现 integration/search/scoring 问题，不是输出最终 benchmark 结论。
-
-## 阅读顺序
+## Reading Order
 
 1. `README.md`
-2. `docs/STAGE1_SUMMARY.md`
-3. `docs/STAGE2_SUMMARY.md`
-4. `docs/STAGE2_DEEP_ANALYSIS.md`
-5. `docs/STAGE3_REFERENCE.md`
-6. `docs/STAGE3_ATTACK_DESIGN.md`
-7. `docs/STAGE4_START.md`
-8. `artifacts/studies/20260421_090255_stage2_six_line_common_cause_analysis/reports/stage2_six_line_common_cause.md`
-9. `artifacts/studies/20260421_115334_stage3_attack_design/reports/stage3_attack_design.md`
+2. `docs/v1/STAGE1_SUMMARY_v1.md`
+3. `docs/v1/STAGE2_SUMMARY_v1.md`
+4. `docs/v1/STAGE2_DEEP_ANALYSIS_v1.md`
+5. `docs/v1/STAGE2_MATHEVIDENCE_v1.md`
+6. `docs/v1/STAGE3_REFERENCE_v1.md`
+7. `docs/v1/STAGE3_ATTACK_DESIGN_v1.md`
+8. `docs/v1/STAGE4_PLAN_v1.md`
+9. `docs/v1/STAGE4_PART1_v1.md`
+10. `docs/v1/STAGE4_PART2_v1.md`
+11. `docs/v1/STAGE4_PART3_v1.md`
+12. `docs/v1/STAGE4_PART4_v1.md`
+13. `docs/v1/STAGE4_EVALUATION_v1.md`
+14. `docs/v2/USDTA_V2_CHECKLIST.md`
 
-## 正式入口
+## Formal Entry Points
 
 Stage 1：
 
@@ -136,15 +110,23 @@ Stage 3：
 
 - `scripts/analyze_stage3_attack_design.py`
 
-Stage 4：
+Stage 4 official：
 
-- `scripts/run_stage4_px4_px_stc_posctl.sh`
+- `scripts/run_stage4_part1_official.py`
+- `scripts/run_stage4_part2_official.py`
+- `scripts/run_stage4_part4_official.py`
 
-## 目录
+说明：
 
-- `artifacts/studies/`: 正式 study artifact
-- `configs/`: Stage 1 retained config
-- `docs/`: Stage 1/Stage 2 canonical summary、Stage 3 reference / design 文档，以及 Stage 4 exploratory kickoff 文档
-- `scripts/`: 当前正式入口
-- `src/`: retained analysis code
-- `tests/`: 保留后的最小回归集
+- Stage 4 的 official artifacts 已经完成闭环；当前保留这些入口主要是为了复验与后续 rerun。
+- `docs/v2/USDTA_V2_CHECKLIST.md` 是下一步实现入口，不是执行脚本。
+
+## Directory Guide
+
+- `artifacts/studies/`: 正式 study artifacts
+- `configs/`: 实验配置
+- `docs/v1/`: 冻结的 `USDTA v1` 文档链
+- `docs/v2/`: `USDTA v2` 设计清单
+- `scripts/`: 保留的正式入口
+- `src/`: 分析、runtime 与 backend 代码
+- `tests/`: 当前最小回归集
